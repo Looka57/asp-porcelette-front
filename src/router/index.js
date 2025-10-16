@@ -30,6 +30,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/admin/licencies',
+      name: 'admin-licencies',
+      component: () => import('@/views/licenciesView.vue'),
+      meta: {
+        requiresAuth: true,
+        roles: ['Admin', 'Sensei'] // 🎯 Admin ET Sensei
+      }
+    },
+    {
       path: '/admin/events',
       name: 'admin-events',
       component: () => import('@/views/EventsView.vue'),
