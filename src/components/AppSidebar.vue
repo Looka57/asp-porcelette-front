@@ -22,7 +22,7 @@ const filteredNavItems = computed(() => {
   const userRoles = authStore.user?.roles || [];
 
   // Si l'utilisateur n'est pas connecté ou n'a pas de rôle, retourner un tableau vide
-  if (userRoles.length === 0) {
+  if (userRoles.length === 0) { 
     return [];
   }
 

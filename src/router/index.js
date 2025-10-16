@@ -32,7 +32,7 @@ const router = createRouter({
     {
       path: '/admin/events',
       name: 'admin-events',
-      component: () => import('@/views/eventsView.vue'),
+      component: () => import('@/views/EventsView.vue'),
       meta: {
         requiresAuth: true,
         roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
@@ -41,16 +41,7 @@ const router = createRouter({
     {
       path: '/admin/actualite',
       name: 'admin-actualite',
-      component: () => import('@/views/actualiteView.vue'),
-      meta: {
-        requiresAuth: true,
-        roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
-      }
-    },
-    {
-      path: '/admin/events',
-      name: 'admin-events',
-      component: () => import('@/views/eventsView.vue'),
+      component: () => import('@/views/ActualiteView.vue'),
       meta: {
         requiresAuth: true,
         roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
@@ -59,7 +50,7 @@ const router = createRouter({
     {
       path: '/admin/discipline',
       name: 'admin-discipline',
-      component: () => import('@/views/disciplineView.vue'),
+      component: () => import('@/views/DisciplineView.vue'),
       meta: {
         requiresAuth: true,
         roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
@@ -68,7 +59,7 @@ const router = createRouter({
     {
       path: '/admin/tarifs',
       name: 'admin-tarifs',
-      component: () => import('@/views/tarifsView.vue'),
+      component: () => import('@/views/TarifsView.vue'),
       meta: {
         requiresAuth: true,
         roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
@@ -77,7 +68,7 @@ const router = createRouter({
     {
       path: '/admin/compta',
       name: 'admin-compta',
-      component: () => import('@/views/comptabiliteView.vue'),
+      component: () => import('@/views/ComptabiliteView.vue'),
       meta: {
         requiresAuth: true,
         roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
