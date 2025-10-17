@@ -11,8 +11,8 @@ onMounted(async () => {
     // 🎯 Appel à votre endpoint C# sécurisé /api/User/admin/list
     const response = await api.get('User/admin/list');
     const allUsers = response.data || [];
-    // Filtrer pour ne garder que les utilisateurs avec le rôle "Sensei"
-    userList.value = allUsers.filter(user => user.roles.includes('Student'));
+    // Filtrer pour ne garder que les utilisateurs avec le rôle "Adherent"
+    userList.value = allUsers.filter(user => user.roles.includes('Adherent'));
   } catch (err) {
     error.value = 'Échec du chargement. Vérifiez que vous êtes Admin et que le token est valide.';
     console.error(err);
@@ -32,7 +32,7 @@ onMounted(async () => {
         <div v-else>
             <!-- Gestion du cas où aucun Sensei n'est trouvé -->
             <div v-if="userList.length === 0" class="text-light p-4 border rounded">
-                Aucun Sensei trouvé pour le moment.
+                Aucun Adhérent trouvé pour le moment.
             </div>
 
             <!-- NOUVELLE TABLE DE STYLE BOOTSTRAP -->
@@ -46,7 +46,10 @@ onMounted(async () => {
                             <th scope="col">Prénom</th>
                             <th scope="col">Email</th>
                             <th scope="col">Téléphone</th>
-                            <th scope="col">Date d'inscription</th>
+                            <th scope="col">Adresse</th>
+                            <th scope="col">Ville</th>
+                            <th scope="col">Statut</th>
+                            <!-- <th scope="col">Date</th> -->
                             <th scope="col" style="width: 400px;">Action</th>
                         </tr>
                     </thead>
@@ -58,7 +61,10 @@ onMounted(async () => {
                             <td>{{ user.prenom }}</td>
                             <td>{{ user.email || 'N/A' }}</td>
                             <td>{{ user.telephone || 'N/A' }}</td>
-                            <td>{{ user.dateDeCreation || 'N/A' }}</td>
+                            <td>{{ user.adresse || 'N/A' }}</td>
+                            <td>{{ user.ville || 'N/A' }}</td>
+                            <td>{{ user.statut || 'N/A' }}</td>
+                            <!-- <td>{{ user.dateDeCreation || 'N/A' }}</td> -->
                             <td>
                                 <button class="btn btn-outline-info mx-2">
                                     <i class="pi pi-pencil"></i> Modifier

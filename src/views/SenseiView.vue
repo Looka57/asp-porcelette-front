@@ -23,52 +23,61 @@ onMounted(async () => {
 </script>
 
 <template>
-    <!-- UTILISATION DE container-fluid ET p-4 POUR RÉDUIRE L'ESPACE -->
-    <div class="container-fluid bg-dark text-white min-h-screen p-4">
-        <h1 class="m-3 text-center">Liste des Senseis</h1>
+  <!-- UTILISATION DE container-fluid ET p-4 POUR RÉDUIRE L'ESPACE -->
+  <div class="container-fluid bg-dark text-white min-h-screen p-4">
+    <h1 class="m-3 text-center">Liste des Senseis</h1>
 
-        <div v-if="loading" class="text-secondary">Chargement de la liste des Sensei...</div>
-        <div v-else-if="error" class="text-red-600">{{ error }}</div>
-        <div v-else>
-            <!-- Gestion du cas où aucun Sensei n'est trouvé -->
-            <div v-if="userList.length === 0" class="text-light p-4 border rounded">
-                Aucun Sensei trouvé pour le moment.
-            </div>
+    <div v-if="loading" class="text-secondary">Chargement de la liste des Sensei...</div>
+    <div v-else-if="error" class="text-red-600">{{ error }}</div>
+    <div v-else>
+      <!-- Gestion du cas où aucun Sensei n'est trouvé -->
+      <div v-if="userList.length === 0" class="text-light p-4 border rounded">
+        Aucun Sensei trouvé pour le moment.
+      </div>
 
-            <!-- NOUVELLE TABLE DE STYLE BOOTSTRAP -->
-            <!-- Ajout de 'table-responsive' pour un bon affichage sur les petits écrans -->
-            <div v-else class="table-responsive">
-                <table class="table table-dark table-striped table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Nom</th>
-                            <th scope="col">Prénom</th>
-                            <th scope="col">Email</th>
-                            <!-- MODIFICATION: Définir une largeur minimale pour la colonne Action -->
-                            <th scope="col" style="width: 400px;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Utilisation de user.userId comme clé pour une meilleure performance -->
-                        <tr v-for="(user, index) in userList" :key="user.userId">
-                            <th scope="row">{{ index + 1 }}</th>
-                            <!-- Correction : Les cellules de données sont des <td> -->
-                            <td>{{ user.nom }}</td>
-                            <td>{{ user.prenom }}</td>
-                            <td>{{ user.email || 'N/A' }}</td>
-                            <td>
-                                <button class="btn btn-outline-info mx-2">
-                                    <i class="pi pi-pencil"></i> Modifier
-                                </button>
-                                <button class="btn btn-outline-danger">
-                                    <i class="pi pi-trash"></i> Supprimer
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      <!-- NOUVELLE TABLE DE STYLE BOOTSTRAP -->
+      <!-- Ajout de 'table-responsive' pour un bon affichage sur les petits écrans -->
+      <div v-else class="table-responsive">
+        <table class="table table-dark table-striped table-hover align-middle text-center">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Nom</th>
+              <th scope="col">Prénom</th>
+              <th scope="col">Email</th>
+              <th scope="col">Téléphone</th>
+              <th scope="col">Adresse</th>
+              <th scope="col">Ville</th>
+              <th scope="col">Statut</th>
+              <!-- <th scope="col">Date</th> -->
+              <th scope="col" style="width: 400px;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Utilisation de user.userId comme clé pour une meilleure performance -->
+            <tr v-for="(user, index) in userList" :key="user.userId">
+              <th scope="row">{{ index + 1 }}</th>
+              <!-- Correction : Les cellules de données sont des <td> -->
+              <td>{{ user.nom }}</td>
+              <td>{{ user.prenom }}</td>
+              <td>{{ user.email || 'N/A' }}</td>
+              <td>{{ user.telephone || 'N/A' }}</td>
+              <td>{{ user.adresse || 'N/A' }}</td>
+              <td>{{ user.ville || 'N/A' }}</td>
+              <td>{{ user.statut || 'N/A' }}</td>
+              <!-- <td>{{ user.dateDeCreation || 'N/A' }}</td> -->
+              <td>
+                <button class="btn btn-outline-info mx-2">
+                  <i class="pi pi-pencil"></i> Modifier
+                </button>
+                <button class="btn btn-outline-danger">
+                  <i class="pi pi-trash"></i> Supprimer
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
 </template>
