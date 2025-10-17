@@ -38,7 +38,7 @@ onMounted(async () => {
             <!-- NOUVELLE TABLE DE STYLE BOOTSTRAP -->
             <!-- Ajout de 'table-responsive' pour un bon affichage sur les petits écrans -->
             <div v-else class="table-responsive">
-                <table class="table table-dark table-striped">
+                <table class="table table-dark table-striped table-hover align-middle">
                     <thead>
                         <tr>
                             <th scope="col">#</th>

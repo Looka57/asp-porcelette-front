@@ -32,7 +32,7 @@ const router = createRouter({
     {
       path: '/admin/licencies',
       name: 'admin-licencies',
-      component: () => import('@/views/licenciesView.vue'),
+      component: () => import('@/views/LicenciesView.vue'),
       meta: {
         requiresAuth: true,
         roles: ['Admin', 'Sensei'] // 🎯 Admin ET Sensei
