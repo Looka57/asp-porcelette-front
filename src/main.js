@@ -1,7 +1,4 @@
 import { createApp } from 'vue'
-import './assets/main.css' // <-- Importation unique de Tailwind/Styles locaux
-import './assets/primevue-aura.css';
-import 'primeicons/primeicons.css'; // <-- Icônes PrimeVue
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import App from './App.vue'
@@ -9,27 +6,26 @@ import router from './router'
 
 // --- Styles PrimeVue (Obligatoires) ---
 
-// Importation du fichier de thème téléchargé localement dans src/assets
-import './assets/primevue-aura.css';
+// 🚨 CORRIGÉ : L'importation '@primevue/themes/aura/theme.css' qui causait une erreur de résolution a été supprimée.
+// Nous conservons votre importation de thème locale (primevue-aura.css) et les autres styles.
+import './assets/primevue-aura.css'; // Votre thème local PrimeVue 4.x
+import 'primeicons/primeicons.css'     // Icônes PrimeIcons
+import 'primeflex/primeflex.css'       // Utilitaires CSS PrimeFlex
+import './assets/main.css'             // Votre CSS personnel/global
 
-// PrimeIcons : Obligatoire pour les icônes
-import 'primeicons/primeicons.css';
+// --- Importation des Composants Globaux ---
+import Menubar from 'primevue/menubar'
 
-// L'ancienne importation en double './assets/main.css' a été supprimée ici.
-
-// --- Importation des Composants Globaux (Ajoutez les vôtres ici) ---
-// import Button from 'primevue/button';
-import Menubar from 'primevue/menubar';
 
 const app = createApp(App)
-// const pinia = createPinia()
 
 app.use(createPinia())
-app.use(PrimeVue, { ripple: true });
+app.use(PrimeVue, { ripple: true })
 app.use(router)
 
-// app.component('Button', Button);
-app.component('MenubarDashboard', Menubar);
+// Enregistrement global des composants
+app.component('MenubarDashboard', Menubar)
+
 
 
 app.mount('#app')
