@@ -1,6 +1,7 @@
 <script setup>
-// import { defineProps, defineEmits } from 'vue';
+import { watch } from 'vue'
 
+// ✅ Déclare d'abord tes props
 const props = defineProps({
   // L'objet des données du Sensei (passé par v-model)
   modelValue: {
@@ -17,27 +18,37 @@ const props = defineProps({
     type: [String, Number],
     required: true
   }
-});
+})
 
-const emit = defineEmits(['update:modelValue', 'update:selectedDiscipline', 'file-change']);
+// ✅ Puis seulement après, tes emits
+const emit = defineEmits(['update:modelValue', 'update:selectedDiscipline', 'file-change'])
+
+// ✅ Et enfin, ton watch
+watch(
+  () => props.modelValue.bio,
+  (newBio, oldBio) => {
+    console.log('📝 Bio dans SenseiFormFields - Ancienne:', oldBio, 'Nouvelle:', newBio)
+  },
+  { immediate: true }
+)
 
 // Mettre à jour l'objet principal (pour Grade et Bio)
 const updateField = (field, value) => {
   emit('update:modelValue', {
     ...props.modelValue,
     [field]: value
-  });
-};
+  })
+}
 
 // Mettre à jour la discipline sélectionnée (pour v-model)
 const updateDiscipline = (value) => {
-  emit('update:selectedDiscipline', value);
-};
+  emit('update:selectedDiscipline', value)
+}
 
 // Transmettre l'événement de changement de fichier à la vue parent
 const handleFileChange = (event) => {
-  emit('file-change', event);
-};
+  emit('file-change', event)
+}
 </script>
 
 <template>

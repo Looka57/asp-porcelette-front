@@ -45,14 +45,12 @@ const emit = defineEmits(['edit', 'delete']);
           <td>{{ user.statut || 'N/A' }}</td>
 
        <td>{{ getDisciplineName(user.disciplineId) }}</td>
-
-
           <td>
-            <button class="btn btn-outline-info mx-2" @click="$emit('edit', user)">
-              <i class="pi pi-pencil"></i> Modifier
+            <button class="btn btn-outline-info m-3 " @click="$emit('edit', user)">
+              <i class="pi pi-pencil"></i>
             </button>
             <button class="btn btn-outline-danger" @click="$emit('delete', user.userId)">
-              <i class="pi pi-trash"></i> Supprimer
+              <i class="pi pi-trash"></i>
             </button>
           </td>
         </tr>

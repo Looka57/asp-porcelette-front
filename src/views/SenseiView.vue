@@ -15,6 +15,7 @@ const loading = ref(true);
 const error = ref(null);
 const photoFile = ref(null);
 const validationError = ref(''); // erreurs de validation affichées dans le modal
+const editingUserId = ref(null); // ID de l'utilisateur en cours d'édition
 
 // --------------------
 // Helpers utilitaires
@@ -30,7 +31,6 @@ const onFileChange = (event) => {
     photoFile.value = file;
   }
 };
-
 
 // --------------------
 // Modèle du formulaire (nouveau Sensei)
@@ -55,7 +55,6 @@ const newSensei = ref({
   statut: 1,
   roles: ['Sensei']
 });
-
 
 // --------------------
 // Fonctions utilitaires liées aux données
@@ -88,14 +87,27 @@ const resetForm = () => {
   };
   selectedDiscipline.value = '';
   validationError.value = '';
+  editingUserId.value = null; // Réinitialiser l'ID en cours d'édition
 };
-
 
 // --------------------
 // Événements from child components / actions utilisateur
 // --------------------
-const handleEdit = (event) => {
-  console.log('Événement reçu:', event);
+const handleEdit = (user) => {
+  console.log("Valeur de la biographie reçue de l'API :", user.bio);
+  editingUserId.value = user.userId; // Stocker l'ID de l'utilisateur en cours d'édition
+  newSensei.value = { ...user, bio: user.bio, password:'' }; // Copier les données de l'utilisateur dans le formulaire
+  selectedDiscipline.value = user.disciplineId ? String(user.disciplineId) : ''; // Mettre à jour la discipline sélectionnée
+  newSensei.value.password = ''; // Ne pas préremplir le mot de passe pour des raisons de sécurité
+  const modalElement = document.getElementById('createAdherent');
+  if (modalElement) {
+    // L'objet window.bootstrap est normalement disponible si vous utilisez la librairie JS
+    const modal = new window.bootstrap.Modal(modalElement);
+    modal.show();
+  }
+  // 💥 CORRECTION : suppression de console.log('Événement reçu:', event);
+  // car 'event' n'est pas défini ici, c'est 'user'.
+  console.log('Utilisateur en édition:', user);
 };
 
 const handleDelete = async (userId) => {
@@ -103,7 +115,7 @@ const handleDelete = async (userId) => {
     return;
   }
   try {
-    await api.delete(`User/${userId}`);
+    await api.delete(`User/admin/${userId}`);
     alert('Utilisateur supprimé avec succès.');
     await loadSenseiData();
   } catch (err) {
@@ -111,7 +123,6 @@ const handleDelete = async (userId) => {
     console.error(err);
   }
 };
-
 
 // --------------------
 // Chargement / rechargement des données
@@ -129,45 +140,79 @@ const loadSenseiData = async () => {
   }
 };
 
-
 // --------------------
-// Soumission du formulaire (création Sensei)
+// Soumission du formulaire (création / modification Sensei)
 // --------------------
 const saveNewSensei = async () => {
   validationError.value = '';
   const disciplineIdNum = Number(selectedDiscipline.value);
   newSensei.value.disciplineId = disciplineIdNum;
 
-  if (!newSensei.value.nom || !newSensei.value.email || !newSensei.value.password || !disciplineIdNum) {
-    validationError.value = 'Veuillez remplir tous les champs obligatoires : Nom, Email, Mot de passe et Discipline.';
+  // 💥 CORRECTION : Une seule et unique validation, conditionnée au mode d'édition
+  const isPasswordRequired = !editingUserId.value;
+
+  if (!newSensei.value.nom || !newSensei.value.email || !disciplineIdNum || (isPasswordRequired && !newSensei.value.password)) {
+    validationError.value = 'Veuillez remplir tous les champs obligatoires (Mot de passe requis pour l\'ajout).';
     return;
   }
 
   try {
     const formData = new FormData();
     for (const key in newSensei.value) {
-      if (newSensei.value[key] !== null && key !== 'roles') {
-        formData.append(key, newSensei.value[key]);
+      const value = newSensei.value[key];
+
+      // Ignorer le tableau de rôles
+      if (key === 'roles') {
+        continue;
+      }
+
+      // Ignorer le mot de passe s'il est vide (uniquement en mode édition)
+      if (key === 'password' && value === '') {
+        continue;
+      }
+
+      if (value !== null) {
+        formData.append(key, value);
       }
     }
     if (photoFile.value) {
       formData.append('PhotoFile', photoFile.value);
     }
 
-    const response = await api.post('/User/register/sensei', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    // 💥 CORRECTION : Suppression de la double déclaration et de l'ancienne logique POST
+    let response; // Déclaration unique de la variable de portée de bloc
+    let successMessage;
 
-    alert('Nouveau Sensei créé avec succès !');
+    if (editingUserId.value) {
+      // REQUÊTE PUT (MODIFICATION)
+      response = await api.put(`User/admin/${editingUserId.value}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      successMessage = 'Sensei mis à jour avec succès !';
+    } else {
+      // REQUÊTE POST (CRÉATION)
+      response = await api.post('/User/register/sensei', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      successMessage = 'Nouveau Sensei créé avec succès !';
+    }
+
+    // 🟢 Utilisation de 'response' pour éviter l'erreur ESLint
     console.log('Réponse de l\'API:', response.data);
+    alert(successMessage);
+
+    // Fermeture du modal (nécessite l'API JS de Bootstrap)
+    const modalElement = document.getElementById('createAdherent');
+    if (modalElement) {
+      const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) modalInstance.hide();
+    }
 
     await loadSenseiData();
-    resetForm();
+    resetForm(); // Réinitialise l'état d'édition
   }
   catch (err) {
-    let errorMessage = 'Erreur lors de la création du Sensei. Veuillez réessayer.';
+    let errorMessage = 'Erreur lors de la création/modification du Sensei. Veuillez réessayer.';
     if (err.response && err.response.data) {
       if (err.response.data.message) {
         errorMessage = `Erreur API: ${err.response.data.message}`;
@@ -182,7 +227,6 @@ const saveNewSensei = async () => {
     console.error('Erreur API détaillée:', err);
   }
 };
-
 
 // --------------------
 // Cycle de vie : montage
@@ -203,39 +247,33 @@ onMounted(async () => {
   <div class="container-fluid bg-dark text-white min-h-screen p-4">
     <h1 class="m-3 text-center">Liste des Senseis</h1>
 
-    <!-- --------------------
-         Bouton : ouvrir modal création
-         -------------------- -->
     <button class="mb-3 btn btn-outline-warning d-flex align-items-center" data-bs-toggle="modal"
       data-bs-target="#createAdherent">
       <i class="pi pi-plus-circle me-2"></i> Ajout Sensei
     </button>
 
-    <!-- --------------------
-         Modal : création d'un Sensei
-         -------------------- -->
     <div class="modal fade" id="createAdherent" tabindex="-1" aria-labelledby="createAdherentLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content modalDesign bg-light text-dark rounded-lg shadow-2xl">
           <div class="modal-header border-b-2 border-gray-200">
-            <h1 class="modal-title fs-5" id="createrAdherentHeader">Créer un nouveau Sensei</h1>
+            <h1 class="modal-title fs-5" id="createrAdherentHeader">
+              {{ editingUserId ? 'Modifier le Sensei' : 'Créer un nouveau Sensei' }}
+            </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
               @click="resetForm"></button>
           </div>
           <div class="modal-body">
-            <!-- Message d'erreur -->
             <div v-if="validationError" class="alert alert-danger" role="alert">
               {{ validationError }}
             </div>
 
             <form @submit.prevent="saveNewSensei">
+
               <UserFormFields v-model="newSensei" :isPasswordRequired="true" />
+
               <SenseiFormFields v-model="newSensei" v-model:selectedDiscipline="selectedDiscipline"
                 :disciplineList="disciplineList" @file-change="onFileChange" />
 
-              <!-- --------------------
-                   Footer du modal : actions
-                   -------------------- -->
               <div class="modal-footer border-t-2 border-gray-200">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                   @click="resetForm">Fermer</button>
@@ -247,9 +285,6 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- --------------------
-         Affichage : tableau des Sensei / états
-         -------------------- -->
     <div v-if="loading" class="text-secondary p-4 text-center">Chargement de la liste des Sensei...</div>
     <div v-else-if="error" class="text-red-600 p-4 border rounded bg-danger bg-opacity-10">{{ error }}</div>
     <div v-else>
@@ -258,8 +293,10 @@ onMounted(async () => {
       </div>
 
       <div v-else>
+
         <UserTable :userList="userList" :getDisciplineName="getDisciplineName" @edit="handleEdit"
           @delete="handleDelete" />
+
       </div>
     </div>
   </div>
@@ -267,8 +304,8 @@ onMounted(async () => {
 
 <style scoped>
 /* --------------------
-   Styles locaux du composant
-   -------------------- */
+ Styles locaux du composant
+ -------------------- */
 .modalDesign {
   background-color: #f8f9fa;
   color: #212529;
