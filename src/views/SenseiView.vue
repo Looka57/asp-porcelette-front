@@ -116,16 +116,36 @@ const saveNewSensei = async () => {
   }
 
   try {
-    // Envoi des données.
-    const response = await api.post('/User/register/sensei', newSensei.value);
+    // 💥 CORRECTION MAJEURE : Construction de l'objet FormData
+    const formData = new FormData();
 
-    // Si vous utilisez Bootstrap 5 JS, vous pouvez décommenter et adapter ce bloc pour fermer le modal
-    // const modalElement = document.getElementById('createAdherent');
-    // if (modalElement && window.bootstrap) {
-    //   const modalInstance = window.bootstrap.Modal.getInstance(modalElement) || new window.bootstrap.Modal(modalElement);
-    //   modalInstance.hide();
-    // }
+    // Parcourir l'objet newSensei et ajouter chaque valeur au FormData
+    // La boucle assure que toutes les propriétés de newSensei.value sont ajoutées.
+    for (const key in newSensei.value) {
+      // Ignorer le champ 'roles' pour l'instant (il est complexe à envoyer via FormData)
+      // Note: Le DTO UserCreationDto ne doit pas contenir de champ 'roles'
+      // ou vous devez l'ajouter correctement (ex: formData.append('Roles[]', role))
+      if (newSensei.value[key] !== null && key !== 'roles') {
+        formData.append(key, newSensei.value[key]);
+      }
+    }
 
+    // Le champ PhotoFile doit être ajouté à partir de la référence du fichier
+    if (photoFile.value) {
+      // Le nom de la clé (PhotoFile) doit correspondre EXACTEMENT au nom de la propriété dans votre DTO C#
+      formData.append('PhotoFile', photoFile.value);
+    }
+
+    // 3. Envoi des données.
+    // L'envoi de l'objet FormData crée automatiquement le bon Content-Type: multipart/form-data
+    const response = await api.post('/User/register/sensei', formData, {
+      // Optionnel mais recommandé: s'assurer que l'API gère le type de contenu
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    // ... Reste de votre code (alert, loadSenseiData, resetForm)
     alert('Nouveau Sensei créé avec succès !');
     console.log('Réponse de l\'API:', response.data);
 
@@ -180,7 +200,8 @@ onMounted(async () => {
         <div class="modal-content modalDesign bg-light text-dark rounded-lg shadow-2xl">
           <div class="modal-header border-b-2 border-gray-200">
             <h1 class="modal-title fs-5" id="createrAdherentHeader">Créer un nouveau Sensei</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="resetForm"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+              @click="resetForm"></button>
           </div>
           <div class="modal-body">
             <!-- Message d'erreur de validation (affiché si validationError n'est pas vide) -->
@@ -271,7 +292,8 @@ onMounted(async () => {
               </div>
               <!-- Les boutons de soumission sont à l'intérieur du formulaire, c'est CORRECT -->
               <div class="modal-footer border-t-2 border-gray-200">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="resetForm">Fermer</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                  @click="resetForm">Fermer</button>
                 <button type="submit" class="btn btn-warning">Sauvegarder</button>
               </div>
             </form>
