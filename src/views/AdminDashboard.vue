@@ -35,7 +35,7 @@ onMounted(async () => {
             <div class="col"><a href="#">
                 <div
                     class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
-                    <img width="90" height="90" src="https://img.icons8.com/ios-glyphs/90/judo.png" alt="judo" />
+                   <img width="100" height="100" src="https://img.icons8.com/bubbles/100/user-group-man-woman.png" alt="user-group-man-woman"/>
                     <h4>Licenciés</h4>
                     <p>500</p>
                 </div>
@@ -44,9 +44,7 @@ onMounted(async () => {
             <div class="col"><a href="#">
                 <div
                     class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
-                    <img width="96" height="96"
-                        src="https://img.icons8.com/external-goofy-solid-kerismaker/96/external-Event-birthday-party-goofy-solid-kerismaker.png"
-                        alt="external-Event-birthday-party-goofy-solid-kerismaker" />
+              <img width="100" height="100" src="https://img.icons8.com/bubbles/100/today.png" alt="today"/>
                     <h4>Evenements</h4>
                     <p>12</p>
                 </div>
@@ -55,7 +53,7 @@ onMounted(async () => {
             <div class="col"><a href="#">
                 <div
                     class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
-                    <img width="90" height="90" src="https://img.icons8.com/ios-glyphs/90/archive.png" alt="archive" />
+                   <img width="100" height="100" src="https://img.icons8.com/bubbles/100/archive-folder.png" alt="archive-folder"/>
                     <h4>Archives</h4>
                     <p>24</p>
                 </div>

@@ -4,6 +4,8 @@ import { ref } from 'vue'
 import CardsEvent from '@/components/Events/CardsEvent.vue' // adapte le chemin
 import HeaderCards from '@/components/Events/HeaderCards.vue';
 
+
+
 const eventTitle = ref('')
 </script>
 
