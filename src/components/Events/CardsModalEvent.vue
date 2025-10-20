@@ -1,5 +1,5 @@
 <script setup>
-import { watch, defineProps } from 'vue';
+import { watch } from 'vue';
 
 function formatDate(dateString) {
   if (!dateString) return 'Date inconnue';
@@ -15,6 +15,7 @@ function formatDate(dateString) {
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   event: { type: Object, default: null },
+  typeEventMap: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -23,7 +24,22 @@ function closeModal() {
   emit('update:modelValue', false);
 }
 
-// 🔸 Watch pour gérer le scroll du body
+// Debug - À retirer après résolution
+watch(
+  () => props.event,
+  (newEvent) => {
+    if (newEvent) {
+      console.log('=== DEBUG MODAL ===');
+      console.log('event.typeEvenementId:', newEvent.typeEvenementId);
+      console.log('event.type:', newEvent.type);
+      console.log('typeEventMap:', props.typeEventMap);
+      console.log('typeEventMap[typeEvenementId]:', props.typeEventMap[newEvent.typeEvenementId]);
+    }
+  },
+  { immediate: true }
+)
+
+// Watch pour gérer le scroll du body
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -33,14 +49,14 @@ watch(
 </script>
 
 <template>
-  <!-- Transition pour l’apparition/disparition -->
+  <!-- Transition pour l'apparition/disparition -->
   <transition name="fade">
     <div v-if="modelValue && event" class="modal-overlay" @click.self="closeModal">
       <transition name="slide-up">
-        <div class="modal-dialogue bg-dark text-white " v-if="modelValue">
+        <div class="modal-dialogue bg-dark text-white" v-if="modelValue">
           <div class="modal-content">
             <!-- HEADER -->
-            <div class="modal-header bg-dark text-white ">
+            <div class="modal-header bg-dark text-white">
               <h5 class="modal-title mb-5">{{ event.titre }}</h5>
               <hr class="my-3" />
               <button type="button" class="btn-close btn-close-white" @click="closeModal" aria-label="Fermer"></button>
@@ -51,6 +67,8 @@ watch(
               <p class="lead"><strong>Date :</strong> {{ formatDate(event.dateDebut) }}</p>
               <p><strong>Discipline :</strong> {{ event.nom || 'Non spécifiée' }}</p>
               <p><strong>Lieu :</strong> {{ event.lieu || 'Complexe Porcelette' }}</p>
+              <p><strong>Événement :</strong> {{ event.type || typeEventMap[event.typeEvenementId] || 'Non spécifié' }}</p>
+
               <hr class="my-3" />
               <h6>Description détaillée :</h6>
               <p>{{ event.description || 'Aucune description disponible.' }}</p>

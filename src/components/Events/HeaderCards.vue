@@ -1,13 +1,17 @@
-<!-- CardsEvent.vue -->
+
 <script setup>
+
 </script>
 
 <template>
   <div class="container-fluid">
-    <div class="headerLink w-100 d-flex align-items-center my-4 p-3 rounded">
-      <!-- Bouton -->
-      <button class="btn btn-outline-warning d-flex justify-content-center align-items-center" type="button"
-        data-bs-toggle="modal" data-bs-target="#createEvent">
+  <div class="headerLink w-100 d-flex align-items-center my-4 p-3 rounded">
+      <!-- Bouton (dans le Header) -->
+      <!-- ATTENTION : Retrait du @click="isCreateModalOpen = true" car Bootstrap le gère via data-bs-target="#createEvent" -->
+      <button class="btn btn-outline-warning d-flex justify-content-center align-items-center"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#createEvent">
         <i class="pi pi-calendar-plus me-2"></i> Ajouter un événement
       </button>
 

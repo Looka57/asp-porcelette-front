@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios';
 import CardsModalEvent from './CardsModalEvent.vue';
+import CreateEventModal from './CreateEventModal.vue'; // Import de la modale de création
 
 
 // --------------------
@@ -9,13 +10,20 @@ import CardsModalEvent from './CardsModalEvent.vue';
 // --------------------
 const events = ref([]);
 const disciplineMap = ref({}); // Carte dynamique { id: nom_discipline }
-const isModalOpen = ref(false); // État ouvert/fermé de la modale
+const typeEventMap =ref({});
+const isModalOpen = ref(false); // État ouvert/fermé de la modale de DÉTAIL
 const selectedEvent = ref(null); // Pour stocker les détails de l'événement
 // L'ID est initialisé à null, mais contiendra une string (l'ID de l'événement) si une confirmation est demandée.
 const eventToDelete = ref(null);
 
+// >>> AJOUT N°1 : État pour la modale de CRÉATION
+// L'état est conservé pour la fonction handleEventAdded, mais n'est pas utilisé pour l'ouverture si Bootstrap est la source principale.
+const isCreateModalOpen = ref(false);
+
+
 const API_PATH_EVENT = '/Evenement';
-const API_PATH_DISCIPLINE = '/Discipline'; // Chemin API supposé pour les disciplines
+const API_PATH_DISCIPLINE = '/Discipline';
+const API_PATH_TYPE_EVENEMENT = '/TypeEvenement'
 
 
 // --------------------
@@ -66,21 +74,24 @@ async function deleteEvent(id) {
 
 
 // --------------------
-// LOGIQUE FETCH & MODALE (existante)
+// LOGIQUE MODALE DÉTAIL (existante)
 // --------------------
-
 function showDetails(event) {
-  const disciplineIdNumber = event.disciplineId ? Number(event.disciplineId) : 0;
-  const disciplineName = disciplineMap.value[disciplineIdNumber] || 'Inconnu';
+  const disciplineIdNumber = Number(event.disciplineId || 0);
+  const typeIdNumber = Number(event.typeEvenementId || 0);
+
+  console.log('🎯 IDs:', { disciplineIdNumber, typeIdNumber });
+  console.log('🗺️ Maps:', { disciplineMap: disciplineMap.value, typeEventMap: typeEventMap.value });
 
   selectedEvent.value = {
-    ...event, // Copie toutes les propriétés existantes
-    nom: disciplineName // Ajoute la propriété 'nom' pour la modale
+    ...event, // Garde TOUTES les propriétés originales
+    nom: disciplineMap.value[disciplineIdNumber] || 'Inconnu',
+    type: typeEventMap.value[typeIdNumber] || 'Non spécifié',
   };
 
-  // S'assurer que la confirmation est cachée si on ouvre les détails
-  cancelDelete();
+  console.log('📤 selectedEvent:', selectedEvent.value);
 
+  cancelDelete();
   isModalOpen.value = true;
   document.body.style.overflow = 'hidden';
 }
@@ -97,6 +108,17 @@ function formatDate(dateString) {
   }
 }
 
+
+function handleEventAdded(newEvent) {
+    console.log("Nouvel événement ajouté et rafraîchissement de la liste.", newEvent);
+    events.value.push(newEvent);
+    isCreateModalOpen.value = false;
+}
+
+
+// --------------------
+// LOGIQUE FETCH
+// --------------------
 async function fetchDisciplines() {
   try {
     const reponse = await api.get(API_PATH_DISCIPLINE);
@@ -130,6 +152,33 @@ async function fetchEvent() {
   }
 }
 
+async function fetchEventTypes() {
+  try {
+    const response = await api.get(API_PATH_TYPE_EVENEMENT);
+     console.log('🔍 Premier événement complet:', response.data[0]);
+    console.log('🔍 Réponse API TypeEvenement:', response.data); // DEBUG
+    const map = {};
+
+    response.data.forEach(t => {
+      // ⚠️ CORRECTION : gérer toutes les variations de casse
+      let id = t.TypeEvenementId ?? t.typeEvenementId;
+      let nom = t.libelle ?? t.Libelle ?? t.libele ?? t.Libele ?? `Type #${id}`;
+
+      if (id !== undefined) {
+        map[Number(id)] = nom;
+        console.log(`✅ Type ajouté: ${id} -> ${nom}`); // DEBUG
+      } else {
+        console.warn('TypeEvenement sans ID valide:', t);
+      }
+    });
+    typeEventMap.value = map;
+    console.log('✅ typeEventMap final:', typeEventMap.value); // DEBUG
+  } catch (error) {
+    console.error('Erreur lors de la récupération des types d\'événements:', error);
+  }
+}
+
+
 const disciplineIcons = {
   2: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png', // Judo
   3: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Aïkido
@@ -144,51 +193,63 @@ function getIconUrl(disciplineId) {
 onMounted(() => {
   fetchDisciplines();
   fetchEvent();
+  fetchEventTypes();
 });
 
 
 </script>
 
 <template>
-  <div class="bg-warm p-2 rounded">
-    <div v-if="events.length === 0" class="text-center p-5">
-      <p>Chargement des événements...</p>
-    </div>
-    <div v-else class="row g-4 mb-5">
-      <div class="col-lg-4 col-md-6 col-lg-4" v-for="event in events" :key="event.id">
-        <div class="cards text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center">
-          <img width="64" height="64" :src="getIconUrl(event.disciplineId)"
-            :alt="'Icône Discipline ' + event.disciplineId" />
-          <h4>{{ event.titre }}</h4>
-          <p>{{ formatDate(event.dateDebut) }}</p>
+  <div class="container-fluid">
 
-          <!-- Boutons d'Action -->
-          <div class="d-flex gap-2">
-            <!-- VÉRIFICATION CORRIGÉE : Afficher le mode confirmation UNIQUEMENT si l'ID de l'événement correspond à l'ID en attente de suppression. -->
-            <template v-if="Number(eventToDelete) === Number(event.evenementId)">
-              <span class="text-danger p-2">Êtes-vous sûr ?</span>
-              <button class="btn btn-danger" @click="deleteEvent(event.evenementId)">
-                Oui
-              </button>
-              <button class="btn btn-secondary" @click="cancelDelete">Non</button>
-            </template>
+    <!-- Section des cartes d'événements -->
+    <div class="bg-warm p-2 rounded">
+      <div v-if="events.length === 0" class="text-center p-5">
+        <p>Chargement des événements...</p>
+      </div>
+      <div v-else class="row g-4 mb-5">
+        <div class="col-lg-4 col-md-6 col-lg-4" v-for="event in events" :key="event.id">
+          <div class="cards text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center">
+            <img width="64" height="64" :src="getIconUrl(event.disciplineId)"
+              :alt="'Icône Discipline ' + event.disciplineId" />
+            <h4>{{ event.titre }}</h4>
+            <p>{{ formatDate(event.dateDebut) }}</p>
 
-            <!-- État Normal -->
-            <template v-else>
-              <button class="btn btn-outline-info" @click="showDetails(event)">
-                Voir Détail
-              </button>
-              <button class="btn btn-outline-danger" @click="confirmDelete(event.evenementId)">
-                Supprimer
-              </button>
-            </template>
+
+            <!-- Boutons d'Action -->
+            <div class="d-flex gap-2">
+              <template v-if="Number(eventToDelete) === Number(event.evenementId)">
+                <span class="text-danger p-2">Êtes-vous sûr ?</span>
+                <button class="btn btn-danger" @click="deleteEvent(event.evenementId)">
+                  Oui
+                </button>
+                <button class="btn btn-secondary" @click="cancelDelete">Non</button>
+              </template>
+
+              <!-- État Normal -->
+              <template v-else>
+                <button class="btn btn-outline-info" @click="showDetails(event)">
+                  Voir Détail
+                </button>
+                <button class="btn btn-outline-danger" @click="confirmDelete(event.evenementId)">
+                  Supprimer
+                </button>
+              </template>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <CardsModalEvent v-model="isModalOpen" :event="selectedEvent" />
+  <!-- MODALES -->
+
+  <CardsModalEvent v-model="isModalOpen" :event="selectedEvent" :disciplineMap="disciplineMap" :typeEventMap="typeEventMap" />
+  <CreateEventModal
+    v-model="isCreateModalOpen"
+    :disciplineMap="disciplineMap"
+    @event-added="handleEventAdded"
+  />
 </template>
 
 <style scoped>
@@ -199,4 +260,7 @@ onMounted(() => {
   background-color: #343a40 !important;
   /* bg-dark ou secondary */
 }
+
+/* Styles pour les liens de navigation (conservés de votre code) */
+
 </style>
