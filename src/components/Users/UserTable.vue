@@ -12,7 +12,7 @@ const { userList, getDisciplineName } = defineProps({
 });
 
 // Déclaration obligatoire pour utiliser $emit (ou 'emit') dans le template.
-const emit = defineEmits(['edit', 'delete']);
+// const emit = defineEmits(['edit', 'delete']);
 
 </script>
 

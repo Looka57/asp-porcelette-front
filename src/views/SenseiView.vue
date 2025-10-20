@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '@/api/axios';
-import SenseiFormFields from '@/components/SenseiFormFields.vue';
-import UserFormFields from '@/components/UserFormFields.vue';
-import UserTable from '@/components/UserTable.vue';
+import SenseiFormFields from '@/components/Senseis/SenseiFormFields.vue';
+import UserFormFields from '@/components/Users/UserFormFields.vue';
+import UserTable from '@/components/Users/UserTable.vue';
 
 // --------------------
 // Références / état local
@@ -246,7 +246,6 @@ onMounted(async () => {
 <template>
   <div class="container-fluid bg-dark text-white min-h-screen p-4">
     <h1 class="m-3 text-center">Liste des Senseis</h1>
-
     <button class="mb-3 btn btn-outline-warning d-flex align-items-center" data-bs-toggle="modal"
       data-bs-target="#createAdherent">
       <i class="pi pi-plus-circle me-2"></i> Ajout Sensei
@@ -268,12 +267,9 @@ onMounted(async () => {
             </div>
 
             <form @submit.prevent="saveNewSensei">
-
               <UserFormFields v-model="newSensei" :isPasswordRequired="true" />
-
               <SenseiFormFields v-model="newSensei" v-model:selectedDiscipline="selectedDiscipline"
                 :disciplineList="disciplineList" @file-change="onFileChange" />
-
               <div class="modal-footer border-t-2 border-gray-200">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                   @click="resetForm">Fermer</button>
@@ -291,9 +287,7 @@ onMounted(async () => {
       <div v-if="userList.length === 0" class="text-light p-4 border rounded bg-dark-subtle text-center">
         Aucun Sensei ou Admin trouvé pour le moment.
       </div>
-
       <div v-else>
-
         <UserTable :userList="userList" :getDisciplineName="getDisciplineName" @edit="handleEdit"
           @delete="handleDelete" />
 
