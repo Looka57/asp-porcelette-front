@@ -1,5 +1,5 @@
 <script setup>
-import { watch, defineProps, defineEmits } from 'vue';
+import { watch, defineProps } from 'vue';
 
 function formatDate(dateString) {
   if (!dateString) return 'Date inconnue';
