@@ -2,11 +2,19 @@
 // ===============================
 // 🔹 IMPORTS
 // ===============================
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import api from '@/api/axios';
 import CardsModalEvent from './CardsModalEvent.vue';
 import CreateEventModal from './CreateEventModal.vue';
 import EditEventModal from './EditEventModal.vue';
+
+
+const props = defineProps({
+  filter: {
+    type: String,
+    default: 'Tous'
+  }
+})
 
 // ===============================
 // 🔹 ÉTATS & COMMUNICATION
@@ -27,6 +35,23 @@ const isEditModalOpen = ref(false);
 const API_PATH_EVENT = '/Evenement';
 const API_PATH_DISCIPLINE = '/Discipline';
 const API_PATH_TYPE_EVENEMENT = '/TypeEvenement';
+
+
+const filteredEvents = computed(() => {
+  if (props.filter === 'Tous') return events.value
+
+  if (props.filter === 'À venir') {
+    const now = new Date()
+    return events.value.filter(e => new Date(e.dateDebut) > now)
+  }
+
+  // Pour les disciplines
+  return events.value.filter(e =>
+    e.discipline?.nom?.toLowerCase().includes(props.filter.toLowerCase()) ||
+    e.disciplineId && disciplineMap.value[e.disciplineId]?.toLowerCase().includes(props.filter.toLowerCase())
+  )
+})
+
 
 // ===============================
 // 🔹 LOGIQUE CRUD : MODIFICATION (UPDATE)
@@ -197,8 +222,7 @@ async function fetchEvent() {
 async function fetchEventTypes() {
   try {
     const response = await api.get(API_PATH_TYPE_EVENEMENT);
-    console.log('🔍 Premier événement complet:', response.data[0]);
-    console.log('🔍 Réponse API TypeEvenement:', response.data);
+
 
     const map = {};
 
@@ -207,7 +231,6 @@ async function fetchEventTypes() {
       const nom = t.libelle ?? t.Libelle ?? t.libele ?? t.Libele ?? `Type #${id}`;
       if (id !== undefined) {
         map[Number(id)] = nom;
-        console.log(`✅ Type ajouté: ${id} -> ${nom}`);
       } else {
         console.warn('TypeEvenement sans ID valide:', t);
       }
@@ -260,12 +283,12 @@ onMounted(() => {
       🔸 SECTION : Liste des cartes d'événements
       =============================== -->
     <div class="bg-warm p-2 rounded">
-      <div v-if="events.length === 0" class="text-center p-5">
-        <p>Chargement des événements...</p>
+      <div v-if="filteredEvents.length === 0" class="text-center p-5">
+        <p>Aucun événement trouvé pour "{{ props.filter }}"</p>
       </div>
 
       <div v-else class="row g-4 mb-5">
-        <div class="col-lg-4 col-md-6 col-lg-4" v-for="event in events" :key="event.id">
+<div class="col-lg-4 col-md-6 col-lg-4" v-for="event in filteredEvents" :key="event.id">
           <div class="cards text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center">
             <!-- Icône discipline -->
             <img width="64" height="64" :src="getIconUrl(event.disciplineId)"
@@ -304,7 +327,7 @@ onMounted(() => {
   <!-- Modale de Création -->
   <CreateEventModal v-model="isCreateModalOpen" :disciplineMap="disciplineMap" @event-added="handleEventAdded" />
   <!-- Modale d'Edition -->
-  <EditEventModal v-model="isEditModalOpen" :eventData="eventToEdit" :disciplineMap="disciplineMap" :typeEventMap="typeEventMap" @event-updated="handleEventUpdated" />
+  <EditEventModal v-model="isEditModalOpen" :eventData="eventToEdit" :disciplineMap="disciplineMap" @event-updated="handleEventUpdated"  :typeEventMap="typeEventMap"  />
 
 
 

@@ -1,42 +1,50 @@
-
 <script setup>
+import { ref } from 'vue'
 
+// ===============================
+// 🔹 ÉTATS & COMMUNICATION
+// ===============================
+const activeFiltre = ref('Tous')
+const emit = defineEmits(['filter-selected'])
+
+// ===============================
+// 🔹 MÉTHODES
+// ===============================
+function selectFilter(filter) {
+  activeFiltre.value = filter
+  emit('filter-selected', filter)
+}
 </script>
 
 <template>
   <div class="container-fluid">
-  <div class="headerLink w-100 d-flex align-items-center my-4 p-3 rounded">
-      <!-- Bouton (dans le Header) -->
-      <!-- ATTENTION : Retrait du @click="isCreateModalOpen = true" car Bootstrap le gère via data-bs-target="#createEvent" -->
-      <button class="btn btn-outline-warning d-flex justify-content-center align-items-center"
+    <div class="headerLink w-100 d-flex align-items-center my-4 p-3 rounded">
+      <!-- Bouton d’ajout d’événement -->
+      <button
+        class="btn btn-outline-warning d-flex justify-content-center align-items-center"
         type="button"
         data-bs-toggle="modal"
-        data-bs-target="#createEvent">
-        <i class="pi pi-calendar-plus me-2"></i> Ajouter un événement
+        data-bs-target="#createEvent"
+      >
+        <i class="pi pi-calendar-plus me-2"></i>
+        Ajouter un événement
       </button>
 
       <!-- Liens de navigation -->
-      <ul class="nav mb-0 ">
-        <li class="nav-item">
-          <a class="nav-link" href="#">Tous</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link " href="#">À venir</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link " href="#">Judo</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link " href="#">Judo Détente</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link " href="#">Aïkido</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link " href="#">Jujitsu</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link " href="#">Trier par…</a>
+      <ul class="nav mb-0">
+        <li
+          class="nav-item"
+          v-for="filter in ['Tous', 'À venir', 'Judo', 'Judo Détente', 'Aïkido', 'Jujitsu']"
+          :key="filter"
+        >
+          <a
+            class="nav-link"
+            :class="{ active: activeFiltre === filter }"
+            href="#"
+            @click.prevent="selectFilter(filter)"
+          >
+            {{ filter }}
+          </a>
         </li>
       </ul>
     </div>
