@@ -1,6 +1,14 @@
 <script setup>
-import { watch } from 'vue';
+// ===============================
+// 🔹 IMPORTS
+// ===============================
+import { watch, computed } from 'vue';
 
+// ===============================
+// 🔹 FONCTIONS UTILITAIRES
+// ===============================
+
+// Formater une date au format français
 function formatDate(dateString) {
   if (!dateString) return 'Date inconnue';
   try {
@@ -12,6 +20,9 @@ function formatDate(dateString) {
   }
 }
 
+// ===============================
+// 🔹 PROPS & ÉMISSIONS
+// ===============================
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   event: { type: Object, default: null },
@@ -20,26 +31,33 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+// ===============================
+// 🔹 COMPUTED PROPERTIES
+// ===============================
+
+// Récupère le nom du type d'événement selon son ID
+const eventTypeName = computed(() => {
+  if (!props.event || !props.event.typeEvenementId) {
+    return 'Non spécifié';
+  }
+  const typeId = Number(props.event.typeEvenementId);
+  return props.typeEventMap[typeId] || 'Non spécifié';
+});
+
+// ===============================
+// 🔹 FONCTIONS MÉTHODES
+// ===============================
+
+// Ferme la modale
 function closeModal() {
   emit('update:modelValue', false);
 }
 
-// Debug - À retirer après résolution
-watch(
-  () => props.event,
-  (newEvent) => {
-    if (newEvent) {
-      console.log('=== DEBUG MODAL ===');
-      console.log('event.typeEvenementId:', newEvent.typeEvenementId);
-      console.log('event.type:', newEvent.type);
-      console.log('typeEventMap:', props.typeEventMap);
-      console.log('typeEventMap[typeEvenementId]:', props.typeEventMap[newEvent.typeEvenementId]);
-    }
-  },
-  { immediate: true }
-)
+// ===============================
+// 🔹 WATCHERS
+// ===============================
 
-// Watch pour gérer le scroll du body
+// Empêche le scroll de la page quand la modale est ouverte
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -48,36 +66,46 @@ watch(
 );
 </script>
 
+<!-- ===============================
+    🔹 TEMPLATE (HTML)
+    =============================== -->
 <template>
-  <!-- Transition pour l'apparition/disparition -->
   <transition name="fade">
     <div v-if="modelValue && event" class="modal-overlay" @click.self="closeModal">
       <transition name="slide-up">
         <div class="modal-dialogue bg-dark text-white" v-if="modelValue">
           <div class="modal-content">
-            <!-- HEADER -->
+
+            <!-- ===============================
+                🔸 HEADER DE LA MODALE
+                =============================== -->
             <div class="modal-header bg-dark text-white">
-              <h5 class="modal-title mb-5">{{ event.titre }}</h5>
+              <h5 class="modal-title mb-5 fs-2">{{ event.titre }}</h5>
               <hr class="my-3" />
               <button type="button" class="btn-close btn-close-white" @click="closeModal" aria-label="Fermer"></button>
             </div>
 
-            <!-- BODY -->
+            <!-- ===============================
+                🔸 CORPS DE LA MODALE
+                =============================== -->
             <div class="modal-body bg-light text-dark p-3 mb-3">
-              <p class="lead"><strong>Date :</strong> {{ formatDate(event.dateDebut) }}</p>
+              <p class="lead fs-4"><strong>Date de début :</strong> {{ formatDate(event.dateDebut) }}</p>
+              <p class="lead fs-4"><strong>Date de fin :</strong> {{ formatDate(event.dateFin) }}</p>
               <p><strong>Discipline :</strong> {{ event.nom || 'Non spécifiée' }}</p>
               <p><strong>Lieu :</strong> {{ event.lieu || 'Complexe Porcelette' }}</p>
-              <p><strong>Événement :</strong> {{ event.type || typeEventMap[event.typeEvenementId] || 'Non spécifié' }}</p>
-
+              <p><strong>Événement :</strong> {{ eventTypeName }}</p>
               <hr class="my-3" />
               <h6>Description détaillée :</h6>
               <p>{{ event.description || 'Aucune description disponible.' }}</p>
             </div>
 
-            <!-- FOOTER -->
+            <!-- ===============================
+                🔸 PIED DE PAGE (FOOTER)
+                =============================== -->
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="closeModal">Fermer</button>
             </div>
+
           </div>
         </div>
       </transition>
@@ -85,8 +113,13 @@ watch(
   </transition>
 </template>
 
+<!-- ===============================
+🔹 STYLES CSS
+=============================== -->
 <style scoped>
-/* Overlay sombre (backdrop) */
+/* ===============================
+🔸 Overlay sombre (fond de la modale)
+   =============================== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -100,7 +133,9 @@ watch(
   z-index: 1055;
 }
 
-/* Conteneur de la modale */
+/* ===============================
+  🔸 Conteneur de la modale
+   =============================== */
 .modal-dialogue {
   padding: 20px;
   width: 90%;
@@ -111,7 +146,9 @@ watch(
   box-shadow: 0 0 25px rgba(240, 231, 231, 0.4);
 }
 
-/* --- TRANSITIONS --- */
+/* ===============================
+  🔸 Animations de transition
+   =============================== */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
