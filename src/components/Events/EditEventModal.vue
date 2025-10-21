@@ -132,9 +132,9 @@ async function saveEvent() {
       ...localEvent.value,
       disciplineId: Number(localEvent.value.disciplineId),
       // Toujours envoyer un Number pour le type d'événement (0 = aucun)
-typeEvenementId: localEvent.value.typeEvenementId && localEvent.value.typeEvenementId !== 0
-  ? Number(localEvent.value.typeEvenementId)
-  : null,
+      typeEvenementId: localEvent.value.typeEvenementId && localEvent.value.typeEvenementId !== 0
+        ? Number(localEvent.value.typeEvenementId)
+        : null,
       dateDebut: localEvent.value.dateDebut,
       dateFin: localEvent.value.dateFin || null,
     };
@@ -206,12 +206,12 @@ typeEvenementId: localEvent.value.typeEvenementId && localEvent.value.typeEvenem
                 </div>
 
                 <!-- Type d'événement -->
-               <select id="typeEvenement" class="form-select" v-model.number="localEvent.typeEvenementId">
-  <option :value="0">Choisir un événement</option>
-  <option v-for="type in typeEventOptions" :key="type.id" :value="type.id">
-    {{ type.nom }}
-  </option>
-</select>
+                <select id="typeEvenement" class="form-select" v-model.number="localEvent.typeEvenementId">
+                  <option :value="0">Choisir un événement</option>
+                  <option v-for="type in typeEventOptions" :key="type.id" :value="type.id">
+                    {{ type.nom }}
+                  </option>
+                </select>
 
 
                 <!-- Description -->
@@ -240,20 +240,57 @@ typeEvenementId: localEvent.value.typeEvenementId && localEvent.value.typeEvenem
 
 <style scoped>
 .modal-overlay {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.55);
-  display: flex; justify-content: center; align-items: center; z-index: 1055;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1055;
 }
+
 .modal-dialogue {
-  padding: 0; width: 95%; max-width: 700px; max-height: 95vh;
-  border-radius: 0.5rem; overflow: hidden; box-shadow: 0 0 25px rgba(0,0,0,0.4);
+  padding: 0;
+  width: 95%;
+  max-width: 700px;
+  max-height: 95vh;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
 }
-.modal-content { background: none; border: none; border-radius: 0.5rem; }
-.modal-body { overflow-y: auto; max-height: 80vh; }
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-.slide-up-enter-active, .slide-up-leave-active {
-  transition: transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.35s ease;
+
+.modal-content {
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
 }
-.slide-up-enter-from, .slide-up-leave-to { transform: translateY(50px) scale(0.95); opacity: 0; }
+
+.modal-body {
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(50px) scale(0.95);
+  opacity: 0;
+}
 </style>

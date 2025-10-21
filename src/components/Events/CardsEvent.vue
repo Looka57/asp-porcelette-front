@@ -44,6 +44,10 @@ const filteredEvents = computed(() => {
     const now = new Date()
     return events.value.filter(e => new Date(e.dateDebut) > now)
   }
+    if (props.filter === 'Archives') {
+    const now = new Date()
+    return events.value.filter(e => new Date(e.dateDebut) < now)
+  }
 
   // Pour les disciplines
   return events.value.filter(e =>

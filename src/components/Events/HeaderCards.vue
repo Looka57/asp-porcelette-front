@@ -21,7 +21,7 @@ function selectFilter(filter) {
     <div class="headerLink w-100 d-flex align-items-center my-4 p-3 rounded">
       <!-- Bouton d’ajout d’événement -->
       <button
-        class="btn btn-outline-warning d-flex justify-content-center align-items-center"
+        class="btn btn-outline-warning d-flex justify-content-center align-items-center mr-5"
         type="button"
         data-bs-toggle="modal"
         data-bs-target="#createEvent"
@@ -34,7 +34,7 @@ function selectFilter(filter) {
       <ul class="nav mb-0">
         <li
           class="nav-item"
-          v-for="filter in ['Tous', 'À venir', 'Judo', 'Judo Détente', 'Aïkido', 'Jujitsu']"
+          v-for="filter in ['Tous', 'À venir', 'Judo', 'Judo Détente', 'Aïkido', 'Jujitsu', 'Archives']"
           :key="filter"
         >
           <a
