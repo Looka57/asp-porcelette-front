@@ -25,7 +25,7 @@
 
       <!-- 🎯 Bouton d’ajout d’actualité -->
       <button class="btn btn-outline-warning d-flex align-items-center shadow-sm" type="button" data-bs-toggle="modal"
-        data-bs-target="#createEvent">
+        data-bs-target="#createActualite">
         <i class="pi pi-calendar-plus me-2"></i>
         Ajouter une actualité
       </button>

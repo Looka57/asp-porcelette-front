@@ -75,7 +75,6 @@ onMounted(() => {
 
 
 <template>
-
   <div v-if="isLoading" class="alert alert-info text-center">
     Chargement des actualités...
   </div>
@@ -87,7 +86,7 @@ onMounted(() => {
       <img src="../../assets/img/denki.webp" class="card-img-top" alt="...">
       <div class="card-body">
         <h5 class="card-title"> {{ article.titre }}</h5>
-        <p class="">{{ article.contenu }}</p>
+        <p class="text-truncate">{{ article.contenu }}</p>
         <p class="m-0 text-end">{{ formatDate(article.dateDePublication) }}</p>
         <p class="text-end">Ecrit par: {{ article.user.nom }}</p>
         <div class="groupBtn d-flex justify-content-between gap-2">
@@ -105,12 +104,10 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
-  /* espace entre les cartes */
 }
 
 .card {
-  width: 100%;
-  /* prend la largeur de la colonne */
+
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
