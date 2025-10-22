@@ -1,7 +1,7 @@
 <!-- PageEvenements.vue -->
 <script setup>
 import { ref } from 'vue'
-import CardsEvent from '@/components/Events/CardsEvent.vue' // adapte le chemin
+import CardsEvent from '@/components/Events/CardsEvent.vue'
 import HeaderCards from '@/components/Events/HeaderCards.vue';
 
 const selectedFilter = ref('Tous')

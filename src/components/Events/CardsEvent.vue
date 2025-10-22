@@ -44,7 +44,7 @@ const filteredEvents = computed(() => {
     const now = new Date()
     return events.value.filter(e => new Date(e.dateDebut) > now)
   }
-    if (props.filter === 'Archives') {
+  if (props.filter === 'Archives') {
     const now = new Date()
     return events.value.filter(e => new Date(e.dateDebut) < now)
   }
@@ -252,11 +252,11 @@ async function fetchEventTypes() {
 // ===============================
 // 🔹 ICONES DE DISCIPLINE
 // ===============================
-
 const disciplineIcons = {
-  2: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png', // Judo
-  3: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Aïkido
-  4: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-judo-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Jujitsu
+  1: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png', // Judo
+  2: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Aïkido
+  3: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-jiu-jitsu-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Jujitsu
+  4: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-judo-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Judo Detente
 };
 
 /**
@@ -291,34 +291,34 @@ onMounted(() => {
         <p>Aucun événement trouvé pour "{{ props.filter }}"</p>
       </div>
 
-      <div v-else class="row g-4 mb-5">
-<div class="col-lg-4 col-md-6 col-lg-4" v-for="event in filteredEvents" :key="event.id">
-          <div class="cards text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center">
-            <!-- Icône discipline -->
-            <img width="64" height="64" :src="getIconUrl(event.disciplineId)"
-              :alt="'Icône Discipline ' + event.disciplineId" />
-            <h4>{{ event.titre }}</h4>
-            <p>{{ formatDate(event.dateDebut) }}</p>
+      <div v-else class="events-grid mb-5">
+        <div v-for="event in filteredEvents" :key="event.id"
+          class="event-card text-white p-3 rounded d-flex flex-column align-items-center justify-content-center">
 
-            <!-- Boutons d’action -->
-            <div class="d-flex gap-2">
-              <!-- Confirmation de suppression -->
-              <template v-if="Number(eventToDelete) === Number(event.evenementId)">
-                <span class="text-danger p-2">Êtes-vous sûr ?</span>
-                <button class="btn btn-danger" @click="deleteEvent(event.evenementId)">Oui</button>
-                <button class="btn btn-secondary" @click="cancelDelete">Non</button>
-              </template>
+          <!-- Icône discipline -->
+          <img width="64" height="64" :src="getIconUrl(event.disciplineId)"
+            :alt="'Icône Discipline ' + event.disciplineId" />
+          <h4 class="mt-2">{{ event.titre }}</h4>
+          <p class="mb-3">{{ formatDate(event.dateDebut) }}</p>
 
-              <!-- État normal -->
-              <template v-else>
-                <button class="btn btn-outline-info" @click="showDetails(event)">Voir Détail</button>
-                <button class="btn btn-outline-success" @click="openEditModal(event)">Modifier</button>
-                <button class="btn btn-outline-danger" @click="confirmDelete(event.evenementId)">Supprimer</button>
-              </template>
-            </div>
+          <!-- Boutons d’action -->
+          <div class="d-flex gap-2 flex-wrap justify-content-center">
+            <template v-if="Number(eventToDelete) === Number(event.evenementId)">
+              <span class="text-danger p-2">Êtes-vous sûr ?</span>
+              <button class="btn btn-danger" @click="deleteEvent(event.evenementId)">Oui</button>
+              <button class="btn btn-secondary" @click="cancelDelete">Non</button>
+            </template>
+
+            <template v-else>
+              <button class="btn btn-outline-info" @click="showDetails(event)">Voir Détail</button>
+              <button class="btn btn-outline-success" @click="openEditModal(event)">Modifier</button>
+              <button class="btn btn-outline-danger" @click="confirmDelete(event.evenementId)">Supprimer</button>
+            </template>
           </div>
+
         </div>
       </div>
+
     </div>
   </div>
 
@@ -331,7 +331,8 @@ onMounted(() => {
   <!-- Modale de Création -->
   <CreateEventModal v-model="isCreateModalOpen" :disciplineMap="disciplineMap" @event-added="handleEventAdded" />
   <!-- Modale d'Edition -->
-  <EditEventModal v-model="isEditModalOpen" :eventData="eventToEdit" :disciplineMap="disciplineMap" @event-updated="handleEventUpdated"  :typeEventMap="typeEventMap"  />
+  <EditEventModal v-model="isEditModalOpen" :eventData="eventToEdit" :disciplineMap="disciplineMap"
+    @event-updated="handleEventUpdated" :typeEventMap="typeEventMap" />
 
 
 
@@ -345,5 +346,22 @@ onMounted(() => {
   background-color: #343a40;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   background-color: #343a40 !important;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.5rem;
+}
+
+.event-card {
+  background-color: #343a40;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 </style>

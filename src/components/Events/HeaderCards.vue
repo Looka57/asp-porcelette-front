@@ -17,7 +17,7 @@ function selectFilter(filter) {
 </script>
 
 <template>
-  <div class="container-fluid">
+
     <div class="headerLink w-100 d-flex align-items-center my-4 p-3 rounded">
       <!-- Bouton d’ajout d’événement -->
       <button
@@ -48,7 +48,7 @@ function selectFilter(filter) {
         </li>
       </ul>
     </div>
-  </div>
+  
 </template>
 
 <style scoped>
