@@ -1,4 +1,9 @@
 <script setup>
+const emit = defineEmits(['create-actualite']);
+
+function openCreateModal() {
+  emit('create-actualite');
+}
 // import { ref } from 'vue'
 
 // ===============================
@@ -24,11 +29,12 @@
     <div class="headerSearchBtn d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
       <!-- 🎯 Bouton d’ajout d’actualité -->
-      <button class="btn btn-outline-warning d-flex align-items-center shadow-sm" type="button" data-bs-toggle="modal"
-        data-bs-target="#createActualite">
-        <i class="pi pi-calendar-plus me-2"></i>
-        Ajouter une actualité
-      </button>
+     <button class="btn btn-outline-warning d-flex align-items-center shadow-sm"
+        type="button"
+        @click="openCreateModal">
+    <i class="pi pi-calendar-plus me-2"></i>
+    Ajouter une actualité
+</button>
 
       <!-- 🔍 Champ de recherche -->
       <div class="input-group w-auto" style="min-width: 250px;">

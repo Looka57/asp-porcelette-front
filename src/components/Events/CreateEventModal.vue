@@ -4,9 +4,6 @@
 // ════════════════════════════════════════════════════════════════════════════════
 import { ref, watch, onMounted } from 'vue';
 import api from '@/api/axios';
-// Remplacement de l'importation de Bootstrap qui échouait
-// Nous utilisons window.bootstrap.Modal à la place.
-
 
 // ════════════════════════════════════════════════════════════════════════════════
 // ⚙️ DÉCLARATION DES PROPS ET ÉMISSIONS D'ÉVÉNEMENTS

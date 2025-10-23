@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios';
+import CreateArticleModal from './CreateArticleModal.vue';
 
 /* -------------------------------------------------------------------------- */
 /* 💾 VARIABLES RÉACTIVES */
@@ -8,6 +9,21 @@ import api from '@/api/axios';
 const actualites = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
+
+
+/* -------------------------------------------------------------------------- */
+/* 🎯 NOUVEAU : PROPS et EMITS */
+/* -------------------------------------------------------------------------- */
+const props = defineProps({
+  // Déclaration de la prop en camelCase pour correspondre à :is-modal-open
+  isModalOpen: {
+    type: Boolean,
+    required: true
+  }
+});
+
+// Déclaration des événements que ce composant peut émettre
+const emit = defineEmits(['update:isModalOpen']);
 
 // ===============================
 // 🔹 CONSTANTES D’API
@@ -45,6 +61,10 @@ function formatDate(dateString) {
   }
 }
 
+function handleCloseModal(newValue) {
+  emit('update:isModalOpen', newValue);
+}
+
 onMounted(() => {
   fetchActualites();
   formatDate();
@@ -54,36 +74,28 @@ onMounted(() => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <template>
+  <CreateArticleModal :modelValue="props.isModalOpen" @update:modelValue="handleCloseModal" />
   <div v-if="isLoading" class="alert alert-info text-center">
     Chargement des actualités...
   </div>
   <div v-else-if="errorMessage" class="alert alert-danger text-center">
     {{ errorMessage }}
   </div>
+
+
+
   <div class="cards-grid cardsActualite">
     <div class="card" v-for="article in actualites" :key="article.actualitesId">
-      <img src="../../assets/img/denki.webp" class="card-img-top" alt="...">
+  <img
+  :src="!article.imageUrl || article.imageUrl.includes('placeholder')
+    ? 'http://localhost:5067/images/actualites/placeholder-styling.jpg'
+    : (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)"
+  class="card-img-top"
+  alt="Image Actualité"
+/>
+
+
       <div class="card-body">
         <h5 class="card-title"> {{ article.titre }}</h5>
         <p class="text-truncate">{{ article.contenu }}</p>
@@ -98,7 +110,6 @@ onMounted(() => {
 
   </div>
 </template>
-
 <style scoped>
 .cards-grid {
   display: grid;
@@ -107,7 +118,6 @@ onMounted(() => {
 }
 
 .card {
-
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -115,6 +125,15 @@ onMounted(() => {
   transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+
+.cardsActualite img {
+  width: 100%;
+  height: 200px; /* ajustable selon ton design */
+  object-fit: cover; /* garde les proportions sans déformer */
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
 
 .cardsActualite .card {
   background-color: #343a40;
