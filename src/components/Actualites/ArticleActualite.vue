@@ -65,14 +65,27 @@ function handleCloseModal(newValue) {
   emit('update:isModalOpen', newValue);
 }
 
+
+async function deleteActualite(id) {
+  if (!confirm("Voulez-vous vraiment supprimer cette actualité ?")) return;
+
+  try {
+    await api.delete(`${PATH_API}/${id}`);
+    // 🔄 Actualiser la liste après suppression
+    actualites.value = actualites.value.filter(a => a.actualiteId !== id);
+    console.log(`Actualité ${id} supprimée avec succès.`);
+  } catch (error) {
+    console.error("Erreur lors de la suppression de l’actualité :", error);
+    alert("Impossible de supprimer l’actualité.");
+  }
+}
+
+
 onMounted(() => {
   fetchActualites();
   formatDate();
 });
-
 </script>
-
-
 
 <template>
   <CreateArticleModal :modelValue="props.isModalOpen" @update:modelValue="handleCloseModal" />
@@ -83,18 +96,12 @@ onMounted(() => {
     {{ errorMessage }}
   </div>
 
-
-
   <div class="cards-grid cardsActualite">
     <div class="card" v-for="article in actualites" :key="article.actualitesId">
-  <img
-  :src="!article.imageUrl || article.imageUrl.includes('placeholder')
-    ? 'http://localhost:5067/images/actualites/placeholder-styling.jpg'
-    : (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)"
-  class="card-img-top"
-  alt="Image Actualité"
-/>
-
+      <img :src="!article.imageUrl || article.imageUrl.includes('placeholder')
+        ? 'http://localhost:5067/images/actualites/placeholder-styling.jpg'
+        : (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)"
+        class="card-img-top" alt="Image Actualité" />
 
       <div class="card-body">
         <h5 class="card-title"> {{ article.titre }}</h5>
@@ -103,7 +110,9 @@ onMounted(() => {
         <p class="text-end">Ecrit par: {{ article.user.nom }}</p>
         <div class="groupBtn d-flex justify-content-between gap-2">
           <button class="btn btn-outline-info">Modifier</button>
-          <button class="btn btn-outline-danger">Supprimer</button>
+          <button class="btn btn-outline-danger" @click="deleteActualite(article.actualiteId)">
+            Supprimer
+          </button>
         </div>
       </div>
     </div>
@@ -128,8 +137,10 @@ onMounted(() => {
 
 .cardsActualite img {
   width: 100%;
-  height: 200px; /* ajustable selon ton design */
-  object-fit: cover; /* garde les proportions sans déformer */
+  height: 200px;
+  /* ajustable selon ton design */
+  object-fit: cover;
+  /* garde les proportions sans déformer */
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
 }
