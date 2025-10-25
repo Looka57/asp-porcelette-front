@@ -56,19 +56,10 @@ function handleFilterStatus(status) {
     <!-- Événements émis :
          - @create-actualite : ouvre la modale d'ajout
          - @search-updated : transmet le terme de recherche -->
-   <HeaderBarNav
-  @create-actualite="handleOpenCreateModal"
-  @search-updated="handleSearch"
-  @filter-status="handleFilterStatus"
-  :stats="stats"
-/>
-<ArticleActualite
-  :is-modal-open="isCreateModalOpen"
-  @update:is-modal-open="isCreateModalOpen = $event"
-  :searchTerm="searchTerm"
-  :currentFilter="stats.currentFilter"
-  @update-stats="handleUpdateStats"
-/>
+    <HeaderBarNav @create-actualite="handleOpenCreateModal" @search-updated="handleSearch"
+      @filter-status="handleFilterStatus" :stats="stats" />
+    <ArticleActualite :is-modal-open="isCreateModalOpen" @update:is-modal-open="isCreateModalOpen = $event"
+      :searchTerm="searchTerm" :currentFilter="stats.currentFilter" @update-stats="handleUpdateStats" />
 
 
   </div>
