@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import api from '@/api/axios';
 import CreateArticleModal from './CreateArticleModal.vue';
 import UpdateArticleModal from './UpdateArticleModal.vue';
@@ -11,117 +11,221 @@ const actualites = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 
-// 🛑 NOUVEAU : Variables pour la modale de MISE À JOUR (internes à ce composant)
+// ⚙️ Modale de mise à jour
 const isUpdateModalOpen = ref(false);
 const selectedArticleId = ref(null);
 
+
+
+
+
 /* -------------------------------------------------------------------------- */
-/* 🎯 PROPS et EMITS pour la modale de CRÉATION (v-model) */
+/* 🎯 PROPS et EMITS */
 /* -------------------------------------------------------------------------- */
 const props = defineProps({
- // C'est la prop qui contrôle la modale de *CRÉATION* depuis le parent.
- isModalOpen: {
-  type: Boolean,
-  required: true
- }
+  isModalOpen: {
+    type: Boolean,
+    required: true
+  },
+  searchTerm: {
+    type: String,
+    default: ''
+  },
+  currentFilter: {
+    type: String,
+    default: 'total' }
 });
 
-const emit = defineEmits(['update:isModalOpen', 'articleUpdated']);
-
-// ===============================
-// 🔹 CONSTANTES D’API
-// ===============================
+const emit = defineEmits(['update:isModalOpen', 'articleUpdated', 'update-stats']);
 
 const PATH_API = '/Actualite';
 
 /* -------------------------------------------------------------------------- */
-/* 🔄 FONCTION DE RÉCUPÉRATION DES DONNÉES */
+/* 🔄 RÉCUPÉRATION DES ACTUALITÉS */
 /* -------------------------------------------------------------------------- */
 async function fetchActualites() {
- // ... (votre code fetchActualites) ...
-    isLoading.value = true;
-    errorMessage.value = null;
+  isLoading.value = true;
+  errorMessage.value = null;
 
-    try {
-        const reponse = await api.get(PATH_API);
-        actualites.value = reponse.data;
-    } catch (error) {
-        console.error('Erreur lors du chargement des actualités:', error);
-        errorMessage.value = 'Impossible de charger les actualités. Veuillez réessayer.';
-    } finally {
-        isLoading.value = false;
-    }
+  try {
+    const reponse = await api.get(PATH_API);
+    actualites.value = reponse.data;
+
+    // Mise à jour des statistiques après le chargement
+    emit('update-stats', {
+      total: totalArticles.value,
+      publies: articlesActifs.value,
+      archives: articlesArchives.value,
+    });
+  } catch (error) {
+    console.error('Erreur lors du chargement des actualités:', error);
+    errorMessage.value = 'Impossible de charger les actualités.';
+  } finally {
+    isLoading.value = false;
+  }
 }
 
+/* -------------------------------------------------------------------------- */
+/* 🗓️ FONCTIONS UTILITAIRES */
+/* -------------------------------------------------------------------------- */
 function formatDate(dateString) {
- // ... (votre code formatDate) ...
-    if (!dateString) return 'Date inconnue';
-    try {
-        const date = new Date(dateString);
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return new Intl.DateTimeFormat('fr-FR', options).format(date);
-    } catch (error) {
-        console.error("Erreur de formatage de date:", error);
-        return dateString;
-    }
+  if (!dateString) return 'Date inconnue';
+  try {
+    const date = new Date(dateString);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return new Intl.DateTimeFormat('fr-FR', options).format(date);
+  } catch (error) {
+    console.error("Erreur de formatage de date:", error);
+    return dateString;
+  }
 }
 
-// --------------------------------------------------
-// Gestion des Modales
-// --------------------------------------------------
+// Date butoir : aujourd’hui - 10 jours
+function getArchiveCutoffDate() {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 10);
+  cutoffDate.setUTCHours(0, 0, 0, 0);
+  return cutoffDate;
+}
 
-// 1. Gestion de la modale de CRÉATION (utilise les props/emits du v-model)
+// Aujourd’hui sans heure
+function getToday() {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  return today;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 📊 STATISTIQUES */
+/* -------------------------------------------------------------------------- */
+const totalArticles = computed(() => actualites.value.length);
+
+// Articles archivés : publication > 10 jours
+const articlesArchives = computed(() => {
+  const archiveCutoff = getArchiveCutoffDate();
+
+  return actualites.value.filter(article => {
+    if (!article.dateDePublication) return false;
+
+    try {
+      const dateString = article.dateDePublication.includes('Z') || article.dateDePublication.includes('+')
+        ? article.dateDePublication
+        : article.dateDePublication + 'Z';
+
+      const pubDate = new Date(dateString);
+      pubDate.setUTCHours(0, 0, 0, 0);
+
+      return pubDate < archiveCutoff; // plus de 10 jours
+    } catch {
+      return false;
+    }
+  }).length;
+});
+
+// Articles actifs (publiés mais pas encore archivés)
+const articlesActifs = computed(() => {
+  const archiveCutoff = getArchiveCutoffDate();
+  const today = getToday();
+
+  return actualites.value.filter(article => {
+    if (!article.dateDePublication) return false;
+
+    try {
+      const dateString = article.dateDePublication.includes('Z') || article.dateDePublication.includes('+')
+        ? article.dateDePublication
+        : article.dateDePublication + 'Z';
+
+      const pubDate = new Date(dateString);
+      pubDate.setUTCHours(0, 0, 0, 0);
+
+      // Publié si >= cutoff OU dans le futur
+      return pubDate > today || pubDate >= archiveCutoff;
+    } catch {
+      return false;
+    }
+  }).length;
+});
+
+/* -------------------------------------------------------------------------- */
+/* 🧱 MODALES */
+/* -------------------------------------------------------------------------- */
 function handleCloseCreateModal(newValue) {
-  // Émet l'état vers le parent (fermeture)
   emit('update:isModalOpen', newValue);
-  // Rafraîchir la liste si on vient de fermer la modale (après création)
-  if (newValue === false) {
+  if (!newValue) fetchActualites();
+}
+
+function handleCloseUpdateModal(newValue) {
+  isUpdateModalOpen.value = newValue;
+  if (!newValue) {
+    selectedArticleId.value = null;
     fetchActualites();
   }
 }
 
-// 2. Gestion de la modale de MISE À JOUR (utilise l'état interne)
-function handleCloseUpdateModal(newValue) {
-  isUpdateModalOpen.value = newValue;
-  if (!newValue) {
-    selectedArticleId.value = null; // Réinitialiser l'ID sélectionné
-  }
-    // Rafraîchir après la mise à jour (l'événement @articleUpdated est aussi une option)
-    if (newValue === false) {
-        fetchActualites();
-    }
-}
-
-// 🛑 NOUVEAU : OUVERTURE DE LA MODALE DE MODIFICATION
 function openUpdateModal(articleId) {
   selectedArticleId.value = articleId;
   isUpdateModalOpen.value = true;
 }
 
-
-// --------------------------------------------------
-// CRUD
-// --------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
+/* ❌ SUPPRESSION */
+/* -------------------------------------------------------------------------- */
 async function deleteActualite(id) {
- // ... (votre code deleteActualite) ...
-    if (!confirm("Voulez-vous vraiment supprimer cette actualité ?")) return;
+  if (!confirm("Voulez-vous vraiment supprimer cette actualité ?")) return;
+  try {
+    await api.delete(`${PATH_API}/${id}`);
+    actualites.value = actualites.value.filter(a => a.actualiteId !== id);
 
-    try {
-        await api.delete(`${PATH_API}/${id}`);
-        // 🔄 Actualiser la liste après suppression
-        actualites.value = actualites.value.filter(a => a.actualiteId !== id);
-        console.log(`Actualité ${id} supprimée avec succès.`);
-    } catch (error) {
-        console.error("Erreur lors de la suppression de l’actualité :", error);
-        alert("Impossible de supprimer l’actualité.");
-    }
+    // Mise à jour des stats
+    emit('update-stats', {
+      total: totalArticles.value,
+      publies: articlesActifs.value,
+      archives: articlesArchives.value,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la suppression :", error);
+    alert("Impossible de supprimer l’actualité.");
+  }
 }
 
+/* -------------------------------------------------------------------------- */
+/* 🔍 FILTRAGE */
+/* -------------------------------------------------------------------------- */
+const filteredActualites = computed(() => {
+    let list = actualites.value;
 
-onMounted(() => {
- fetchActualites();
+    // Filtre par statut
+    if (props.currentFilter === 'publies') {
+        list = list.filter(a => {
+            const pubDate = new Date(a.dateDePublication);
+            return pubDate >= getArchiveCutoffDate();
+        });
+    } else if (props.currentFilter === 'archives') {
+        list = list.filter(a => {
+            const pubDate = new Date(a.dateDePublication);
+            return pubDate < getArchiveCutoffDate();
+        });
+    }
+
+    // Filtre textuel
+    if (props.searchTerm) {
+        const term = props.searchTerm.toLowerCase();
+        list = list.filter(a =>
+            a.titre.toLowerCase().includes(term) ||
+            a.contenu.toLowerCase().includes(term) ||
+            a.user?.nom?.toLowerCase().includes(term)
+        );
+    }
+
+    return list;
 });
+
+
+
+/* -------------------------------------------------------------------------- */
+/* 🚀 INITIALISATION */
+/* -------------------------------------------------------------------------- */
+onMounted(fetchActualites);
 </script>
 
 <template>
@@ -129,7 +233,7 @@ onMounted(() => {
     :modelValue="props.isModalOpen"
     @update:modelValue="handleCloseCreateModal"
     @articleCreated="fetchActualites"
-/>
+  />
 
   <UpdateArticleModal
     :modelValue="isUpdateModalOpen"
@@ -141,76 +245,117 @@ onMounted(() => {
   <div v-if="isLoading" class="alert alert-info text-center">
     Chargement des actualités...
   </div>
+
   <div v-else-if="errorMessage" class="alert alert-danger text-center">
     {{ errorMessage }}
   </div>
 
-  <div class="cards-grid cardsActualite">
-    <div class="card" v-for="article in actualites" :key="article.actualiteId">
-      <img :src="!article.imageUrl || article.imageUrl.includes('placeholder')
-        ? 'http://localhost:5067/images/actualites/placeholder-styling.jpg'
-        : (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)"
-        class="card-img-top" alt="Image Actualité" />
+  <div v-else class="cards-grid cardsActualite">
+    <div
+      v-for="article in filteredActualites"
+      :key="article.actualiteId"
+      class="card card-actualite"
+    >
+      <img
+        :src="!article.imageUrl || article.imageUrl.includes('placeholder')
+          ? 'http://localhost:5067/images/actualites/placeholder-styling.jpg'
+          : (article.imageUrl.startsWith('http')
+            ? article.imageUrl
+            : 'http://localhost:5067' + article.imageUrl)"
+        class="card-img-top"
+        alt="Image Actualité"
+      />
 
-      <div class="card-body">
-        <h5 class="card-title"> {{ article.titre }}</h5>
-        <p class="text-truncate">{{ article.contenu }}</p>
-        <p class="m-0 text-end">{{ formatDate(article.dateDePublication) }}</p>
-        <p class="text-end">Ecrit par: {{ article.user.nom }}</p>
-        <div class="groupBtn d-flex justify-content-between gap-2">
-                    <button class="btn btn-outline-info" @click="openUpdateModal(article.actualiteId)">
-            Modifier
-          </button>
-          <button class="btn btn-outline-danger" @click="deleteActualite(article.actualiteId)">
-            Supprimer
-          </button>
+      <div class="card-body d-flex flex-column justify-content-between">
+        <div>
+          <h5 class="card-title text-warning fw-bold">{{ article.titre }}</h5>
+          <p class="card-text text-light text-truncate">{{ article.contenu }}</p>
+        </div>
+
+        <div class="mt-auto">
+          <p class="m-0 text-end text-secondary small">
+            Publié le {{ formatDate(article.dateDePublication) }}
+          </p>
+          <p class="text-end text-secondary small">
+            Écrit par : <strong>{{ article.user.nom }}</strong>
+          </p>
+
+          <div class="groupBtn d-flex justify-content-between mt-3 gap-2">
+            <button class="btn btn-outline-info btn-sm" @click="openUpdateModal(article.actualiteId)">
+              Modifier
+            </button>
+            <button class="btn btn-outline-danger btn-sm" @click="deleteActualite(article.actualiteId)">
+              Supprimer
+            </button>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
+
 <style scoped>
-/* (Styles inchangés) */
+/* ===================================================== */
+/* 🎨 STYLE DE LA GRID DES ACTUALITÉS */
+/* ===================================================== */
 .cards-grid {
- display: grid;
- grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
- gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.75rem;
+  margin-top: 2rem;
+  align-items: stretch;
 }
 
-.card {
- transition: transform 0.2s ease, box-shadow 0.2s ease;
+.card-actualite {
+  background-color: #2c3035;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card:hover {
- transform: translateY(-4px);
- box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+.card-actualite:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
 }
 
-.cardsActualite img {
- width: 100%;
- height: 200px;
- /* ajustable selon ton design */
- object-fit: cover;
- /* garde les proportions sans déformer */
- border-top-left-radius: 12px;
- border-top-right-radius: 12px;
+.card-actualite img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
 }
 
-
-.cardsActualite .card {
- background-color: #343a40;
- color: white;
- border: none;
- border-radius: 12px;
- box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+.card-body {
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.cardsActualite img {
- flex-shrink: 0;
+.card-title {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
 }
 
-.cardsActualite h4 {
- font-size: 1.25rem;
+.card-text {
+  font-size: 0.95rem;
+  color: #d1d1d1;
+}
+
+.groupBtn button {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .card-actualite img {
+    height: 180px;
+  }
+  .card-title {
+    font-size: 1.05rem;
+  }
 }
 </style>

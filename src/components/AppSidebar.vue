@@ -70,6 +70,7 @@ const filteredNavItems = computed(() => {
   background-color: rgb(22, 22, 22) !important;
   width: 250px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .custom-navbar a:hover {
