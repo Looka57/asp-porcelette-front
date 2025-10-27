@@ -75,6 +75,7 @@ onMounted(async () => {
           <div
             class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
             <img width="100" height="100" src="https://img.icons8.com/bubbles/100/megaphone.png" alt="megaphone" />
+            <!-- <img width="100" height="100" src="https://img.icons8.com/bubbles/100/accounting.png" alt="accounting"/> -->
             <h4>Actualités</h4>
             <p>24</p>
           </div>
@@ -107,6 +108,13 @@ onMounted(async () => {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+.card{
+   background-color: #343a40 !important;
+  border-radius: 1rem;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .hover-card {
