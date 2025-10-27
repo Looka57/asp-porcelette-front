@@ -9,6 +9,7 @@ import api from '@/api/axios'
 // 🔹 ÉTATS
 // ===============================
 const disciplines = ref([])
+const tarifs = ref([]);
 const isLoading = ref(false)
 const errorMessage = ref(null)
 
@@ -16,6 +17,7 @@ const errorMessage = ref(null)
 // 🔹 CONSTANTES D’API
 // ===============================
 const API_PATH_DISCIPLINE = '/Discipline'
+const API_PATH_TARIF = '/Tarif'
 
 // ===============================
 // 🔹 FONCTIONS
@@ -32,6 +34,21 @@ async function fetchDisciplines() {
   } finally {
     isLoading.value = false
   }
+}
+
+async function fetchTarifs() {
+  try {
+    isLoading.value = true
+    const reponse = await api.get(API_PATH_TARIF)
+    tarifs.value = reponse.data
+    console.log('✅ Tarifs chargées :', tarifs.value)
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement des tarifs :', error)
+    errorMessage.value = "Erreur lors du chargement des tarifs."
+  } finally {
+    isLoading.value = false;
+  }
+
 }
 
 // ===============================
@@ -52,7 +69,11 @@ function getIconUrl(disciplineId) {
 // ===============================
 // 🔹 MONTAGE
 // ===============================
-onMounted(fetchDisciplines)
+onMounted(() => {
+  fetchDisciplines()
+  fetchTarifs()
+})
+
 </script>
 
 <template>
@@ -69,25 +90,54 @@ onMounted(fetchDisciplines)
     </div>
 
     <!-- ✅ Liste des disciplines -->
-    <div v-else class="discipline-grid ">
-      <div
-        v-for="discipline in disciplines"
-        :key="discipline.disciplineId"
-        class="discipline-card text-white p-4 rounded d-flex flex-column align-items-center justify-content-center"
-      >
-        <h3>{{ discipline.nom }}</h3>
-        <img
-          width="64"
-          height="64"
-          :src="getIconUrl(discipline.disciplineId)"
-          :alt="`Icône ${discipline.nom}`"
-        />
-        <p class="mt-2 text-justify ">
-          {{ discipline.description || 'Aucune description disponible.' }}
-        </p>
-      </div>
+  <!-- ✅ Liste des disciplines -->
+<div v-else class="discipline-grid">
+  <div
+    v-for="discipline in disciplines"
+    :key="discipline.disciplineId"
+    class="discipline-card text-white p-4 rounded d-flex flex-column align-items-center"
+  >
+    <h3 class="mb-3">{{ discipline.nom }}</h3>
+    <img
+      width="64"
+      height="64"
+      :src="getIconUrl(discipline.disciplineId)"
+      :alt="`Icône ${discipline.nom}`"
+      class="mb-3"
+    />
+
+    <!-- Liste des tarifs pour cette discipline -->
+    <div
+      v-for="tarif in tarifs.filter(t => t.disciplineId === discipline.disciplineId)"
+      :key="tarif.tarifId"
+      class="tarif-block text-center mb-3 w-100"
+    >
+      <h5 class="tarif-periode mb-1 text-warning">
+        {{ tarif.periodicite }}
+      </h5>
+      <p class="tarif-nom mb-0">
+        {{ tarif.nom }}
+      </p>
+      <p class="tarif-montant fw-bold">
+        {{ tarif.montant }} €
+      </p>
+
+      <!-- Trait entre les périodes -->
+      <hr class="tarif-separator w-75 mx-auto" />
     </div>
- 
+
+    <!-- Aucun tarif -->
+    <p
+      v-if="tarifs.filter(t => t.disciplineId === discipline.disciplineId).length === 0"
+      class="text-muted mt-2"
+    >
+      Aucun tarif disponible.
+    </p>
+  </div>
+</div>
+
+
+
     <!-- 🔘 Boutons CRUD -->
     <div class="boutonCrud m-5 d-flex justify-content-around">
       <div class="crud">
@@ -106,7 +156,6 @@ onMounted(fetchDisciplines)
         </button>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -135,4 +184,36 @@ onMounted(fetchDisciplines)
   transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+
+.tarif-block {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.tarif-periode {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.tarif-nom {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.tarif-montant {
+  font-size: 1rem;
+  color: #ffd700; /* or whatever fits ton thème */
+}
+
+.tarif-separator {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 0.5rem;
+}
+
+
+
+
 </style>
