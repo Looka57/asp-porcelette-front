@@ -45,7 +45,7 @@ async function fetchCompte() {
 // ===============================
 const comptaIcons = {
   2: 'https://img.icons8.com/bubbles/100/bank.png',       // Compte courant
-  3: 'https://img.icons8.com/bubbles/100/accounting.png', // Compte épargne
+  3: 'https://img.icons8.com/bubbles/100/stack-of-money.png', // Compte épargne
 };
 function getIconUrl(compteId) {
   return comptaIcons[compteId] || 'https://img.icons8.com/color/96/money.png';
@@ -82,11 +82,15 @@ onMounted(async () => {
     <div v-else>
       <div class="row g-4">
         <div v-for="compte in comptes" :key="compte.compteId" class="col-sm-12 col-md-12 col-lg-6">
-          <div class="compta-card text-center p-4">
-            <img :src="getIconUrl(compte.compteId)" :alt="`Icône ${compte.nom}`" width="100" height="100" class="mb-3" />
-            <h3 class="compte-nom mb-2 ">{{ compte.nom }}</h3>
-            <p class="compte-solde mb-0 fs-3">{{ compte.solde }} €</p>
-          </div>
+          <router-link :to="{ name: 'admin-transactions-gestion', params: { compteId: compte.compteId } }"
+            class="card-link">
+            <div class="compta-card text-center p-4">
+              <img :src="getIconUrl(compte.compteId)" :alt="`Icône ${compte.nom}`" width="100" height="100"
+              class="mb-3" />
+              <h3 class="compte-nom mb-2 ">{{ compte.nom }}</h3>
+              <p class="compte-solde mb-0 fs-3">{{ compte.solde }} €</p>
+            </div>
+          </router-link>
         </div>
       </div>
 
@@ -119,6 +123,13 @@ onMounted(async () => {
 
 
 <style scoped>
+
+.card-link {
+    text-decoration: none; /* Supprime le soulignement */
+    color: inherit; /* Utilise la couleur du texte parent (blanc) */
+    display: block; /* Important: s'assure que le lien prend toute la largeur de la colonne */
+    height: 100%; /* S'assure que le lien englobe toute la carte */
+}
 
 .card{
   background-color: #343a40 !important;

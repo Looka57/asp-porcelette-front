@@ -20,7 +20,7 @@ Chart.register(...registerables);
 /* ════════════════════════════════════════════════════════════════════════ */
 /* 🎯 UTILISATION DU COMPOSABLE */
 /* ════════════════════════════════════════════════════════════════════════ */
-const { inscriptionsData, chartOptions } = useEvolutionInscriptionsChart();
+const { inscriptionsData, chartOptions, totalInscriptions } = useEvolutionInscriptionsChart();
 
 /* ════════════════════════════════════════════════════════════════════════ */
 /* 🧠 LOGIQUE DU COMPOSANT */
@@ -86,14 +86,19 @@ onMounted(async () => {
     <!-- ════════════ 📊 SECTION GRAPHIQUE ════════════ -->
     <div v-if="loading" class="text-info mt-5">Chargement du graphique...</div>
 
+  <!-- 🔹 TOTAL INSCRIPTIONS -->
+    <div class="mb-4">
+      <h3 class="text-light">Total des inscrits toutes disciplines : {{ totalInscriptions }}</h3>
+    </div>
+
+    <!-- 🔹 Graphique -->
+    <div v-if="loading" class="text-info mt-5">Chargement du graphique...</div>
     <div v-else class="row justify-content-center">
       <div class="col-md-12">
         <div class="card bg-secondary text-white shadow-lg border-0 rounded-3 p-4">
           <h4 class="card-title text-start mb-3">Évolution des Inscriptions</h4>
-
-          <!-- 🎯 LineChart -->
           <div style="height: 400px; width: 100%;">
-            <LineChart :chartData="inscriptionsData" :options="chartOptions" />
+            <LineChart :chart-data="inscriptionsData" :options="chartOptions" />
           </div>
         </div>
       </div>

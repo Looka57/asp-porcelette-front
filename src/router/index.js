@@ -17,7 +17,7 @@ const router = createRouter({
       component: () => import('@/views/AdminDashboard.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
+        roles: ['Admin','Sensei']
       }
     },
     {
@@ -44,7 +44,7 @@ const router = createRouter({
       component: () => import('@/views/EventsView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
+        roles: ['Admin', 'Sensei'] // 🎯 Seul l'Admin peut y accéder
       }
     },
     {
@@ -53,7 +53,7 @@ const router = createRouter({
       component: () => import('@/views/ActualiteView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
+        roles: ['Admin', 'Sensei'] // 🎯 Seul l'Admin peut y accéder
       }
     },
     {
@@ -62,7 +62,7 @@ const router = createRouter({
       component: () => import('@/views/DisciplineView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
+        roles: ['Admin','Sensei'] //
       }
     },
     {
@@ -71,7 +71,7 @@ const router = createRouter({
       component: () => import('@/views/TarifsView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
+        roles: ['Admin','Sensei'] //
       }
     },
     {
@@ -80,7 +80,16 @@ const router = createRouter({
       component: () => import('@/views/ComptabiliteView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin'] // 🎯 Seul l'Admin peut y accéder
+        roles: ['Admin','Sensei'] //
+      }
+    },
+    {
+      path: '/admin/compta/transactions/:compteId',
+      name: 'admin-transactions-gestion',
+      component: () => import('@/views/GestionTransactionsPage.vue'),
+      meta: {
+        requiresAuth: true,
+        roles: ['Admin','Sensei'] //
       }
     },
     // ... autres routes (ex: /profile, /admin/users)

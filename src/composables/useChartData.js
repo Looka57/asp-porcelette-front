@@ -1,69 +1,52 @@
-import { ref } from 'vue';
+// 📁 src/composables/useChartData.js
+import { ref, computed } from 'vue';
 
-/**
- * Hook pour gérer les données et les options du graphique d'évolution des inscriptions.
- * @returns {object} Les données et options du graphique.
- */
 export function useEvolutionInscriptionsChart() {
 
-    // --- Données Statiques/Mock pour le Graphique ---
-    // Ces données seront remplacées par des données d'API réelles plus tard.
-    const inscriptionsData = ref({
-        labels: ['Sept', 'Oct', 'Nov', 'Déc','Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', ],
-        datasets: [
-            {
-                label: 'Nouvelles Inscriptions',
-                data: [5, 19, 40, 61, 76, 85, 9,115,115,115],
-                fill: true,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.3,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                pointBackgroundColor: 'rgb(75, 192, 192)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(75, 192, 192)'
-            },
-        ],
-    });
+  const inscriptionsData = ref({
+    labels: ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+    datasets: [
+      { label: 'Judo', data: [10, 20, 35, 50, 60, 75, 80, 90, 100, 120], borderColor: 'rgb(255, 99, 132)', tension: 0.3 },
+      { label: 'Aïkido', data: [5, 8, 15, 22, 30, 35, 40, 50, 55, 60], borderColor: 'rgb(54, 162, 235)', tension: 0.3 },
+      { label: 'Jujitsu', data: [3, 6, 10, 15, 20, 25, 28, 35, 40, 45], borderColor: 'rgb(255, 206, 86)', tension: 0.3 },
+      { label: 'Judo Détente', data: [2, 4, 6, 8, 12, 15, 18, 22, 25, 28], borderColor: 'rgb(75, 192, 192)', tension: 0.3 },
+    ],
+  });
 
-    // --- Options pour le Graphique (Thème Sombre) ---
-    const chartOptions = ref({
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)',
-                },
-                ticks: {
-                    color: 'rgba(255, 255, 255, 0.7)',
-                }
-            },
-            y: {
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)',
-                },
-                ticks: {
-                    color: 'rgba(255, 255, 255, 0.7)',
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                labels: {
-                    color: 'rgba(255, 255, 255, 0.9)'
-                }
-            },
-            title: {
-                display: true,
-                text: 'Évolution des Inscriptions',
-                color: 'rgba(255, 255, 255, 0.9)'
-            }
-        }
-    });
+  // 🔢 Calcul du total global des inscrits
+  const totalInscriptions = computed(() =>
+    inscriptionsData.value.datasets.reduce(
+      (sum, ds) => sum + ds.data.reduce((a, b) => a + b, 0),
+      0
+    )
+  );
 
-    return {
-        inscriptionsData,
-        chartOptions
-    };
+  // ⚙️ Options du graphique (titre dynamique)
+  const chartOptions = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+      },
+      y: {
+        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+        beginAtZero: true,
+      },
+    },
+    plugins: {
+      legend: {
+        labels: { color: 'rgba(255, 255, 255, 0.9)' },
+      },
+      title: {
+        display: true,
+        text: `Évolution des Inscriptions (Total : ${totalInscriptions.value})`,
+        color: 'rgba(255, 255, 255, 0.9)',
+      },
+    },
+  }));
+
+  return { inscriptionsData, chartOptions, totalInscriptions };
 }
