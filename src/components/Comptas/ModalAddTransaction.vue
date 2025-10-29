@@ -1,19 +1,18 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import api from '@/api/axios' // Assure-toi que ton instance Axios est bien importée ici
+import { ref, watch, onMounted, computed } from 'vue'
+import api from '@/api/axios'
 
 // ===============================
 // 🔹 PROPS & EMITS
 // ===============================
 const props = defineProps({
-  show: { type: Boolean, default: false },
-  categories: { type: Array, default: () => [] }
+  show: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['update:show', 'submit'])
+const emit = defineEmits(['update:show', 'refresh'])
 const localShow = ref(props.show)
 
-watch(() => props.show, val => localShow.value = val)
+watch(() => props.show, val => (localShow.value = val))
 watch(localShow, val => emit('update:show', val))
 
 // ===============================
@@ -21,9 +20,10 @@ watch(localShow, val => emit('update:show', val))
 // ===============================
 const comptes = ref([])
 const disciplines = ref([])
-const categorieTransactions = ref([]);
+const categorieTransactions = ref([])
 const isLoading = ref(false)
-const errorMessage = ref(null)
+const alertMessage = ref('')
+const alertType = ref('')
 
 // ===============================
 // 🔹 FORMULAIRE
@@ -35,81 +35,104 @@ const transactionForm = ref({
   montant: '',
   compteId: null,
   categorieTransactionId: null,
-  disciplineId: null,
+  disciplineId: null
 })
 
 // ===============================
 // 🔹 API ENDPOINTS
 // ===============================
+const API_TRANSACTION = '/Transaction'
 const API_COMPTE = '/Compte'
 const API_DISCIPLINE = '/Discipline'
 const API_CATEGORIE_TRANSACTION = '/CategorieTransaction'
 
 // ===============================
-// 🔹 FONCTIONS
+// 🔹 INSERTION DE TRANSACTION
 // ===============================
-const submitForm = () => {
-  if (!transactionForm.value.date || !transactionForm.value.libelle || !transactionForm.value.montant) {
-    alert('Veuillez remplir tous les champs obligatoires !')
+const submitForm = async () => {
+  // Validation de base
+  if (
+    !transactionForm.value.date ||
+    !transactionForm.value.libelle ||
+    !transactionForm.value.montant ||
+    !transactionForm.value.compteId ||
+    !transactionForm.value.categorieTransactionId
+  ) {
+    alertMessage.value = '⚠️ Veuillez remplir tous les champs obligatoires.'
+    alertType.value = 'danger'
+    setTimeout(() => (alertMessage.value = ''), 3000)
     return
   }
 
-  emit('submit', { ...transactionForm.value })
-  localShow.value = false
+  try {
+    isLoading.value = true
 
-  transactionForm.value = {
-    date: '',
-    type: '',
-    libelle: '',
-    montant: '',
-    compteId: null,
-    categorieTransactionId: null,
-    disciplineId: null,
+    // Création du payload pour correspondre à ton modèle backend
+    const payload = {
+      dateTransaction: transactionForm.value.date,
+      montant: parseFloat(transactionForm.value.montant),
+      description: transactionForm.value.libelle,
+      compteId: transactionForm.value.compteId,
+      categorieTransactionId: transactionForm.value.categorieTransactionId,
+      disciplineId: transactionForm.value.disciplineId
+    }
+
+    const response = await api.post(API_TRANSACTION, payload)
+    console.log('✅ Transaction créée :', response.data)
+
+    alertMessage.value = '✅ Transaction ajoutée avec succès !'
+    alertType.value = 'success'
+
+    // Réinitialisation du formulaire
+    transactionForm.value = {
+      date: '',
+      type: '',
+      libelle: '',
+      montant: '',
+      compteId: null,
+      categorieTransactionId: null,
+      disciplineId: null
+    }
+
+    // Fermer la modale après un petit délai
+    setTimeout(() => {
+      localShow.value = false
+      alertMessage.value = ''
+      emit('refresh') // pour recharger le tableau
+    }, 1500)
+  } catch (error) {
+    console.error('❌ Erreur lors de la création de la transaction :', error)
+    alertMessage.value = "❌ Une erreur est survenue lors de l'ajout."
+    alertType.value = 'danger'
+  } finally {
+    isLoading.value = false
   }
 }
 
-// --- Récupération des comptes
+// ===============================
+// 🔹 FETCHS
+// ===============================
 async function fetchComptes() {
-  try {
-    isLoading.value = true
-    const response = await api.get(API_COMPTE)
-    comptes.value = response.data
-    console.log('✅ Comptes récupérés :', comptes.value)
-  } catch (error) {
-    console.error('❌ Erreur lors du chargement des comptes :', error)
-    errorMessage.value = "Erreur lors du chargement des comptes."
-  } finally {
-    isLoading.value = false
-  }
+  const reponse = await api.get(API_COMPTE)
+  comptes.value = reponse.data
 }
 
-// recuperation des categorie transactionForm
-async function fetchCategorieTransaction() {
-  try {
-    isLoading.value = true
-    const response = await api.get(API_CATEGORIE_TRANSACTION)
-    categorieTransactions.value = response.data
-    console.log('✅ categorieTransaction récupérés :', categorieTransactions.value)
-  } catch (error) {
-    console.error('❌ Erreur lors du chargement des categorieTransaction :', error)
-    errorMessage.value = "Erreur lors du chargement des categorieTransaction."
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// --- Récupération des disciplines
 async function fetchDisciplines() {
-  try {
-    const response = await api.get(API_DISCIPLINE)
-    disciplines.value = response.data
-    console.log('✅ Disciplines récupérées :', disciplines.value)
-  } catch (error) {
-    console.error('❌ Erreur lors du chargement des disciplines :', error)
-  }
+  const reponse = await api.get(API_DISCIPLINE)
+  disciplines.value = reponse.data
 }
 
-const typeFluxLabel = (typeFlux) => {
+async function fetchCategorieTransaction() {
+  console.log("📦 Données envoyées :", transactionForm.value)
+
+  const reponse = await api.get(API_CATEGORIE_TRANSACTION)
+  categorieTransactions.value = reponse.data
+}
+
+// ===============================
+// 🔹 COMPUTED
+// ===============================
+const typeFluxLabel = typeFlux => {
   switch (typeFlux) {
     case 1: return 'Revenu'
     case 2: return 'Dépense'
@@ -118,10 +141,7 @@ const typeFluxLabel = (typeFlux) => {
   }
 }
 
-import { computed } from 'vue'
-
 const typesDisponibles = computed(() => {
-  // On regroupe les types distincts présents dans les catégories
   const uniqueTypes = [...new Set(categorieTransactions.value.map(c => c.typeFlux))]
   return uniqueTypes.map(t => ({ id: t, label: typeFluxLabel(t) }))
 })
@@ -131,10 +151,9 @@ const categoriesFiltrees = computed(() => {
   return categorieTransactions.value.filter(c => c.typeFlux === transactionForm.value.type)
 })
 
-
-
-
-// --- Chargement initial
+// ===============================
+// 🔹 MOUNT
+// ===============================
 onMounted(() => {
   fetchComptes()
   fetchDisciplines()
@@ -152,6 +171,17 @@ onMounted(() => {
         </div>
 
         <form @submit.prevent="submitForm" class="modal-form">
+          <!-- ✅ ALERT BOOTSTRAP -->
+          <transition name="fade">
+            <div
+              v-if="alertMessage"
+              :class="['alert', alertType === 'success' ? 'alert-success' : 'alert-danger', 'py-2', 'px-3']"
+              role="alert"
+            >
+              {{ alertMessage }}
+            </div>
+          </transition>
+
           <div class="form-group">
             <label>Date</label>
             <input type="date" v-model="transactionForm.date" class="form-control" />
@@ -160,10 +190,8 @@ onMounted(() => {
           <div class="form-group">
             <label>Type</label>
             <select v-model="transactionForm.type" class="form-select">
-              <option :value="null" disabled>Choisir un type de transaction</option>
-              <option v-for="t in typesDisponibles" :key="t.id" :value="t.id">
-                {{ t.label }}
-              </option>
+              <option :value="null" disabled>Choisir un type</option>
+              <option v-for="t in typesDisponibles" :key="t.id" :value="t.id">{{ t.label }}</option>
             </select>
           </div>
 
@@ -171,9 +199,7 @@ onMounted(() => {
             <label>Compte</label>
             <select v-model="transactionForm.compteId" class="form-select">
               <option :value="null" disabled>Choisir un compte</option>
-              <option v-for="compte in comptes" :key="compte.compteId" :value="compte.compteId">
-                {{ compte.nom }}
-              </option>
+              <option v-for="c in comptes" :key="c.compteId" :value="c.compteId">{{ c.nom }}</option>
             </select>
           </div>
 
@@ -181,15 +207,15 @@ onMounted(() => {
             <label>Catégorie</label>
             <select v-model="transactionForm.categorieTransactionId" class="form-select">
               <option :value="null" disabled>Choisir une catégorie</option>
-              <option v-for="cat in categoriesFiltrees" :key="cat.categorieTransactionId"
-                :value="cat.categorieTransactionId">
+              <option v-for="cat in categoriesFiltrees" :key="cat.categorieTransactionId" :value="cat.categorieTransactionId">
                 {{ cat.nom }}
               </option>
             </select>
           </div>
+
           <div class="form-group">
             <label>Libellé</label>
-            <textarea rows="3" v-model="transactionForm.libelle" class="form-control" />
+            <textarea rows="2" v-model="transactionForm.libelle" class="form-control"></textarea>
           </div>
 
           <div class="form-group">
@@ -209,19 +235,16 @@ onMounted(() => {
 
           <div class="modal-actions">
             <button type="button" class="btn cancel-btn" @click="localShow = false">Annuler</button>
-            <button type="submit" class="btn submit-btn">Ajouter</button>
+            <button type="submit" class="btn submit-btn" :disabled="isLoading">
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+              Ajouter
+            </button>
           </div>
         </form>
       </div>
     </div>
   </transition>
 </template>
-
-<style scoped>
-/* même CSS que ta version précédente */
-</style>
-
-
 
 <style scoped>
 /* backdrop + animation */
@@ -243,6 +266,12 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.alert {
+  border-radius: 0.5rem;
+  font-weight: 500;
+  animation: ping 0.4s ease;
 }
 
 /* modal container */
