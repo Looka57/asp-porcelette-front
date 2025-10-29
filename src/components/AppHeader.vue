@@ -29,7 +29,7 @@ const userName = computed(() => {
     </div>
 
     <div class="d-flex align-items-center">
-      <router-link to="/profile" class="btn btn-outline-light me-2">
+      <router-link to="profile" class="btn btn-outline-light me-2">
         <i class="pi pi-user"></i>
       </router-link>
 

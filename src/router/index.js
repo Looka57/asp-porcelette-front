@@ -92,6 +92,16 @@ const router = createRouter({
         roles: ['Admin','Sensei'] //
       }
     },
+    {
+      path: '/admin/profile',
+      name: 'admin-profile',
+      component: () => import('@/views/ProfilePageView.vue'),
+      meta: {
+        requiresAuth: true,
+        roles: ['Admin','Sensei'] //
+      }
+    },
+
     // ... autres routes (ex: /profile, /admin/users)
   ]
 });

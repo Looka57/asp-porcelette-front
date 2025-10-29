@@ -6,7 +6,7 @@
 /* 📦 IMPORTS */
 /* ════════════════════════════════════════════════════════════════════════ */
 import { ref, onMounted } from 'vue';
-import { BarChart, LineChart } from 'vue-chart-3';
+import { BarChart } from 'vue-chart-3';
 import { Chart, registerables } from 'chart.js';
 
 // 💡 Import du composable (logique de graphique externalisée)
