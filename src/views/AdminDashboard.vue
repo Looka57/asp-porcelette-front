@@ -6,7 +6,7 @@
 /* 📦 IMPORTS */
 /* ════════════════════════════════════════════════════════════════════════ */
 import { ref, onMounted } from 'vue';
-import { LineChart } from 'vue-chart-3';
+import { BarChart, LineChart } from 'vue-chart-3';
 import { Chart, registerables } from 'chart.js';
 
 // 💡 Import du composable (logique de graphique externalisée)
@@ -98,7 +98,7 @@ onMounted(async () => {
         <div class="card bg-secondary text-white shadow-lg border-0 rounded-3 p-4">
           <h4 class="card-title text-start mb-3">Évolution des Inscriptions</h4>
           <div style="height: 400px; width: 100%;">
-            <LineChart :chart-data="inscriptionsData" :options="chartOptions" />
+            <BarChart :chart-data="inscriptionsData" :options="chartOptions" />
           </div>
         </div>
       </div>
