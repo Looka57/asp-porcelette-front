@@ -60,7 +60,6 @@ const computeLastTransactions = () => {
 
   // Limite aux 5 premières
   lastTransactions.value = sortedTransactions.slice(0, 5);
-
   console.log(`📦 Transactions filtrées pour compte ${currentCompteId.value} :`, lastTransactions.value);
 }
 
@@ -89,7 +88,7 @@ watch(currentCompteId, () => {
 </script>
 
 <template>
-   <h2 class="mx-5">Dernières transactions effectuées sur le compte {{ compteNomAffiche }}</h2>
+   <h2 class="">Dernières transactions effectuées sur le compte {{ compteNomAffiche }}</h2>
    <div class="table-responsive mt-4">
     <table class="table table-dark table-hover align-middle">
       <thead class="table-secondary text-dark">

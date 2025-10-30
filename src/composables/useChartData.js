@@ -1,50 +1,59 @@
-// 📁 src/composables/useChartData.js
-import { ref, computed } from 'vue';
+import { ref } from 'vue'
 
 export function useEvolutionInscriptionsChart() {
-
   const inscriptionsData = ref({
     labels: ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
     datasets: [
-      { label: 'Judo', data: [10, 20, 35, 50, 60, 75, 80, 90, 100, 120], backgroundColor: 'rgba(255, 99, 132, 0.7)' },
-      { label: 'Aïkido', data: [5, 8, 15, 22, 30, 35, 40, 50, 55, 60], backgroundColor: 'rgba(54, 162, 235, 0.7)' },
-      { label: 'Jujitsu', data: [3, 6, 10, 15, 20, 25, 28, 35, 40, 45], backgroundColor: 'rgba(255, 206, 86, 0.7)' },
-      { label: 'Judo Détente', data: [2, 4, 6, 8, 12, 15, 18, 22, 25, 28], backgroundColor: 'rgba(75, 192, 192, 0.7)' },
-    ],
-  });
+      {
+        label: 'Inscriptions',
+        backgroundColor: '#3B82F6',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        data: [12, 19, 8, 15, 10, 18, 25, 30, 22, 28]
+      }
+    ]
+  })
 
-  const totalInscriptions = computed(() =>
-    inscriptionsData.value.datasets.reduce(
-      (sum, ds) => sum + ds.data.reduce((a, b) => a + b, 0),
-      0
-    )
-  );
-
-  const chartOptions = computed(() => ({
+  const chartOptions = ref({
     responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-        ticks: { color: 'rgba(255, 255, 255, 0.8)' },
-      },
-      y: {
-        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-        ticks: { color: 'rgba(255, 255, 255, 0.8)' },
-        beginAtZero: true,
-      },
-    },
     plugins: {
-      legend: {
-        labels: { color: 'rgba(255, 255, 255, 0.9)' },
-      },
+      legend: { display: true, position: 'bottom' },
       title: {
         display: true,
-        text: `Évolution des Inscriptions (Total : ${totalInscriptions.value})`,
-        color: 'rgba(255, 255, 255, 0.9)',
-      },
+        text: 'Évolution des inscriptions'
+      }
     },
-  }));
+    scales: {
+      y: { beginAtZero: true }
+    }
+  })
 
-  return { inscriptionsData, chartOptions, totalInscriptions };
+  return { inscriptionsData, chartOptions }
+}
+
+export function useDepensesDisciplinesChart() {
+  const depensesDisciplinesData = ref({
+    labels: ['Judo', 'Aïkido', 'Karaté', 'Jujitsu', 'Judo Détente'],
+    datasets: [
+      {
+        label: 'Dépenses',
+        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+        data: [3200, 2100, 1800, 900, 1200]
+      }
+    ]
+  })
+
+  const chartOptions = ref({
+    responsive: true,
+    cutout: '60%',
+    plugins: {
+      legend: { position: 'bottom' },
+      title: {
+        display: true,
+        text: 'Dépenses par discipline'
+      }
+    }
+  })
+
+  return { depensesDisciplinesData, chartOptions }
 }
