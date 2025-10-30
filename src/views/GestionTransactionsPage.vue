@@ -40,6 +40,9 @@ onMounted(() => {
         Ajouter une dépense
       </button>
     </div>
+      <button class="btn btn-outline-warning d-flex align-items-center" @click="$router.back()">
+        <i class="pi pi-arrow-circle-left me-2"></i> Retour à la comptabilité
+      </button>
 
     <!-- Modal -->
     <ModalAddTransaction v-model:show="showModal" @submit="handleAddTransaction" />

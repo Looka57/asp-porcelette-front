@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router'; // 👈 NOUVEAU : Import pour lire l'URL
 import api from '@/api/axios';
 import { LineChart, BarChart } from 'vue-chart-3'
 import { Chart, registerables } from 'chart.js'
+// NOTE: Ces composables devront être adaptés pour prendre en compte les filtres d'année si vous les utilisez
 import { useDepensesGeneralesChart } from '@/composables/graphDepensesGenerales'
 import { useDepensesDisciplinesChart } from '@/composables/graphDepensesDisciplines'
 
@@ -18,7 +19,6 @@ const route = useRoute();
 const currentCompteId = computed(() => parseInt(route.params.compteId));
 
 // 🔹 Récupération des données et options
-// NOTE: Vous devrez ajuster ces composables pour qu'ils acceptent les transactions filtrées
 const { depensesData, chartOptions } = useDepensesGeneralesChart()
 const { depensesDisciplinesData, chartOptions: chartOptionsDisciplines } = useDepensesDisciplinesChart()
 
@@ -49,7 +49,7 @@ async function fetchCompte() {
 async function fetchTransactions() {
   try {
     isLoading.value = true;
-    // Idéalement, on filtrerait ici via l'API, mais pour l'instant on récupère tout.
+    // Récupère toutes les transactions pour l'instant
     const response = await api.get(API_TRANSACTIONS);
     transactions.value = response.data;
   } catch (error) {
@@ -60,9 +60,8 @@ async function fetchTransactions() {
 }
 
 // ===============================
-// 🔹 DONNÉES FILTRÉES (NOUVEAU)
+// 🔹 DONNÉES FILTRÉES
 // ===============================
-
 // Le Compte actuellement affiché (Compte Courant ou Épargne)
 const currentCompte = computed(() => {
   return comptes.value.find(c => c.compteId === currentCompteId.value);
@@ -74,19 +73,47 @@ const filteredTransactions = computed(() => {
 });
 
 
-// ✅ Calcul du total des dépenses pour le compte actuel (MODIFIÉ)
-function totalDepenses() {
-  return filteredTransactions.value // 👈 Utilisation des transactions filtrées
+// 🔹 Année en cours (année de la transaction la plus récente du compte sélectionné)
+const currentYear = computed(() => {
+  // 1. Prendre uniquement les transactions du compte actuel
+  const currentAccountTransactions = transactions.value.filter(t => t.compte?.compteId === currentCompteId.value);
+
+  if (currentAccountTransactions.length === 0) {
+    return new Date().getFullYear(); // Si pas de transactions, prend l'année actuelle
+  }
+
+  // 2. Trouver la date la plus récente
+  const latestDate = currentAccountTransactions.reduce((latest, t) => {
+    const transactionDate = new Date(t.dateTransaction);
+    return transactionDate > latest ? transactionDate : latest;
+  }, new Date(0)); // Start avec une date très ancienne
+
+  // 3. Retourner l'année
+  return latestDate.getFullYear();
+});
+
+
+// ✅ Calcul du total des dépenses pour l'année en cours (MODIFIÉ)
+const totalDepensesAnnuelle = computed(() => {
+  // 1. Filtrer par le compte actuel (déjà fait par filteredTransactions)
+  // 2. Filtrer pour ne garder que les transactions de l'année en cours
+  const annualTransactions = filteredTransactions.value.filter(t =>
+    new Date(t.dateTransaction).getFullYear() === currentYear.value
+  );
+
+  // 3. Calculer le total des dépenses (montants négatifs) pour cette sélection annuelle
+  return annualTransactions
     .filter(t => t.montant < 0) // seulement les dépenses
     .reduce((total, t) => total + Math.abs(t.montant), 0)
     .toLocaleString('fr-FR', { minimumFractionDigits: 2 });
-}
+});
+
 
 // ===============================
 // 🔹 ICONES PAR DÉFAUT
 // ===============================
 const comptaIcons = {
-  2: 'https://img.icons8.com/bubbles/100/money.png',   // Compte courant
+  2: 'https://img.icons8.com/bubbles/100/money.png',  // Compte courant
   3: 'https://img.icons8.com/bubbles/100/stack-of-money.png', // Compte épargne
 };
 function getIconUrl(compteId) {
@@ -102,7 +129,7 @@ const depensesIconUrl = 'https://img.icons8.com/bubbles/100/cash-in-hand.png';
 // ===============================
 onMounted(async () => {
   await fetchCompte();
-  await fetchTransactions(); // Assurez-vous d'utiliser await pour le chargement des transactions
+  await fetchTransactions();
   setTimeout(() => loadingChart.value = false, 500);
 });
 </script>
@@ -123,22 +150,23 @@ onMounted(async () => {
           <!-- Icône dynamique (pour Solde Actuel) -->
           <img :src="getIconUrl(currentCompte.compteId)" :alt="`Icône ${currentCompte.nom}`" width="100" height="100"
             class="mb-3" />
-
           <div>
-            <p class="fs-3">{{ currentCompte.nom }}</p>
-            <p class="fs-4"> Solde Actuel: {{ currentCompte.solde }} €</p>
+            <p class="fs-3 m-0">{{ currentCompte.nom }}</p>
+            <p class="fs-3 fw-bold">{{ currentCompte.solde }} €</p>
+            <button class="btn btn-outline-light" @click="$router.push(`/admin/comptes/${currentCompte.compteId}`)">Voir
+              détails</button>
           </div>
         </div>
 
-        <div class="gestionTransaction-card rounded">
-          <h4 class="fs-2">Dépenses Cumulées</h4>
-          <!-- Icône statique (pour Dépenses Cumulées) - CORRIGÉ ICI -->
+        <div class="gestionTransaction-card d-flex flex-column justify-content-center align-items-center rounded">
+          <!-- Nouveau titre pour refléter le calcul annuel -->
+          <h4 class="fs-2">Dépenses Cumulées Annuelles:  {{ currentYear }}</h4>
+          <!-- Icône statique (pour Dépenses Cumulées) -->
           <img width="100" height="100" :src="depensesIconUrl" alt="Icône Dépenses" class="mb-3" />
-
           <div>
-            <p class="fs-3">Montant Total des Dépenses:</p>
-            <!-- Appel de la fonction sans argument, elle utilise filteredTransactions -->
-            <p class="fs-4">{{ totalDepenses() }} €</p>
+            <p class="fs-3 m-0">Montant Total des Dépenses:</p>
+            <!-- Utilisation de la nouvelle computed property -->
+            <p class="fs-3 fw-bold">{{ totalDepensesAnnuelle }} €</p>
           </div>
         </div>
       </div>
@@ -159,10 +187,10 @@ onMounted(async () => {
 
           <!-- Liste des transactions filtrées (Pour le débuggage ou la future implémentation) -->
           <!-- <div class="col-12 mt-4">
-            <h5 class="text-white">Détail des Transactions ({{ filteredTransactions.length }} transactions)</h5>
-            <pre class="text-white bg-dark p-3 rounded overflow-auto"
-              style="max-height: 300px;">{{ filteredTransactions }}</pre>
-          </div> -->
+      <h5 class="text-white">Détail des Transactions ({{ filteredTransactions.length }} transactions)</h5>
+      <pre class="text-white bg-dark p-3 rounded overflow-auto"
+       style="max-height: 300px;">{{ filteredTransactions }}</pre>
+     </div> -->
         </div>
       </div>
     </div>

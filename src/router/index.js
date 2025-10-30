@@ -101,6 +101,16 @@ const router = createRouter({
         roles: ['Admin','Sensei'] //
       }
     },
+   {
+  path: '/admin/comptes/:id',
+  name: 'admin-compte-details',
+  component: () => import('@/views/CompteDetails.vue'),
+  props: true,
+  meta: {
+    requiresAuth: true,
+    roles: ['Admin', 'Sensei']
+  }
+    },
 
     // ... autres routes (ex: /profile, /admin/users)
   ]
