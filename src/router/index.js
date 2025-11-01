@@ -17,7 +17,7 @@ const router = createRouter({
       component: () => import('@/views/AdminDashboard.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin','Sensei']
+        roles: ['Admin', 'Sensei']
       }
     },
     {
@@ -33,6 +33,15 @@ const router = createRouter({
       path: '/admin/licencies',
       name: 'admin-licencies',
       component: () => import('@/views/LicenciesView.vue'),
+      meta: {
+        requiresAuth: true,
+        roles: ['Admin', 'Sensei'] // 🎯 Admin ET Sensei
+      }
+    },
+    {
+      path: '/admin/cours',
+      name: 'admin-cours',
+      component: () => import('@/views/CoursView.vue'),
       meta: {
         requiresAuth: true,
         roles: ['Admin', 'Sensei'] // 🎯 Admin ET Sensei
@@ -62,7 +71,7 @@ const router = createRouter({
       component: () => import('@/views/DisciplineView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin','Sensei'] //
+        roles: ['Admin', 'Sensei'] //
       }
     },
     {
@@ -71,7 +80,7 @@ const router = createRouter({
       component: () => import('@/views/TarifsView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin','Sensei'] //
+        roles: ['Admin', 'Sensei'] //
       }
     },
     {
@@ -80,7 +89,7 @@ const router = createRouter({
       component: () => import('@/views/ComptabiliteView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin','Sensei'] //
+        roles: ['Admin', 'Sensei'] //
       }
     },
     {
@@ -89,7 +98,7 @@ const router = createRouter({
       component: () => import('@/views/GestionTransactionsPage.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin','Sensei'] //
+        roles: ['Admin', 'Sensei'] //
       }
     },
     {
@@ -98,18 +107,18 @@ const router = createRouter({
       component: () => import('@/views/ProfilePageView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin','Sensei'] //
+        roles: ['Admin', 'Sensei'] //
       }
     },
-   {
-  path: '/admin/comptes/:id',
-  name: 'admin-compte-details',
-  component: () => import('@/views/CompteDetails.vue'),
-  props: true,
-  meta: {
-    requiresAuth: true,
-    roles: ['Admin', 'Sensei']
-  }
+    {
+      path: '/admin/comptes/:id',
+      name: 'admin-compte-details',
+      component: () => import('@/views/CompteDetails.vue'),
+      props: true,
+      meta: {
+        requiresAuth: true,
+        roles: ['Admin', 'Sensei']
+      }
     },
 
     // ... autres routes (ex: /profile, /admin/users)

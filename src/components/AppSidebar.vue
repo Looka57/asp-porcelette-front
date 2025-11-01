@@ -21,6 +21,7 @@ const navItems = [
   { label: 'Tableau de bord', icon: 'pi pi-home', to: '/admin/dashboard', roles: ['Admin', 'Sensei'] },
   { label: 'Sensei', icon: 'pi pi-users', to: '/admin/sensei', roles: ['Admin'] },
   { label: 'Licencies', icon: 'pi pi-users', to: '/admin/licencies', roles: ['Admin'] },
+  { label: 'Cours', icon: 'pi pi-slack', to: '/admin/cours', roles: ['Admin'] },
   { label: 'Événements', icon: 'pi pi-calendar', to: '/admin/events', roles: ['Admin', 'Sensei'] },
   { label: 'Actualités', icon: 'pi pi-book', to: '/admin/actualite', roles: ['Admin'] },
   { label: 'Disciplines', icon: 'pi pi-cog', to: '/admin/discipline', roles: ['Admin'] },
