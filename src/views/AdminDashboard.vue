@@ -74,9 +74,9 @@ onMounted(async () => {
         <a href="#">
           <div
             class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
-            <img width="100" height="100" src="https://img.icons8.com/bubbles/100/megaphone.png" alt="megaphone" />
-            <!-- <img width="100" height="100" src="https://img.icons8.com/bubbles/100/accounting.png" alt="accounting"/> -->
-            <h4>Actualités</h4>
+            <!-- <img width="100" height="100" src="https://img.icons8.com/bubbles/100/megaphone.png" alt="megaphone" /> -->
+            <img width="100" height="100" src="https://img.icons8.com/bubbles/100/bank.png" alt="bank"/>
+            <h4>Comptabilité</h4>
             <p>24</p>
           </div>
         </a>

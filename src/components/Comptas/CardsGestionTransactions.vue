@@ -185,13 +185,13 @@ onMounted(async () => {
                 <div class="graphs-container">
                     <div class="graph-item">
                         <!-- Utilisation des données et options du composable de dépenses générales -->
-                        <h4>Dépenses Mensuelles (Compte: {{ currentCompte.nom }} - Année: {{ currentYear }})</h4>
+                        <h4>Dépenses Mensuelles  Année: {{ currentYear }}</h4>
                         <LineChart :chartData="depensesData" :options="chartOptionsGenerales" />
                     </div>
 
                     <div class="graph-item">
                         <!-- Utilisation des données et options du composable de dépenses par discipline -->
-                        <h4>Dépenses par Discipline (Compte: {{ currentCompte.nom }} - Année: {{ currentYear }})</h4>
+                        <h4>Dépenses par Discipline Année: {{ currentYear }}</h4>
                         <BarChart :chartData="depensesDisciplinesData" :options="chartOptionsDisciplines" />
                     </div>
                 </div>

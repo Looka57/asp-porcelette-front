@@ -22,6 +22,7 @@ const { userList, getDisciplineName } = defineProps({
       <thead>
         <tr>
           <th scope="col">#</th>
+          <th scope="col">Photo</th>
           <th scope="col">Nom</th>
           <th scope="col">Prénom</th>
           <th scope="col">Email</th>
@@ -29,6 +30,7 @@ const { userList, getDisciplineName } = defineProps({
           <th scope="col">Adresse</th>
           <th scope="col">Ville</th>
           <th scope="col">Statut</th>
+          <th scope="col">Date Inscriptions</th>
           <th scope="col">Discipline</th>
           <th scope="col" style="width: 250px;">Action</th>
         </tr>
@@ -36,13 +38,15 @@ const { userList, getDisciplineName } = defineProps({
       <tbody>
         <tr v-for="(user, index) in userList" :key="user.userId">
           <th scope="row">{{ index + 1 }}</th>
+          <td>{{ user.photoUrl }}</td>
           <td>{{ user.nom }}</td>
           <td>{{ user.prenom }}</td>
           <td>{{ user.email || 'N/A' }}</td>
           <td>{{ user.telephone || 'N/A' }}</td>
-          <td>{{ user.adresse || 'N/A' }}</td>
+          <td>{{ user.rueEtNumero || 'N/A' }}</td>
           <td>{{ user.ville || 'N/A' }}</td>
           <td>{{ user.statut || 'N/A' }}</td>
+          <td>{{ user.DateAdhesion || 'N/A' }}</td>
 
        <td>{{ getDisciplineName(user.disciplineId) }}</td>
           <td>
