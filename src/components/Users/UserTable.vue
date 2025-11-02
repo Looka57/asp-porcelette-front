@@ -11,8 +11,22 @@ const { userList, getDisciplineName } = defineProps({
   }
 });
 
-// Déclaration obligatoire pour utiliser $emit (ou 'emit') dans le template.
-// const emit = defineEmits(['edit', 'delete']);
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+        // Utilise l'API de date native pour formater
+        const date = new Date(dateString);
+        // 'fr-FR' pour le français, options pour afficher le jour, le mois en entier, et l'année
+        return date.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long', // ou 'short', ou 'numeric'
+            day: 'numeric'
+        });
+    } catch (e) {
+        console.error("Erreur de formatage de date :", e);
+        return 'Date invalide';
+    }
+};
 
 </script>
 
@@ -46,7 +60,7 @@ const { userList, getDisciplineName } = defineProps({
           <td>{{ user.rueEtNumero || 'N/A' }}</td>
           <td>{{ user.ville || 'N/A' }}</td>
           <td>{{ user.statut || 'N/A' }}</td>
-          <td>{{ user.DateAdhesion || 'N/A' }}</td>
+          <td>{{formatDate(user.dateAdhesion) || 'N/A' }}</td>
 
        <td>{{ getDisciplineName(user.disciplineId) }}</td>
           <td>

@@ -8,6 +8,8 @@
 import { ref, onMounted } from 'vue';
 import { BarChart } from 'vue-chart-3';
 import { Chart, registerables } from 'chart.js';
+import api from '@/api/axios';
+import CountUp from 'vue-countup-v3';
 
 // 💡 Import du composable (logique de graphique externalisée)
 import { useEvolutionInscriptionsChart } from '@/composables/useChartData';
@@ -21,14 +23,52 @@ Chart.register(...registerables);
 /* 🎯 UTILISATION DU COMPOSABLE */
 /* ════════════════════════════════════════════════════════════════════════ */
 const { inscriptionsData, chartOptions, totalInscriptions } = useEvolutionInscriptionsChart();
+const totalLicencies = ref(0);
+const totalEvenements = ref(0);
+const totalCompta = ref(0);
 
 /* ════════════════════════════════════════════════════════════════════════ */
 /* 🧠 LOGIQUE DU COMPOSANT */
 /* ════════════════════════════════════════════════════════════════════════ */
+// Fichier : AdminDashboard.vue (dans <script setup>)
+
+const fetchStats = async () => {
+    try {
+        // 1. Licenciés : Récupération de la liste complète
+        const licenciesResponse = await api.get('/User/admin/list');
+        const allUsers = licenciesResponse.data || [];
+
+        totalLicencies.value = allUsers.filter(user =>
+            user.roles.includes('Adherent')).length;
+
+        // 2. Événements : NÉCESSITE UN ENDPOINT C#
+        const eventsResponse = await api.get('/Evenement');
+        totalEvenements.value = eventsResponse.data.length || 0;
+
+        // 3. Comptabilité : NÉCESSITE UN ENDPOINT C#
+        // Simule la valeur en attendant la récupération (si /Compte renvoie la liste)
+       // 3. Comptabilité : Calcul du Solde Total
+        const comptaReponse = await api.get('/Compte');
+        const comptes = comptaReponse.data || [];
+
+        // 🚨 CORRECTION : Calculer la somme des soldes de tous les comptes
+        const soldeTotal = comptes.reduce((sum, compte) => {
+            // Supposons que la propriété de solde est 'solde' ou 'Solde'
+            const soldeDuCompte = compte.solde || 0; // Utiliser compte.Solde si la casse est respectée
+            return sum + soldeDuCompte;
+        }, 0);
+        totalCompta.value = soldeTotal;
+
+    } catch (err) {
+        console.error("Erreur lors du chargement des statistiques du tableau de bord :", err);
+    }
+}
+
 const loading = ref(true);
 
 onMounted(async () => {
-  // Simule un chargement (à remplacer par un appel API réel)
+  await fetchStats();
+
   setTimeout(() => {
     loading.value = false;
   }, 500);
@@ -46,47 +86,50 @@ onMounted(async () => {
     <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
       <!-- 🧍 Licenciés -->
       <div class="col">
-        <a href="#">
+        <router-link :to="{ name: 'admin-licencies' }">
           <div
             class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
             <img width="100" height="100" src="https://img.icons8.com/bubbles/100/user-group-man-woman.png"
               alt="user-group-man-woman" />
             <h4>Licenciés</h4>
-            <p>500</p>
-          </div>
-        </a>
+            <CountUp :end-val="totalLicencies" :duration="2" class="h4 mb-0 fs-1" />          </div>
+        </router-link>
       </div>
 
       <!-- 📅 Événements -->
       <div class="col">
-        <a href="#">
+        <router-link :to="{ name: 'admin-events' }">
           <div
             class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
             <img width="100" height="100" src="https://img.icons8.com/bubbles/100/today.png" alt="today" />
             <h4>Événements</h4>
-            <p>12</p>
-          </div>
-        </a>
+<CountUp :end-val="totalEvenements" :duration="2" class="h4 mb-0 fs-1" />          </div>
+        </router-link>
       </div>
 
       <!-- 📦 Archives -->
       <div class="col">
-        <a href="#">
+        <router-link :to="{ name: 'admin-compta' }">
           <div
             class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
             <!-- <img width="100" height="100" src="https://img.icons8.com/bubbles/100/megaphone.png" alt="megaphone" /> -->
-            <img width="100" height="100" src="https://img.icons8.com/bubbles/100/bank.png" alt="bank"/>
+            <img width="100" height="100" src="https://img.icons8.com/bubbles/100/bank.png" alt="bank" />
             <h4>Comptabilité</h4>
-            <p>24</p>
+          <CountUp
+                    :end-val="totalCompta"
+                    :duration="2"
+                    :options="{ decimalPlaces: 2, suffix: ' €' }"
+                    class="h4 mb-0 fs-1"
+                />
           </div>
-        </a>
+        </router-link>
       </div>
     </div>
 
     <!-- ════════════ 📊 SECTION GRAPHIQUE ════════════ -->
     <div v-if="loading" class="text-info mt-5">Chargement du graphique...</div>
 
-  <!-- 🔹 TOTAL INSCRIPTIONS -->
+    <!-- 🔹 TOTAL INSCRIPTIONS -->
     <div class="mb-4">
       <h3 class="text-light">Total des inscrits toutes disciplines : {{ totalInscriptions }}</h3>
     </div>
@@ -115,8 +158,8 @@ a {
   color: inherit;
 }
 
-.card{
-   background-color: #343a40 !important;
+.card {
+  background-color: #343a40 !important;
   border-radius: 1rem;
   color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);

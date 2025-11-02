@@ -62,7 +62,7 @@ const updateField = (field, value) => {
 
   <div class="mb-3">
     <label for="Adress" class="form-label">Adresse</label>
-    <input :value="modelValue.adresse" @input="e => updateField('adresse', e.target.value)" type="text"
+    <input :value="modelValue.rueEtNumero" @input="e => updateField('adresse', e.target.value)" type="text"
       class="form-control" id="Adress" placeholder="Rue et numéro">
   </div>
 
