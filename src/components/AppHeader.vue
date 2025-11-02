@@ -23,8 +23,8 @@ const userName = computed(() => {
 </script>
 
 <template>
-  <header class="bg-dark text-white p-4 d-flex justify-content-between align-items-center border-bottom">
-    <div class="fs-1 fw-bold mb-0">
+  <header class=" bg-dark text-white p-4 d-flex justify-content-between align-items-center border-bottom">
+    <div class="bob fs-1 fw-bold mb-0">
       Bienvenue, {{ userName }} !
     </div>
 
@@ -33,11 +33,44 @@ const userName = computed(() => {
         <i class="pi pi-user"></i>
       </router-link>
 
-      <button type="button" class="btn btn-outline-danger" @click="handleLogout">
+      <button type="button" class="btn btn-outline-danger button-logout" @click="handleLogout">
         <i class="pi pi-sign-out"></i>
-        Déconnexion
+        <!-- La classe 'd-none d-sm-inline' masque ce texte par défaut (xs) et
+             l'affiche à partir de la taille 'sm' (576px) et au-delà.
+             Si vous voulez le masquer jusqu'à 768px, utilisez 'd-none d-md-inline' -->
+        <span class="d-none d-sm-inline">
+          Déconnexion
+        </span>
       </button>
     </div>
   </header>
 </template>
 
+<style scoped>
+/* 💻 MEDIA QUERY - Mobile */
+
+@media (max-width: 767.98px) {
+
+  /* Styles pour le titre */
+  header .bob {
+    font-size: 1.5rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 50px;
+    align-self: center;
+  }
+
+  /* Styles pour les boutons - Réduire la taille du bouton de déconnexion */
+  .button-logout,
+  .button-profile {
+    width: 40px;
+    /* Taille fixe pour ne montrer que l'icône */
+    padding: 0.5rem;
+    display: flex;
+    /* Assure que l'icône est centrée */
+    justify-content: center;
+    align-items: center;
+  }
+}
+</style>

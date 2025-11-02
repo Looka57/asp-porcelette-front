@@ -1,22 +1,41 @@
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!-- 🧩 NAVBAR ADMIN (ROLE-BASED) -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
 <script setup>
-/* ════════════════════════════════════════════════════════════════════════ */
-/* 📦 IMPORTS */
-/* ════════════════════════════════════════════════════════════════════════ */
-import { computed } from 'vue'; // ⬅️ Assurez-vous d'importer computed
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-// import { useRouter } from 'vue-router'; // Décommenter si vous utilisez useRouter
 
-/* ════════════════════════════════════════════════════════════════════════ */
-/* ⚙️ INITIALISATION DU STORE AUTH */
-/* ════════════════════════════════════════════════════════════════════════ */
 const authStore = useAuthStore();
+const isOpen = ref(true); // Navbar ouverte par défaut sur desktop
+// Utilisation du breakpoint 'lg' de Bootstrap (992px) pour le CSS, mais
+// nous allons conserver 768px pour la logique Vue si c'est votre standard.
+const isMobile = ref(window.innerWidth < 768);
 
-/* ════════════════════════════════════════════════════════════════════════ */
-/* 🎯 LIENS DE NAVIGATION */
-/* ════════════════════════════════════════════════════════════════════════ */
+/* 🧠 Détection du resize pour adapter le comportement */
+const handleResize = () => {
+  const wasMobile = isMobile.value;
+  isMobile.value = window.innerWidth < 768;
+
+  // Si on passe de mobile à desktop, forcer l'ouverture
+  if (wasMobile && !isMobile.value) {
+    isOpen.value = true;
+  }
+  // Si on passe de desktop à mobile, forcer la fermeture
+  else if (!wasMobile && isMobile.value) {
+    isOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+  // Initialiser l'état d'ouverture correct au chargement
+  if (isMobile.value) {
+      isOpen.value = false;
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+/* 🔹 Liens de navigation (inchangés) */
 const navItems = [
   { label: 'Tableau de bord', icon: 'pi pi-home', to: '/admin/dashboard', roles: ['Admin', 'Sensei'] },
   { label: 'Sensei', icon: 'pi pi-users', to: '/admin/sensei', roles: ['Admin'] },
@@ -29,65 +48,140 @@ const navItems = [
   { label: 'Comptabilité', icon: 'pi pi-building-columns', to: '/admin/compta', roles: ['Admin'] },
 ];
 
-/* ════════════════════════════════════════════════════════════════════════ */
-/* 🧠 PROPRIÉTÉ CALCULÉE - FILTRAGE PAR RÔLE */
-/* ════════════════════════════════════════════════════════════════════════ */
+/* 🔹 Filtrage par rôle (inchangé) */
 const filteredNavItems = computed(() => {
   const userRoles = authStore.user?.roles || [];
-
   if (userRoles.length === 0) return [];
-
-  return navItems.filter(item => {
-    return item.roles.some(role => userRoles.includes(role));
-  });
+  return navItems.filter(item => item.roles.some(role => userRoles.includes(role)));
 });
+
+/* 🔹 Toggle burger (inchangé) */
+const toggleNavbar = () => {
+  isOpen.value = !isOpen.value;
+};
 </script>
 
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!-- 🎨 TEMPLATE -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
 <template>
-  <nav class="custom-navbar d-flex flex-column p-4 max-vh-100 bg-dark">
-    <!-- Logo -->
-    <img class="w-25" src="../assets/img/Blason_Ville_fr_Porcelette.svg" alt="Logo ASP Porcelette" />
-    <hr class="my-4 border-light opacity-50" />
+  <div> <button class="btn btn-outline-light position-fixed top-0 start-0 m-3 z-3 d-md-none" type="button"
+      @click="toggleNavbar" v-if="isMobile">
+      <i :class="isOpen ? 'pi pi-times' : 'pi pi-bars'"></i>
+    </button>
 
-    <!-- Liens filtrés -->
-    <router-link v-for="item in filteredNavItems" :key="item.label" :to="item.to"
-      class="d-flex align-items-center p-3 mb-2 text-secondary text-decoration-none rounded"
-      :class="{ 'bg-secondary text-light': $route.path === item.to }"
-      :aria-current="$route.path === item.to ? 'page' : null">
-      <i :class="item.icon" class="me-3"></i>
-      <span>{{ item.label }}</span>
-    </router-link>
-  </nav>
+    <div v-if="isMobile && isOpen" class="overlay" @click="toggleNavbar"></div>
+
+    <nav class="custom-navbar bg-dark text-light p-4" :class="{
+          'open': isOpen,
+          'mobile-mode': isMobile,
+          // Appliquez 'collapsed' uniquement si ce n'est PAS en mode mobile et que c'est fermé
+          'collapsed': !isOpen && !isMobile
+      }">
+      <div class="d-flex justify-content-center align-items-center mb-4">
+        <img class="w-25" src="../assets/img/Blason_Ville_fr_Porcelette.svg" alt="Logo ASP Porcelette" />
+        <hr class="my-4 border-light opacity-50" />
+      </div>
+
+
+      <hr class="border-light opacity-50" />
+
+      <div class="nav-links">
+        <router-link v-for="item in filteredNavItems" :key="item.label" :to="item.to"
+          class="d-flex align-items-center p-3 mb-2 text-secondary text-decoration-none rounded"
+          :class="{ 'bg-secondary text-light': $route.path === item.to }" @click="isMobile && toggleNavbar()">
+          <i :class="item.icon" class="me-3"></i>
+          <span>{{ item.label }}</span>
+        </router-link>
+      </div>
+    </nav>
+
+    <main class="main-content" :class="{
+          // Ajuster la marge pour le mode desktop rétracté
+          'collapsed-margin': !isOpen && !isMobile,
+          // Si ouvert en desktop, la marge est de la taille de la nav ouverte
+          'open-margin': isOpen && !isMobile
+      }">
+      <slot></slot>
+    </main>
+  </div>
 </template>
 
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!-- 💅 STYLE -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<style>
+<style scoped>
+/* ========= NAVBAR DEFAUT (Desktop) ========= */
 .custom-navbar {
-  background-color: rgb(22, 22, 22) !important;
   width: 250px;
-  text-align: center;
+  min-height: 100vh;
+  transition: all 0.3s ease;
   flex-shrink: 0;
+  z-index: 1001;
+  position: fixed; /* Fixer la navbar sur desktop */
+  top: 0;
+  left: 0;
 }
 
+/* Desktop : Rétraction */
+.custom-navbar.collapsed {
+  width: 70px;
+}
+
+/* Desktop : Éléments masqués/réduits lors de la rétraction */
+.custom-navbar.collapsed .nav-links span {
+  display: none; /* Masque les labels des liens */
+}
+.custom-navbar.collapsed .logo {
+  width: 40px; /* Réduit la taille du logo */
+  margin: 0 auto;
+}
+.custom-navbar.collapsed .d-flex.justify-content-between {
+    justify-content: center !important; /* Centre l'icône / logo */
+}
+
+
+/* ========= MAIN CONTENT MARGINS (Desktop) ========= */
+/* Gère l'espace à gauche du contenu principal */
+.main-content {
+    width: 100%; /* Débute comme pleine largeur */
+    min-height: 100vh;
+    padding-left: 250px; /* Marge pour la navbar ouverte */
+    transition: padding-left 0.3s ease;
+}
+
+.main-content.collapsed-margin {
+    padding-left: 70px; /* Marge pour la navbar rétractée */
+}
+
+/* ========= MOBILE (< 768px) ========= */
+.custom-navbar.mobile-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translateX(-250px); /* Cachée par défaut */
+  height: 100vh;
+  width: 250px;
+  /* Assurez-vous que la transition est uniquement sur le transform */
+  transition: transform 0.3s ease-in-out;
+}
+
+.custom-navbar.mobile-mode.open {
+  transform: translateX(0); /* Apparaît */
+}
+
+/* L'overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+/* Le contenu principal doit utiliser la pleine largeur sur mobile */
+@media (max-width: 767.98px) {
+    .main-content {
+        padding-left: 0 !important; /* Pas de marge à gauche sur mobile */
+    }
+}
+
+/* ========= LIENS (inchangés) ========= */
 .custom-navbar a:hover {
   background-color: rgba(255, 255, 255, 0.1);
   color: white !important;
-}
-
-.custom-navbar a:focus {
-  outline: 2px solid #ffffff;
-  outline-offset: -2px;
-}
-
-.custom-navbar img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
 }
 </style>

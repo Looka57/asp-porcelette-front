@@ -93,3 +93,9 @@ const updateField = (field, value) => {
   </div>
 
 </template>
+<style scoped>
+
+.bg-light{
+  background-color: black !important;
+}
+</style>
