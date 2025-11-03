@@ -15,10 +15,6 @@ const errorMessage = ref(null);
 const isUpdateModalOpen = ref(false);
 const selectedArticleId = ref(null);
 
-
-
-
-
 /* -------------------------------------------------------------------------- */
 /* 🎯 PROPS et EMITS */
 /* -------------------------------------------------------------------------- */

@@ -130,6 +130,7 @@ const loadSenseiData = async () => {
     const response = await api.get('User/admin/list');
     const allUsers = response.data || [];
     userList.value = allUsers.filter(user => user.roles.includes('Admin') || user.roles.includes('Sensei'));
+    console.log("Liste des Senseis/Admins reçue:", userList.value);
   } catch (err) {
     error.value = 'Échec du rechargement de la liste des Sensei.';
     console.error(err);

@@ -1,35 +1,3 @@
-<script setup>
-// La liste de données à afficher (userList de la vue parent)
-const { userList, getDisciplineName } = defineProps({
-  userList: {
-    type: Array,
-    default: () => []
-  },
-  getDisciplineName: {
-    type: Function,
-    required: true
-  }
-});
-
-const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    try {
-        // Utilise l'API de date native pour formater
-        const date = new Date(dateString);
-        // 'fr-FR' pour le français, options pour afficher le jour, le mois en entier, et l'année
-        return date.toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long', // ou 'short', ou 'numeric'
-            day: 'numeric'
-        });
-    } catch (e) {
-        console.error("Erreur de formatage de date :", e);
-        return 'Date invalide';
-    }
-};
-
-</script>
-
 <template>
   <div class="table-responsive">
     <table class="table table-dark table-striped table-hover align-middle text-center overflow-hidden">
@@ -50,9 +18,19 @@ const formatDate = (dateString) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(user, index) in userList" :key="user.userId">
+        <tr v-for="(user, index) in userList" :key="user.userId || user.id">
           <th scope="row">{{ index + 1 }}</th>
-          <td>{{ user.photoUrl }}</td>
+          <td>
+            <img
+              v-if="getPhotoPath(user)"
+              :src="getPhotoPath(user)"
+              alt="Photo utilisateur"
+              class="rounded-circle object-fit-cover"
+              style="width: 60px; height: 60px;"
+              @error="handleImageError" />
+            <span v-else class="text-secondary">Aucune photo</span>
+          </td>
+
           <td>{{ user.nom }}</td>
           <td>{{ user.prenom }}</td>
           <td>{{ user.email || 'N/A' }}</td>
@@ -60,14 +38,13 @@ const formatDate = (dateString) => {
           <td>{{ user.rueEtNumero || 'N/A' }}</td>
           <td>{{ user.ville || 'N/A' }}</td>
           <td>{{ user.statut || 'N/A' }}</td>
-          <td>{{formatDate(user.dateAdhesion) || 'N/A' }}</td>
-
-       <td>{{ getDisciplineName(user.disciplineId) }}</td>
+          <td>{{ formatDate(user.dateAdhesion) || 'N/A' }}</td>
+          <td>{{ getDisciplineName(user.disciplineId) }}</td>
           <td>
-            <button class="btn btn-outline-info m-3 " @click="$emit('edit', user)">
+            <button class="btn btn-outline-info m-3" @click="$emit('edit', user)">
               <i class="pi pi-pencil"></i>
             </button>
-            <button class="btn btn-outline-danger" @click="$emit('delete', user.userId)">
+            <button class="btn btn-outline-danger" @click="$emit('delete', user.userId || user.id)">
               <i class="pi pi-trash"></i>
             </button>
           </td>
@@ -76,3 +53,56 @@ const formatDate = (dateString) => {
     </table>
   </div>
 </template>
+
+<script setup>
+const { userList, getDisciplineName } = defineProps({
+  userList: {
+    type: Array,
+    default: () => []
+  },
+  getDisciplineName: {
+    type: Function,
+    required: true
+  }
+});
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  } catch (e) {
+    console.error("Erreur de formatage de date :", e);
+    return 'Date invalide';
+  }
+};
+
+const getPhotoPath = (user) => {
+  const photoPath = user.photoUrl || user.photoUri || user.PhotoUri;
+
+  console.log('Photo path pour', user.nom, ':', photoPath);
+
+  if (!photoPath) return '';
+
+  if (photoPath.startsWith('/')) {
+    return photoPath;
+  }
+
+  return '/' + photoPath;
+};
+
+const handleImageError = (event) => {
+  console.error('Erreur chargement image:', event.target.src);
+  event.target.style.display = 'none';
+};
+</script>
+
+<style scoped>
+img.rounded-circle {
+  border: 2px solid #ffc107;
+}
+</style>
