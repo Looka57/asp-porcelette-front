@@ -1,142 +1,131 @@
 import { ref, computed } from 'vue'
 
-// 🎨 Définition des couleurs pour la cohérence avec useDepensesDisciplinesChart
+// 🎨 Définition des couleurs (inchangée)
 const DISCIPLINE_COLORS = {
-    'Judo': '#FF6384',        // Bleu
-    'Aïkido': '#3B82F6',      // Vert
-    'Jujitsu': '#efd844ff',     // Rouge
-    'Judo Détente': '#10B981' // Violet
+ 'Judo': '#FF6384',
+ 'Aïkido': '#3B82F6',
+ 'Jujitsu': '#efd844ff',
+ 'Judo Détente': '#10B981'
 };
 
-export function useEvolutionInscriptionsChart() {
-    const labels = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
+// 💡 Fonction Utilitaire pour le Calcul Cumulatif
+const cumulativeSum = (data) => {
+ let sum = 0;
+ return data.map(value => sum += value);
+};
 
-    // 🛑 DONNÉES SIMULÉES PAR DISCIPLINE (Exemple)
-    const dataJudo = [5, 8, 3, 7, 5, 10, 15, 20, 15, 18];
-    const dataAikido = [3, 4, 2, 4, 3, 5, 6, 7, 5, 6];
-    const dataJujitsu = [1, 2, 1, 1, 1, 2, 3, 3, 2, 3];
-    const dataJudoDetente = [1, 2, 1, 1, 0, 1, 2, 2, 1, 1];
+// 🎯 Modification : Accepte la *Ref* contenant les données brutes en paramètre
+export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
+ const labels = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
 
-    // Le total mensuel (pour référence): [12, 19, 8, 15, 10, 21, 30, 37, 27, 33]
+ // 💡 Utilisez un computed pour calculer les datasets DYNAMIQUEMENT
+ const inscriptionsData = computed(() => {
+  // L'accès à la ref est sécurisé ici :
+  const rawData = (rawInscriptionsDataRef && rawInscriptionsDataRef.value) ? rawInscriptionsDataRef.value : {};
 
-    const inscriptionsData = ref({
-        labels: labels,
-        datasets: [
-            {
-                label: 'Judo',
-                backgroundColor: DISCIPLINE_COLORS.Judo,
-                data: dataJudo,
-            },
-            {
-                label: 'Aïkido',
-                backgroundColor: DISCIPLINE_COLORS.Aïkido,
-                data: dataAikido,
-            },
-            {
-                label: 'Jujitsu',
-                backgroundColor: DISCIPLINE_COLORS.Jujitsu,
-                data: dataJujitsu,
-            },
-            {
-                label: 'Judo Détente',
-                backgroundColor: DISCIPLINE_COLORS['Judo Détente'],
-                data: dataJudoDetente,
-            },
-        ]
-    })
+  // Calculs sécurisés :
+  const dataJudo = rawData.Judo ? cumulativeSum(rawData.Judo) : [];
+  const dataAikido = rawData.Aïkido ? cumulativeSum(rawData.Aïkido) : [];
+  const dataJujitsu = rawData.Jujitsu ? cumulativeSum(rawData.Jujitsu) : [];
+  const dataJudoDetente = rawData['Judo Détente'] ? cumulativeSum(rawData['Judo Détente']) : [];
 
-    // Calcul du total des inscrits (pour votre carte du haut)
-    const totalInscriptions = computed(() => {
-        return inscriptionsData.value.datasets.reduce((total, dataset) => {
-            return total + dataset.data.reduce((sum, value) => sum + value, 0);
-        }, 0);
-    });
+  return {
+   labels: labels,
+   datasets: [
+    {
+     type: 'line',
+     label: 'Judo',
+     borderColor: DISCIPLINE_COLORS.Judo,
+     tension: 0.3,
+     pointRadius: 6,
+     pointBackgroundColor: DISCIPLINE_COLORS.Judo,
+     data: dataJudo,
+    },
+    {
+     type: 'line',
+     label: 'Aïkido',
+     borderColor: DISCIPLINE_COLORS.Aïkido,
+     tension: 0.3,
+     pointRadius: 6,
+     pointBackgroundColor: DISCIPLINE_COLORS.Aïkido,
+     data: dataAikido,
+    },
+    {
+     type: 'line',
+     label: 'Jujitsu',
+     borderColor: DISCIPLINE_COLORS.Jujitsu,
+     tension: 0.3,
+     pointRadius: 6,
+     pointBackgroundColor: DISCIPLINE_COLORS.Jujitsu,
+     data: dataJujitsu,
+    },
+    {
+     type: 'line',
+     label: 'Judo Détente',
+     borderColor: DISCIPLINE_COLORS['Judo Détente'],
+     tension: 0.3,
+     pointRadius: 6,
+     pointBackgroundColor: DISCIPLINE_COLORS['Judo Détente'],
+     data: dataJudoDetente,
+    },
+   ]
+  }
+ });
 
-    const chartOptions = ref({
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'bottom',
-                labels: { color: 'rgba(255, 255, 255, 0.9)' }
-            },
-            title: {
-                display: true,
-                text: 'Évolution des Inscriptions par Discipline (Groupées)',
-                color: 'rgba(255, 255, 255, 0.9)'
-            }
-        },
-        scales: {
-            x: {
-                stacked: false, // 🛑 CLÉ 1 : Désactive l'empilement sur l'axe X (Barres Groupées)
-                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                ticks: { color: 'rgba(255, 255, 255, 0.7)' }
-            },
-            y: {
-                stacked: false, // 🛑 CLÉ 2 : Désactive l'empilement sur l'axe Y
-                beginAtZero: true,
-                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                ticks: { color: 'rgba(255, 255, 255, 0.7)' }
-            }
+ // Le calcul du totalInscriptions doit aussi utiliser l'objet computed
+ const totalInscriptions = computed(() => {
+  // La dernière valeur de chaque série cumulée donne le total final
+  return inscriptionsData.value.datasets.reduce((total, dataset) => {
+   const lastValue = dataset.data.length > 0 ? dataset.data[dataset.data.length - 1] : 0;
+   return total + lastValue;
+  }, 0);
+ });
+
+ // 🎯 OPTIONS pour les INSCRIPTIONS (nombres entiers)
+ const chartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: 'top' },
+    tooltip: {
+      callbacks: {
+        label: (context) => {
+          let label = context.dataset.label || '';
+          if (label) {
+            label += ': ';
+          }
+          if (context.parsed.y !== null) {
+            label += context.parsed.y.toFixed(0); // Affiche sans décimales
+          }
+          return label;
         }
-    })
-
-    return { inscriptionsData, chartOptions, totalInscriptions }
-}
-
-// 💡 Laissez useDepensesDisciplinesChart inchangé
-export function useDepensesDisciplinesChart() {
-    const DISCIPLINE_COLORS = ['#3B82F6', '#10B981', '#EF4444', '#8B5CF6'];
-    const depensesDisciplinesData = ref({
-        labels: ['Judo', 'Aïkido', 'Jujitsu', 'Judo Détente'],
-        datasets: [
-            {
-                label: 'Dépenses',
-                backgroundColor: DISCIPLINE_COLORS,
-                data: [3200, 2100, 1800, 900, 1200]
-            }
-        ]
-    })
-    // ... (Reste inchangé) ...
-    const chartOptions = ref({
-        responsive: true,
-        cutout: '60%',
-        plugins: {
-            legend: { position: 'bottom' },
-            title: {
-                display: true,
-                text: 'Dépenses par discipline'
-            }
+      }
+    }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: "Nombre d'Inscriptions Cumulées"
+      },
+      ticks: {
+        stepSize: 1, // Force les pas à être des entiers
+        callback: (value) => {
+          if (Number.isInteger(value)) {
+            return value;
+          }
         }
-    })
+      }
+    },
+    x: {
+      title: {
+        display: true,
+        text: "Mois de l'Année en cours"
+      }
+    }
+  }
+ });
 
-    return { depensesDisciplinesData, chartOptions }
+ return { inscriptionsData, chartOptions, totalInscriptions }
 }
-
-// export function useDepensesDisciplinesChart() {
-//   const depensesDisciplinesData = ref({
-//     labels: ['Judo', 'Aïkido', 'Karaté', 'Jujitsu', 'Judo Détente'],
-//     datasets: [
-//       {
-//         label: 'Dépenses',
-//         backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
-//         data: [3200, 2100, 1800, 900, 1200]
-//       }
-//     ]
-//   })
-
-//   const chartOptions = ref({
-//     responsive: true,
-//     cutout: '60%',
-//     plugins: {
-//       legend: { position: 'bottom' },
-//       title: {
-//         display: true,
-//         text: 'Dépenses par discipline'
-//       }
-//     }
-//   })
-
-//   return { depensesDisciplinesData, chartOptions }
-// }

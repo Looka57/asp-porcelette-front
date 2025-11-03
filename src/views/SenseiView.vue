@@ -105,8 +105,6 @@ const handleEdit = (user) => {
     const modal = new window.bootstrap.Modal(modalElement);
     modal.show();
   }
-  // 💥 CORRECTION : suppression de console.log('Événement reçu:', event);
-  // car 'event' n'est pas défini ici, c'est 'user'.
   console.log('Utilisateur en édition:', user);
 };
 

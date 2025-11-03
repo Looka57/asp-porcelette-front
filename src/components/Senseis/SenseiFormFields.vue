@@ -1,29 +1,36 @@
 <script setup>
 import { watch } from 'vue'
 
-// ✅ Déclare d'abord tes props
+// ===============================
+// 🔹 PROPS
+// ===============================
 const props = defineProps({
-  // L'objet des données du Sensei (passé par v-model)
+  // L'objet du Sensei (passé via v-model)
   modelValue: {
     type: Object,
     required: true
   },
-  // La liste des disciplines (passée par la vue parent)
+  // Liste des disciplines (provenant du parent)
   disciplineList: {
     type: Array,
     default: () => []
   },
-  // La discipline sélectionnée (passée par v-model)
+  // Discipline sélectionnée (v-model)
   selectedDiscipline: {
     type: [String, Number],
     required: true
   }
 })
 
-// ✅ Puis seulement après, tes emits
+// ===============================
+// 🔹 EMITS
+// ===============================
 const emit = defineEmits(['update:modelValue', 'update:selectedDiscipline', 'file-change'])
 
-// ✅ Et enfin, ton watch
+// ===============================
+// 🔹 WATCHERS
+// ===============================
+// Exemple : log chaque changement de la bio
 watch(
   () => props.modelValue.bio,
   (newBio, oldBio) => {
@@ -32,7 +39,11 @@ watch(
   { immediate: true }
 )
 
-// Mettre à jour l'objet principal (pour Grade et Bio)
+// ===============================
+// 🔹 FONCTIONS UTILITAIRES
+// ===============================
+
+// Mettre à jour une propriété spécifique de l'objet Sensei
 const updateField = (field, value) => {
   emit('update:modelValue', {
     ...props.modelValue,
@@ -40,44 +51,58 @@ const updateField = (field, value) => {
   })
 }
 
-// Mettre à jour la discipline sélectionnée (pour v-model)
+// Mettre à jour la discipline sélectionnée
 const updateDiscipline = (value) => {
   emit('update:selectedDiscipline', value)
 }
 
-// Transmettre l'événement de changement de fichier à la vue parent
+// Transmettre un changement de fichier au parent
 const handleFileChange = (event) => {
   emit('file-change', event)
 }
 </script>
 
 <template>
+  <!-- ===============================
+       🔹 GRADE
+  =============================== -->
   <div class="row mb-3">
     <div class="col-md-6">
       <label for="Grade" class="form-label">Grade</label>
       <input :value="modelValue.grade" @input="e => updateField('grade', e.target.value)" type="text"
         class="form-control" id="Grade" placeholder="Grade actuel">
     </div>
+
+    <!-- ===============================
+         🔹 DISCIPLINE
+    =============================== -->
     <div class="col-md-6">
-  <div class="mb-3">
-    <label for="Discipline" class="form-label">Discipline <span class="text-danger">*</span></label>
-    <select class="form-control" :value="selectedDiscipline" @change="e => updateDiscipline(e.target.value)"
-      name="discipline" id="Discipline" required>
-      <option value="">-- Choisir une discipline --</option>
-      <option v-for="discipline in disciplineList" :key="discipline.disciplineId" :value="discipline.disciplineId">
-        {{ discipline.nom }}
-      </option>
-    </select>
-  </div>
+      <div class="mb-3">
+        <label for="Discipline" class="form-label">Discipline <span class="text-danger">*</span></label>
+        <select class="form-control" :value="selectedDiscipline" @change="e => updateDiscipline(e.target.value)"
+          name="discipline" id="Discipline" required>
+          <option value="">-- Choisir une discipline --</option>
+          <option v-for="discipline in disciplineList" :key="discipline.disciplineId" :value="discipline.disciplineId">
+            {{ discipline.nom }}
+          </option>
+        </select>
+      </div>
     </div>
   </div>
 
+  <!-- ===============================
+       🔹 BIOGRAPHIE
+  =============================== -->
   <div class="mb-3">
     <label for="Bio" class="form-label">Biographie</label>
     <textarea :value="modelValue.bio" @input="e => updateField('bio', e.target.value)" class="form-control" id="Bio"
-      rows="3"></textarea>
+      rows="3">
+    </textarea>
   </div>
 
+  <!-- ===============================
+       🔹 PHOTO
+  =============================== -->
   <div class="mb-3">
     <label for="PhotoUrl" class="form-label">Télecharger une photo</label>
     <input type="file" class="form-control" id="PhotoUrl" accept="image/*" @change="handleFileChange">

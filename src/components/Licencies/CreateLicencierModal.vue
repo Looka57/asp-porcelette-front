@@ -140,9 +140,16 @@ const submitAdherent = async () => {
             // Note: Si la route POST /User/register/adherent attend aussi du [FromForm], vous devrez utiliser FormData ici aussi !
             await api.post('User/register/adherent', createPayload);
         } catch (err) {
-            console.error('Erreur lors de l\'enregistrement :', err);
-            error.value = err.response?.data?.message || "Erreur lors de l'enregistrement du nouvel adhérent.";
-        }
+    console.error('Erreur lors de l\'enregistrement :', err);
+
+    const apiMessage =
+        err.response?.data?.Message ||
+        err.response?.data?.message ||
+        "Erreur lors de l'enregistrement du nouvel adhérent.";
+
+    error.value = apiMessage;
+    alert(apiMessage); // ou ton système de notification
+}
     }
 
     // Gestion du succès / nettoyage
