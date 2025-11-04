@@ -1,3 +1,55 @@
+
+<script setup>
+
+const API_BASE_URL = 'http://localhost:5067'; // 🟢 UTILISEZ LE PORT HTTP
+// Définissez ce chemin après avoir déplacé l'image dans /public/img/
+const DEFAULT_PHOTO_PATH = '/img/default-profile.png';
+
+const { userList, getDisciplineName } = defineProps({
+  userList: {
+    type: Array,
+    default: () => []
+  },
+  getDisciplineName: {
+    type: Function,
+    required: true
+  }
+});
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  } catch (e) {
+    console.error("Erreur de formatage de date :", e);
+    return 'Date invalide';
+  }
+};
+
+const getPhotoPath = (user) => {
+    const photoPath = user.photoUrl;
+
+    if (!photoPath || photoPath.length < 5) {
+        // Retourne une image par défaut si le chemin est vide.
+        return DEFAULT_PHOTO_PATH;
+    }
+
+    // Le nouveau chemin complet sera : https://localhost:7183/images/profiles/...
+    return `${API_BASE_URL}${photoPath}`;
+};
+
+const handleImageError = (event) => {
+  console.error('Erreur chargement image:', event.target.src);
+  event.target.style.display = 'none';
+};
+</script>
+
+
 <template>
   <div class="table-responsive">
     <table class="table table-dark table-striped table-hover align-middle text-center overflow-hidden">
@@ -54,52 +106,6 @@
   </div>
 </template>
 
-<script setup>
-const { userList, getDisciplineName } = defineProps({
-  userList: {
-    type: Array,
-    default: () => []
-  },
-  getDisciplineName: {
-    type: Function,
-    required: true
-  }
-});
-
-const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  } catch (e) {
-    console.error("Erreur de formatage de date :", e);
-    return 'Date invalide';
-  }
-};
-
-const getPhotoPath = (user) => {
-  const photoPath = user.photoUrl || user.photoUri || user.PhotoUri;
-
-  console.log('Photo path pour', user.nom, ':', photoPath);
-
-  if (!photoPath) return '';
-
-  if (photoPath.startsWith('/')) {
-    return photoPath;
-  }
-
-  return '/' + photoPath;
-};
-
-const handleImageError = (event) => {
-  console.error('Erreur chargement image:', event.target.src);
-  event.target.style.display = 'none';
-};
-</script>
 
 <style scoped>
 img.rounded-circle {

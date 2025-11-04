@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from 'vue'; // Ajout de 'computed'
 import api from '@/api/axios';
 import SenseiFormFields from '@/components/Senseis/SenseiFormFields.vue';
 import UserFormFields from '@/components/Users/UserFormFields.vue';
@@ -38,7 +38,7 @@ const onFileChange = (event) => {
 const newSensei = ref({
   nom: '',
   prenom: '',
-  adresse: '',
+  rueEtNumero: '', // 🟢 Utilise RueEtNumero
   ville: '',
   codePostal: '',
   telephone: '',
@@ -70,7 +70,7 @@ const resetForm = () => {
     prenom: '',
     email: '',
     password: '',
-    adresse: '',
+    rueEtNumero: '', // 🟢 CORRECTION: Doit être 'rueEtNumero' pour correspondre au modèle initial
     ville: '',
     codePostal: '',
     telephone: '',
@@ -88,6 +88,7 @@ const resetForm = () => {
   selectedDiscipline.value = '';
   validationError.value = '';
   editingUserId.value = null; // Réinitialiser l'ID en cours d'édition
+  photoFile.value = null; // Réinitialiser la photo
 };
 
 // --------------------
@@ -95,10 +96,21 @@ const resetForm = () => {
 // --------------------
 const handleEdit = (user) => {
   console.log("Valeur de la biographie reçue de l'API :", user.bio);
-  editingUserId.value = user.userId; // Stocker l'ID de l'utilisateur en cours d'édition
-  newSensei.value = { ...user, bio: user.bio, password:'' }; // Copier les données de l'utilisateur dans le formulaire
+  editingUserId.value = user.id || user.userId; // Stocker l'ID de l'utilisateur en cours d'édition
+console.log('Utilisateur en édition:', user);
+  // Copier les données de l'utilisateur. L'opérateur de décomposition gère
+  // ville et codePostal si les noms correspondent (camelCase).
+  newSensei.value = {
+    ...user,
+    // Assurer que le champ d'adresse est mis à jour avec le bon nom
+    rueEtNumero: user.rueEtNumero || user.adresse || '',
+    bio: user.bio,
+    password: '' // Ne pas préremplir le mot de passe
+  };
+
   selectedDiscipline.value = user.disciplineId ? String(user.disciplineId) : ''; // Mettre à jour la discipline sélectionnée
-  newSensei.value.password = ''; // Ne pas préremplir le mot de passe pour des raisons de sécurité
+  newSensei.value.password = ''; // Re-vérification de sécurité (déjà dans le spread)
+
   const modalElement = document.getElementById('createAdherent');
   if (modalElement) {
     // L'objet window.bootstrap est normalement disponible si vous utilisez la librairie JS
@@ -147,7 +159,6 @@ const saveNewSensei = async () => {
   const disciplineIdNum = Number(selectedDiscipline.value);
   newSensei.value.disciplineId = disciplineIdNum;
 
-  // 💥 CORRECTION : Une seule et unique validation, conditionnée au mode d'édition
   const isPasswordRequired = !editingUserId.value;
 
   if (!newSensei.value.nom || !newSensei.value.email || !disciplineIdNum || (isPasswordRequired && !newSensei.value.password)) {
@@ -160,8 +171,8 @@ const saveNewSensei = async () => {
     for (const key in newSensei.value) {
       const value = newSensei.value[key];
 
-      // Ignorer le tableau de rôles
-      if (key === 'roles') {
+      // Ignorer les clés non pertinentes
+      if (key === 'roles' || key === 'adresse') { // 🟢 AJOUT: Ignorer l'ancien nom 'adresse'
         continue;
       }
 
@@ -171,14 +182,15 @@ const saveNewSensei = async () => {
       }
 
       if (value !== null) {
+        // Envoie les clés en camelCase (nom, prenom, rueEtNumero, ville, codePostal, etc.)
         formData.append(key, value);
       }
     }
+
     if (photoFile.value) {
       formData.append('PhotoFile', photoFile.value);
     }
 
-    // 💥 CORRECTION : Suppression de la double déclaration et de l'ancienne logique POST
     let response; // Déclaration unique de la variable de portée de bloc
     let successMessage;
 
@@ -196,7 +208,6 @@ const saveNewSensei = async () => {
       successMessage = 'Nouveau Sensei créé avec succès !';
     }
 
-    // 🟢 Utilisation de 'response' pour éviter l'erreur ESLint
     console.log('Réponse de l\'API:', response.data);
     alert(successMessage);
 
@@ -266,7 +277,7 @@ onMounted(async () => {
             </div>
 
             <form @submit.prevent="saveNewSensei">
-              <UserFormFields v-model="newSensei" :isPasswordRequired="true" />
+              <UserFormFields v-model="newSensei" :isPasswordRequired="!editingUserId" />
               <SenseiFormFields v-model="newSensei" v-model:selectedDiscipline="selectedDiscipline"
                 :disciplineList="disciplineList" @file-change="onFileChange" />
               <div class="modal-footer border-t-2 border-gray-200">
@@ -297,8 +308,8 @@ onMounted(async () => {
 
 <style scoped>
 /* --------------------
- Styles locaux du composant
- -------------------- */
+Styles locaux du composant
+-------------------- */
 .modalDesign {
   background-color: #f8f9fa;
   color: #212529;
