@@ -11,7 +11,6 @@ const actualites = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 
-// ⚙️ Modale de mise à jour
 const isUpdateModalOpen = ref(false);
 const selectedArticleId = ref(null);
 
@@ -19,21 +18,12 @@ const selectedArticleId = ref(null);
 /* 🎯 PROPS et EMITS */
 /* -------------------------------------------------------------------------- */
 const props = defineProps({
-  isModalOpen: {
-    type: Boolean,
-    required: true
-  },
-  searchTerm: {
-    type: String,
-    default: ''
-  },
-  currentFilter: {
-    type: String,
-    default: 'total' }
+  isModalOpen: { type: Boolean, required: true },
+  searchTerm: { type: String, default: '' },
+  currentFilter: { type: String, default: 'publies' } // 'publies', 'archives', 'total'
 });
 
 const emit = defineEmits(['update:isModalOpen', 'articleUpdated', 'update-stats']);
-
 const PATH_API = '/Actualite';
 
 /* -------------------------------------------------------------------------- */
@@ -47,7 +37,6 @@ async function fetchActualites() {
     const reponse = await api.get(PATH_API);
     actualites.value = reponse.data;
 
-    // Mise à jour des statistiques après le chargement
     emit('update-stats', {
       total: totalArticles.value,
       publies: articlesActifs.value,
@@ -62,7 +51,7 @@ async function fetchActualites() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 🗓️ FONCTIONS UTILITAIRES */
+/* 🗓️ UTILITAIRES */
 /* -------------------------------------------------------------------------- */
 function formatDate(dateString) {
   if (!dateString) return 'Date inconnue';
@@ -70,80 +59,45 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return new Intl.DateTimeFormat('fr-FR', options).format(date);
-  } catch (error) {
-    console.error("Erreur de formatage de date:", error);
+  } catch {
     return dateString;
   }
 }
 
-// Date butoir : aujourd’hui - 10 jours
 function getArchiveCutoffDate() {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - 10);
-  cutoffDate.setUTCHours(0, 0, 0, 0);
-  return cutoffDate;
-}
-
-// Aujourd’hui sans heure
-function getToday() {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  return today;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 10);
+  cutoff.setUTCHours(0, 0, 0, 0);
+  return cutoff;
 }
 
 /* -------------------------------------------------------------------------- */
-/* 📊 STATISTIQUES */
+/* 🧾 STATS */
 /* -------------------------------------------------------------------------- */
 const totalArticles = computed(() => actualites.value.length);
 
-// Articles archivés : publication > 10 jours
 const articlesArchives = computed(() => {
-  const archiveCutoff = getArchiveCutoffDate();
-
-  return actualites.value.filter(article => {
-    if (!article.dateDePublication) return false;
-
-    try {
-      const dateString = article.dateDePublication.includes('Z') || article.dateDePublication.includes('+')
-        ? article.dateDePublication
-        : article.dateDePublication + 'Z';
-
-      const pubDate = new Date(dateString);
-      pubDate.setUTCHours(0, 0, 0, 0);
-
-      return pubDate < archiveCutoff; // plus de 10 jours
-    } catch {
-      return false;
-    }
+  const cutoff = getArchiveCutoffDate();
+  return actualites.value.filter(a => {
+    if (!a.dateDePublication) return false;
+    const pubDate = new Date(a.dateDePublication);
+    pubDate.setUTCHours(0, 0, 0, 0);
+    return pubDate < cutoff;
   }).length;
 });
 
-// Articles actifs (publiés mais pas encore archivés)
 const articlesActifs = computed(() => {
-  const archiveCutoff = getArchiveCutoffDate();
-  const today = getToday();
-
-  return actualites.value.filter(article => {
-    if (!article.dateDePublication) return false;
-
-    try {
-      const dateString = article.dateDePublication.includes('Z') || article.dateDePublication.includes('+')
-        ? article.dateDePublication
-        : article.dateDePublication + 'Z';
-
-      const pubDate = new Date(dateString);
-      pubDate.setUTCHours(0, 0, 0, 0);
-
-      // Publié si >= cutoff OU dans le futur
-      return pubDate > today || pubDate >= archiveCutoff;
-    } catch {
-      return false;
-    }
+  const cutoff = getArchiveCutoffDate();
+  return actualites.value.filter(a => {
+    if (!a.dateDePublication) return false;
+    const pubDate = new Date(a.dateDePublication);
+    pubDate.setUTCHours(0, 0, 0, 0);
+    return pubDate >= cutoff;
   }).length;
 });
 
 /* -------------------------------------------------------------------------- */
-/* 🧱 MODALES */
+/* 🧱 MODALES & SUPPRESSION */
 /* -------------------------------------------------------------------------- */
 function handleCloseCreateModal(newValue) {
   emit('update:isModalOpen', newValue);
@@ -163,126 +117,170 @@ function openUpdateModal(articleId) {
   isUpdateModalOpen.value = true;
 }
 
-/* -------------------------------------------------------------------------- */
-/* ❌ SUPPRESSION */
-/* -------------------------------------------------------------------------- */
 async function deleteActualite(id) {
   if (!confirm("Voulez-vous vraiment supprimer cette actualité ?")) return;
   try {
     await api.delete(`${PATH_API}/${id}`);
     actualites.value = actualites.value.filter(a => a.actualiteId !== id);
-
-    // Mise à jour des stats
     emit('update-stats', {
       total: totalArticles.value,
       publies: articlesActifs.value,
       archives: articlesArchives.value,
     });
-  } catch (error) {
-    console.error("Erreur lors de la suppression :", error);
+  } catch {
     alert("Impossible de supprimer l’actualité.");
   }
 }
 
 /* -------------------------------------------------------------------------- */
-/* 🔍 FILTRAGE */
+/* 🔍 FILTRAGE PUR */
 /* -------------------------------------------------------------------------- */
-const filteredActualites = computed(() => {
-    let list = actualites.value;
+const filteredListUnpaged = computed(() => {
+  let list = actualites.value;
 
-    // Filtre par statut
-    if (props.currentFilter === 'publies') {
-        list = list.filter(a => {
-            const pubDate = new Date(a.dateDePublication);
-            return pubDate >= getArchiveCutoffDate();
-        });
-    } else if (props.currentFilter === 'archives') {
-        list = list.filter(a => {
-            const pubDate = new Date(a.dateDePublication);
-            return pubDate < getArchiveCutoffDate();
-        });
-    }
+  if (props.currentFilter === 'publies') {
+    list = list.filter(a => new Date(a.dateDePublication) >= getArchiveCutoffDate());
+  } else if (props.currentFilter === 'archives') {
+    list = list.filter(a => new Date(a.dateDePublication) < getArchiveCutoffDate());
+  }
 
-    // Filtre textuel
-    if (props.searchTerm) {
-        const term = props.searchTerm.toLowerCase();
-        list = list.filter(a =>
-            a.titre.toLowerCase().includes(term) ||
-            a.contenu.toLowerCase().includes(term) ||
-            a.user?.nom?.toLowerCase().includes(term)
-        );
-    }
+  if (props.searchTerm) {
+    const term = props.searchTerm.toLowerCase();
+    list = list.filter(a =>
+      a.titre.toLowerCase().includes(term) ||
+      a.contenu.toLowerCase().includes(term) ||
+      a.user?.nom?.toLowerCase().includes(term)
+    );
+  }
 
-    return list;
+  return list;
 });
 
+/* -------------------------------------------------------------------------- */
+/* 🗂️ GROUPÉ PAR ANNÉE / MOIS */
+/* -------------------------------------------------------------------------- */
+function groupByYearMonth(list) {
+  const grouped = {};
+  for (const article of list) {
+    const date = new Date(article.dateDePublication);
+    const year = date.getFullYear();
+    const month = date.toLocaleString('fr-FR', { month: 'long' });
 
+    if (!grouped[year]) grouped[year] = {};
+    if (!grouped[year][month]) grouped[year][month] = [];
+
+    grouped[year][month].push(article);
+  }
+  return grouped;
+}
+
+const archivesGrouped = computed(() => {
+  if (props.currentFilter !== 'archives') return {};
+  const cutoff = getArchiveCutoffDate();
+  return groupByYearMonth(actualites.value.filter(a => new Date(a.dateDePublication) < cutoff));
+});
+
+const totalGrouped = computed(() => {
+  if (props.currentFilter !== 'total') return {};
+  return groupByYearMonth(filteredListUnpaged.value);
+});
 
 /* -------------------------------------------------------------------------- */
-/* 🚀 INITIALISATION */
+/* 🚀 INIT */
 /* -------------------------------------------------------------------------- */
 onMounted(fetchActualites);
+
 </script>
 
 <template>
-  <CreateArticleModal
-    :modelValue="props.isModalOpen"
-    @update:modelValue="handleCloseCreateModal"
-    @articleCreated="fetchActualites"
-  />
+  <CreateArticleModal :modelValue="props.isModalOpen" @update:modelValue="handleCloseCreateModal" />
+  <UpdateArticleModal :modelValue="isUpdateModalOpen" @update:modelValue="handleCloseUpdateModal"
+    :articleId="selectedArticleId" />
 
-  <UpdateArticleModal
-    :modelValue="isUpdateModalOpen"
-    @update:modelValue="handleCloseUpdateModal"
-    :articleId="selectedArticleId"
-    @articleUpdated="fetchActualites"
-  />
+  <div v-if="isLoading" class="alert alert-info text-center">Chargement des actualités...</div>
+  <div v-else-if="errorMessage" class="alert alert-danger text-center">{{ errorMessage }}</div>
 
-  <div v-if="isLoading" class="alert alert-info text-center">
-    Chargement des actualités...
+  <!-- 🔹 ARCHIVES -->
+  <div v-else-if="props.currentFilter === 'archives'" class="mt-3">
+    <div v-for="(months, year) in archivesGrouped" :key="year" class="mb-4">
+      <h4 class="text-warning border-bottom pb-2">{{ year }}</h4>
+      <div v-for="(articles, month) in months" :key="month" class="mb-3">
+        <details>
+          <summary class="fw-bold text-light">
+            {{ month }} ({{ articles.length }} article{{ articles.length > 1 ? 's' : '' }})
+          </summary>
+          <div class="mt-2 ms-3 cards-grid">
+            <div v-for="article in articles" :key="article.actualiteId" class="card card-actualite">
+              <img :src="article.imageUrl
+                ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)
+                : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" class="card-img-top"
+                alt="Image Actualité" />
+              <div class="card-body">
+                <h5 class="card-title text-warning">{{ article.titre }}</h5>
+                <p class="card-text text-light">{{ article.contenu }}</p>
+                <p class="text-end text-secondary small">
+                  Publié le {{ formatDate(article.dateDePublication) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
   </div>
 
-  <div v-else-if="errorMessage" class="alert alert-danger text-center">
-    {{ errorMessage }}
+  <!-- 🔹 TOTAL ARTICLES -->
+  <div v-else-if="props.currentFilter === 'total'" class="mt-3">
+    <div v-for="(months, year) in totalGrouped" :key="year" class="mb-4">
+      <h4 class="text-warning border-bottom pb-2">{{ year }}</h4>
+      <div v-for="(articles, month) in months" :key="month" class="mb-3">
+        <details>
+          <summary class="fw-bold text-light">
+            {{ month }} ({{ articles.length }} article{{ articles.length > 1 ? 's' : '' }})
+          </summary>
+          <div class="mt-2 ms-3 cards-grid">
+            <div v-for="article in articles" :key="article.actualiteId" class="card card-actualite">
+              <img :src="article.imageUrl
+                ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)
+                : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" class="card-img-top"
+                alt="Image Actualité" />
+              <div class="card-body">
+                <h5 class="card-title text-warning">{{ article.titre }}</h5>
+                <p class="card-text text-light">{{ article.contenu }}</p>
+                <p class="text-end text-secondary small">
+                  Publié le {{ formatDate(article.dateDePublication) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
   </div>
 
+  <!-- 🔹 PUBLIÉS / GRILLE PAR DÉFAUT -->
   <div v-else class="cards-grid cardsActualite">
-    <div
-      v-for="article in filteredActualites"
-      :key="article.actualiteId"
-      class="card card-actualite"
-    >
-      <img
-        :src="!article.imageUrl || article.imageUrl.includes('placeholder')
-          ? 'http://localhost:5067/images/actualites/placeholder-styling.jpg'
-          : (article.imageUrl.startsWith('http')
-            ? article.imageUrl
-            : 'http://localhost:5067' + article.imageUrl)"
-        class="card-img-top"
-        alt="Image Actualité"
-      />
-
+    <div v-for="article in filteredListUnpaged" :key="article.actualiteId" class="card card-actualite">
+      <img :src="article.imageUrl
+        ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)
+        : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" class="card-img-top"
+        alt="Image Actualité" />
       <div class="card-body d-flex flex-column justify-content-between">
         <div>
           <h5 class="card-title text-warning fw-bold">{{ article.titre }}</h5>
           <p class="card-text text-light text-truncate">{{ article.contenu }}</p>
         </div>
-
         <div class="mt-auto">
           <p class="m-0 text-end text-secondary small">
             Publié le {{ formatDate(article.dateDePublication) }}
           </p>
           <p class="text-end text-secondary small">
-            Écrit par : <strong>{{ article.user.nom }}</strong>
+            Écrit par : <strong>{{ article.user?.nom || 'Utilisateur inconnu' }}</strong>
           </p>
-
           <div class="groupBtn d-flex justify-content-between mt-3 gap-2">
-            <button class="btn btn-outline-info btn-sm" @click="openUpdateModal(article.actualiteId)">
-              Modifier
-            </button>
-            <button class="btn btn-outline-danger btn-sm" @click="deleteActualite(article.actualiteId)">
-              Supprimer
-            </button>
+            <button class="btn btn-outline-info btn-sm" @click="openUpdateModal(article.actualiteId)">Modifier</button>
+            <button class="btn btn-outline-danger btn-sm"
+              @click="deleteActualite(article.actualiteId)">Supprimer</button>
           </div>
         </div>
       </div>
@@ -291,15 +289,11 @@ onMounted(fetchActualites);
 </template>
 
 <style scoped>
-/* ===================================================== */
-/* 🎨 STYLE DE LA GRID DES ACTUALITÉS */
-/* ===================================================== */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.75rem;
-  margin-top: 2rem;
-  align-items: stretch;
+  margin-top: 1.5rem;
 }
 
 .card-actualite {
@@ -309,8 +303,6 @@ onMounted(fetchActualites);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -325,33 +317,16 @@ onMounted(fetchActualites);
   object-fit: cover;
 }
 
-.card-body {
-  padding: 1rem 1.2rem;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+details summary {
+  cursor: pointer;
+  color: #ffcc00;
 }
 
-.card-title {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-}
-
-.card-text {
-  font-size: 0.95rem;
-  color: #d1d1d1;
+details[open] summary {
+  color: #ffa500;
 }
 
 .groupBtn button {
   flex: 1;
-}
-
-@media (max-width: 600px) {
-  .card-actualite img {
-    height: 180px;
-  }
-  .card-title {
-    font-size: 1.05rem;
-  }
 }
 </style>

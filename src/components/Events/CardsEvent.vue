@@ -1,367 +1,210 @@
 <script setup>
-// ===============================
-// 🔹 IMPORTS
-// ===============================
 import { ref, onMounted, computed } from 'vue'
 import api from '@/api/axios';
 import CardsModalEvent from './CardsModalEvent.vue';
 import CreateEventModal from './CreateEventModal.vue';
 import EditEventModal from './EditEventModal.vue';
 
-
 const props = defineProps({
-  filter: {
-    type: String,
-    default: 'Tous'
-  }
-})
+  filter: { type: String, default: 'Tous' } // "Tous", "À venir", "Archives", "Judo", etc.
+});
 
-// ===============================
-// 🔹 ÉTATS & COMMUNICATION
-// ===============================
-const events = ref([]);                     // Liste des événements récupérés depuis l’API
-const disciplineMap = ref({});              // Association ID → Nom de discipline
-const typeEventMap = ref({});               // Association ID → Nom du type d’événement
-const isModalOpen = ref(false);             // État d’ouverture de la modale de DÉTAIL
-const selectedEvent = ref(null);            // Détails de l’événement sélectionné
-const eventToDelete = ref(null);            // ID de l’événement en attente de suppression
-const isCreateModalOpen = ref(false);       // État de la modale de CRÉATION
+const events = ref([]);
+const disciplineMap = ref({});
+const typeEventMap = ref({});
+const isModalOpen = ref(false);
+const selectedEvent = ref(null);
+const eventToDelete = ref(null);
+const isCreateModalOpen = ref(false);
 const eventToEdit = ref(null);
 const isEditModalOpen = ref(false);
 
-// ===============================
-// 🔹 CONSTANTES D’API
-// ===============================
 const API_PATH_EVENT = '/Evenement';
 const API_PATH_DISCIPLINE = '/Discipline';
 const API_PATH_TYPE_EVENEMENT = '/TypeEvenement';
 
+// -----------------------------
+// 🔹 ÉVÉNEMENTS À VENIR (fixe)
+// -----------------------------
+const upcomingEvents = computed(() => {
+  const now = new Date();
+  return events.value
+    .filter(e => new Date(e.dateDebut) > now)
+    .sort((a,b) => new Date(a.dateDebut) - new Date(b.dateDebut))
+    .slice(0,5); // limite à 5 cartes par exemple
+});
 
+// -----------------------------
+// 🔹 ÉVÉNEMENTS FILTRÉS (dynamique selon filtre)
+// -----------------------------
 const filteredEvents = computed(() => {
-  if (props.filter === 'Tous') return events.value
+  const now = new Date();
+  let list = [...events.value];
 
-  if (props.filter === 'À venir') {
-    const now = new Date()
-    return events.value.filter(e => new Date(e.dateDebut) > now)
+  if (props.filter === 'À venir') list = list.filter(e => new Date(e.dateDebut) > now);
+  else if (props.filter === 'Archives') list = list.filter(e => new Date(e.dateDebut) < now);
+  else if (props.filter !== 'Tous') {
+    // filtre par discipline
+    list = list.filter(e => e.discipline?.nom?.toLowerCase().includes(props.filter.toLowerCase())
+      || (e.disciplineId && disciplineMap.value[e.disciplineId]?.toLowerCase().includes(props.filter.toLowerCase()))
+    );
   }
-  if (props.filter === 'Archives') {
-    const now = new Date()
-    return events.value.filter(e => new Date(e.dateDebut) < now)
+
+  // tri par date décroissante pour les archives ou discipline
+  list.sort((a,b) => new Date(b.dateDebut) - new Date(a.dateDebut));
+
+  return list;
+});
+
+// Grouper par année/mois
+function groupByYearMonth(list) {
+  const grouped = {};
+  for (const event of list) {
+    const date = new Date(event.dateDebut);
+    const year = date.getFullYear();
+    const month = date.toLocaleString('fr-FR', { month: 'long' });
+    if (!grouped[year]) grouped[year] = {};
+    if (!grouped[year][month]) grouped[year][month] = [];
+    grouped[year][month].push(event);
   }
-
-  // Pour les disciplines
-  return events.value.filter(e =>
-    e.discipline?.nom?.toLowerCase().includes(props.filter.toLowerCase()) ||
-    e.disciplineId && disciplineMap.value[e.disciplineId]?.toLowerCase().includes(props.filter.toLowerCase())
-  )
-})
-
-
-// ===============================
-// 🔹 LOGIQUE CRUD : MODIFICATION (UPDATE)
-// ===============================
-
-function openEditModal(event) {
-  eventToEdit.value = { ...event };
-  isEditModalOpen.value = true;
-  cancelDelete();
+  return grouped;
 }
 
-function handleEventUpdated(updatedEvent) {
-  isEditModalOpen.value = false;
-  const index = events.value.findIndex(e => Number(e.evenementId) === Number(updatedEvent.evenementId));
-  if (index !== -1) {
-    events.value[index] = updatedEvent;
-    console.log(`Événement ${updatedEvent.evenementId} mis à jour dans la liste locale.`);
-  }
-  eventToEdit.value = null;
-}
+const groupedEvents = computed(() => groupByYearMonth(filteredEvents.value));
 
-// ===============================
-// 🔹 LOGIQUE CRUD : SUPPRESSION
-// ===============================
-
-/**
- * Prépare la suppression en affichant la confirmation sur la carte.
- */
-function confirmDelete(id) {
-  eventToDelete.value = Number(id);
-}
-
-/**
- * Annule la demande de suppression.
- */
-function cancelDelete() {
-  eventToDelete.value = null;
-}
-
-/**
- * Supprime un événement après confirmation.
- */
-async function deleteEvent(id) {
-  if (!id) return;
-
-  try {
-    // 1️⃣ Appel de l’API DELETE
-    await api.delete(`${API_PATH_EVENT}/${id}`);
-    console.log(`Événement ${id} supprimé avec succès.`);
-
-    // 2️⃣ Mise à jour locale sans refetch complet
-    events.value = events.value.filter(e => Number(e.evenementId) !== Number(id));
-
-  } catch (error) {
-    console.error(`Erreur lors de la suppression de l'événement ${id}:`, error);
-  } finally {
-    // 3️⃣ Nettoyage de l’état de confirmation
-    eventToDelete.value = null;
-  }
-}
-
-
-// ===============================
-// 🔹 LOGIQUE MODALE : DÉTAIL
-// ===============================
-
-/**
- * Ouvre la modale avec les détails complets de l’événement.
- */
-function showDetails(event) {
-  console.log('📥 Event reçu dans showDetails:', event);
-
-  const disciplineIdNumber = Number(event.disciplineId || 0);
-  const typeEvenementId = event.typeEvenement?.typeEvenementId || event.typeEvenementId || 0;
-
-  selectedEvent.value = {
-    evenementId: event.evenementId,
-    titre: event.titre,
-    dateDebut: event.dateDebut,
-    dateFin: event.dateFin,
-    lieu: event.lieu,
-    description: event.description,
-    disciplineId: event.disciplineId,
-    imageUrl: event.imageUrl,
-    typeEvenementId: typeEvenementId,
-    nom: disciplineMap.value[disciplineIdNumber] || 'Inconnu',
-  };
-
-  console.log('✅ selectedEvent.typeEvenementId:', selectedEvent.value.typeEvenementId);
-
-  cancelDelete();
-  isModalOpen.value = true;
-  document.body.style.overflow = 'hidden';
-}
-
-
-// ===============================
-// 🔹 OUTILS D’AFFICHAGE
-// ===============================
-
-/**
- * Formate une date pour l’affichage (fr-FR).
- */
+// -----------------------------
+// 🔹 OUTILS
+// -----------------------------
 function formatDate(dateString) {
   if (!dateString) return 'Date inconnue';
-  try {
-    const date = new Date(dateString);
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return new Intl.DateTimeFormat('fr-FR', options).format(date);
-  } catch (error) {
-    console.error("Erreur de formatage de date:", error);
-    return dateString;
-  }
+  try { return new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'long',year:'numeric'}).format(new Date(dateString)); }
+  catch { return dateString; }
 }
 
-/**
- * Gestion du rafraîchissement après création d’un événement.
- */
-function handleEventAdded(newEvent) {
-  console.log("Nouvel événement ajouté et rafraîchissement de la liste.", newEvent);
-  events.value.push(newEvent);
-  isCreateModalOpen.value = false;
-}
-
-
-// ===============================
-// 🔹 REQUÊTES API (FETCH)
-// ===============================
-
-/**
- * Récupère la liste des disciplines depuis l’API.
- */
-async function fetchDisciplines() {
-  try {
-    const reponse = await api.get(API_PATH_DISCIPLINE);
-    const map = {};
-
-    reponse.data.forEach(d => {
-      let id = d.DisciplineId ?? d.disciplineId;
-      if (id !== undefined && d.nom !== undefined) {
-        map[Number(id)] = d.nom;
-      } else {
-        console.warn('Discipline invalide:', d);
-      }
-    });
-
-    disciplineMap.value = map;
-  } catch (error) {
-    console.error('Erreur lors de la récupération des disciplines:', error);
-  }
-}
-
-/**
- * Récupère la liste des événements depuis l’API.
- */
-async function fetchEvent() {
-  try {
-    const reponse = await api.get(API_PATH_EVENT);
-    events.value = reponse.data;
-  } catch {
-    console.error('Erreur lors de la récupération des événements');
-  }
-}
-
-/**
- * Récupère la liste des types d’événements.
- */
-async function fetchEventTypes() {
-  try {
-    const response = await api.get(API_PATH_TYPE_EVENEMENT);
-
-
-    const map = {};
-
-    response.data.forEach(t => {
-      const id = t.TypeEvenementId ?? t.typeEvenementId;
-      const nom = t.libelle ?? t.Libelle ?? t.libele ?? t.Libele ?? `Type #${id}`;
-      if (id !== undefined) {
-        map[Number(id)] = nom;
-      } else {
-        console.warn('TypeEvenement sans ID valide:', t);
-      }
-    });
-
-    typeEventMap.value = map;
-    console.log('✅ typeEventMap final:', typeEventMap.value);
-
-  } catch (error) {
-    console.error('Erreur lors de la récupération des types d\'événements:', error);
-  }
-}
-
-
-// ===============================
-// 🔹 ICONES DE DISCIPLINE
-// ===============================
-const disciplineIcons = {
-  1: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png', // Judo
-  2: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Aïkido
-  3: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-jiu-jitsu-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Jujitsu
-  4: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-judo-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Judo Detente
-};
-
-/**
- * Retourne l’URL d’icône selon l’ID de discipline.
- */
 function getIconUrl(disciplineId) {
-  const defaultIcon = 'https://img.icons8.com/ios-filled/64/ffffff/star.png';
-  return disciplineIcons[disciplineId] || defaultIcon;
+  const icons = {
+    1: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png',
+    2: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png',
+    3: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-jiu-jitsu-martial-arts-flaticons-lineal-color-flat-icons-3.png',
+    4: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-judo-martial-arts-flaticons-lineal-color-flat-icons-3.png',
+  };
+  return icons[disciplineId] || 'https://img.icons8.com/ios-filled/64/ffffff/star.png';
 }
 
-// ===============================
-// 🔹 MONTAGE DU COMPOSANT
-// ===============================
-onMounted(() => {
-  fetchDisciplines();
-  fetchEvent();
-  fetchEventTypes();
-});
+// -----------------------------
+// 🔹 CRUD MODAL
+// -----------------------------
+function showDetails(event) { selectedEvent.value = {...event}; isModalOpen.value = true; document.body.style.overflow='hidden'; }
+function openEditModal(event) { eventToEdit.value={...event}; isEditModalOpen.value=true; eventToDelete.value=null; }
+function handleEventUpdated(updatedEvent) {
+  isEditModalOpen.value=false;
+  const index = events.value.findIndex(e=>Number(e.evenementId)===Number(updatedEvent.evenementId));
+  if(index!==-1) events.value[index]=updatedEvent;
+  eventToEdit.value=null;
+}
+function confirmDelete(id){eventToDelete.value=Number(id);}
+function cancelDelete(){eventToDelete.value=null;}
+async function deleteEvent(id){
+  if(!id) return;
+  try{ await api.delete(`${API_PATH_EVENT}/${id}`); events.value=events.value.filter(e=>Number(e.evenementId)!==Number(id)); }
+  catch(err){console.error(err);}
+  finally{eventToDelete.value=null;}
+}
+function handleEventAdded(newEvent){events.value.push(newEvent);isCreateModalOpen.value=false;}
+
+// -----------------------------
+// 🔹 FETCH API
+// -----------------------------
+async function fetchDisciplines(){try{const r=await api.get(API_PATH_DISCIPLINE);const map={};r.data.forEach(d=>{if(d.disciplineId) map[d.disciplineId]=d.nom;});disciplineMap.value=map;}catch{console.error('Erreur fetchDisciplines');}}
+async function fetchEvents(){try{const r=await api.get(API_PATH_EVENT);events.value=r.data;}catch{console.error('Erreur fetchEvents');}}
+async function fetchEventTypes(){try{const r=await api.get(API_PATH_TYPE_EVENEMENT);const map={};r.data.forEach(t=>{if(t.typeEvenementId) map[t.typeEvenementId]=t.libelle;});typeEventMap.value=map;}catch{console.error('Erreur fetchEventTypes');}}
+
+onMounted(()=>{fetchDisciplines();fetchEvents();fetchEventTypes();});
 </script>
 
-<!-- ===============================
-    🔹 TEMPLATE (HTML)
-  =============================== -->
 <template>
-  <div class="container-fluid">
+  <div>
 
     <!-- ===============================
-      🔸 SECTION : Liste des cartes d'événements
-      =============================== -->
-    <div class="bg-warm p-2 rounded">
-      <div v-if="filteredEvents.length === 0" class="text-center p-5">
-        <p>Aucun événement trouvé pour "{{ props.filter }}"</p>
-      </div>
+      🔹 ÉVÉNEMENTS À VENIR (toujours en haut)
+    =============================== -->
+    <div v-if="upcomingEvents.length>0" class="mb-4">
+      <h4 class="text-warning border-bottom pb-2">Événements à venir</h4>
+      <div class="events-grid">
+        <div v-for="event in upcomingEvents" :key="event.evenementId" class="event-card p-3 rounded text-white d-flex flex-column align-items-center">
+          <img width="64" height="64" :src="getIconUrl(event.disciplineId)" />
+          <h5 class="mt-2">{{ event.titre }}</h5>
+          <p>{{ formatDate(event.dateDebut) }}</p>
 
-      <div v-else class="events-grid mb-5">
-        <div v-for="event in filteredEvents" :key="event.id"
-          class="event-card text-white p-3 rounded d-flex flex-column align-items-center justify-content-center">
-
-          <!-- Icône discipline -->
-          <img width="64" height="64" :src="getIconUrl(event.disciplineId)"
-            :alt="'Icône Discipline ' + event.disciplineId" />
-          <h4 class="mt-2">{{ event.titre }}</h4>
-          <p class="mb-3">{{ formatDate(event.dateDebut) }}</p>
-
-          <!-- Boutons d’action -->
-          <div class="d-flex gap-2 flex-wrap justify-content-center">
-            <template v-if="Number(eventToDelete) === Number(event.evenementId)">
+          <div class="d-flex gap-2 flex-wrap justify-content-center mt-2">
+            <template v-if="Number(eventToDelete)===Number(event.evenementId)">
               <span class="text-danger p-2">Êtes-vous sûr ?</span>
-              <button class="btn btn-danger" @click="deleteEvent(event.evenementId)">Oui</button>
-              <button class="btn btn-secondary" @click="cancelDelete">Non</button>
+              <button class="btn btn-danger btn-sm" @click="deleteEvent(event.evenementId)">Oui</button>
+              <button class="btn btn-secondary btn-sm" @click="cancelDelete">Non</button>
             </template>
-
             <template v-else>
-              <button class="btn btn-outline-info" @click="showDetails(event)">Voir Détail</button>
-              <button class="btn btn-outline-success" @click="openEditModal(event)">Modifier</button>
-              <button class="btn btn-outline-danger" @click="confirmDelete(event.evenementId)">Supprimer</button>
+              <button class="btn btn-outline-info btn-sm" @click="showDetails(event)">Voir Détail</button>
+              <button class="btn btn-outline-success btn-sm" @click="openEditModal(event)">Modifier</button>
+              <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(event.evenementId)">Supprimer</button>
             </template>
           </div>
-
         </div>
       </div>
-
     </div>
+
+    <!-- ===============================
+      🔹 LISTE PRINCIPALE (Archives / filtre dynamique)
+    =============================== -->
+    <div v-for="(months, year) in groupedEvents" :key="year" class="mb-4">
+      <h4 class="text-warning border-bottom pb-2">{{ year }}</h4>
+      <div v-for="(events, month) in months" :key="month" class="mb-3">
+        <details>
+          <summary class="fw-bold text-light">{{ month }} ({{ events.length }} événement{{ events.length>1?'s':'' }})</summary>
+          <div class="mt-2 ms-3 events-grid">
+            <div v-for="event in events" :key="event.evenementId" class="event-card p-3 rounded text-white d-flex flex-column align-items-center">
+              <img width="64" height="64" :src="getIconUrl(event.disciplineId)" />
+              <h5 class="mt-2">{{ event.titre }}</h5>
+              <p>{{ formatDate(event.dateDebut) }}</p>
+              <div class="d-flex gap-2 flex-wrap justify-content-center mt-2">
+                <template v-if="Number(eventToDelete)===Number(event.evenementId)">
+                  <span class="text-danger p-2">Êtes-vous sûr ?</span>
+                  <button class="btn btn-danger btn-sm" @click="deleteEvent(event.evenementId)">Oui</button>
+                  <button class="btn btn-secondary btn-sm" @click="cancelDelete">Non</button>
+                </template>
+                <template v-else>
+                  <button class="btn btn-outline-info btn-sm" @click="showDetails(event)">Voir Détail</button>
+                  <button class="btn btn-outline-success btn-sm" @click="openEditModal(event)">Modifier</button>
+                  <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(event.evenementId)">Supprimer</button>
+                </template>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- MODALES -->
+    <CardsModalEvent v-model="isModalOpen" :event="selectedEvent" :disciplineMap="disciplineMap" :typeEventMap="typeEventMap" />
+    <CreateEventModal v-model="isCreateModalOpen" :disciplineMap="disciplineMap" @event-added="handleEventAdded" />
+    <EditEventModal v-model="isEditModalOpen" :eventData="eventToEdit" :disciplineMap="disciplineMap" :typeEventMap="typeEventMap" @event-updated="handleEventUpdated" />
   </div>
-
-  <!-- ===============================
-🔸 MODALES
-=============================== -->
-  <!-- Modale de Détail -->
-  <CardsModalEvent v-model="isModalOpen" :event="selectedEvent" :disciplineMap="disciplineMap"
-    :typeEventMap="typeEventMap" />
-  <!-- Modale de Création -->
-  <CreateEventModal v-model="isCreateModalOpen" :disciplineMap="disciplineMap" @event-added="handleEventAdded" />
-  <!-- Modale d'Edition -->
-  <EditEventModal v-model="isEditModalOpen" :eventData="eventToEdit" :disciplineMap="disciplineMap"
-    @event-updated="handleEventUpdated" :typeEventMap="typeEventMap" />
-
-
-
 </template>
 
-<!-- ===============================
-🔹 STYLES CSS
-=============================== -->
 <style scoped>
-.cards {
-  background-color: #343a40;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  background-color: #343a40 !important;
-}
-
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 1.5rem;
 }
 
 .event-card {
   background-color: #343a40;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .event-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 </style>
