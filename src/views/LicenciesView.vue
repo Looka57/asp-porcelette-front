@@ -114,7 +114,12 @@ const fetchDiscipline = async () => {
 // 🔹 OUVERTURE DU MODAL
 // ===============================
 const openModal = (user = null) => {
-  selectedUser.value = user;
+  if (user && user.id) {
+selectedUser.value = { ...user, userId: user.id }; // Cloner l'objet pour éviter les mutations directes
+  }
+  else{
+    selectedUser.value = null;
+  }
   showModal.value = true;
 };
 
@@ -260,7 +265,7 @@ onMounted(() => {
                             <i class="pi pi-pencil"></i>
                           </button>
                           <button class="btn btn-outline-danger btn-sm"
-                            @click="deleteAdherent(user.userId, user.nom, user.prenom)">
+                            @click="deleteAdherent(user.id, user.nom, user.prenom)">
                             <i class="pi pi-trash"></i>
                           </button>
                         </td>

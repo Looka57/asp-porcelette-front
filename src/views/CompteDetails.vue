@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/axios'
+import ModalAddTransaction from '@/components/Comptas/ModalAddTransaction.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -11,6 +12,9 @@ const compte = ref(null)
 const transactions = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
+
+const showModal = ref(false)
+const transactionToEdit = ref(null)
 
 // Variables d'état pour le filtrage
 const selectedYear = ref('all')
@@ -45,6 +49,9 @@ const typeOptions = [
   { value: 'depense', name: 'Dépenses (-)' },
 ]
 
+// --------------------------------------------------
+// 🔹 FONCTIONS D'ACTION
+// --------------------------------------------------
 // 🔹 Récupère les infos du compte courant
 async function fetchCompte() {
   try {
@@ -63,8 +70,6 @@ async function fetchTransactions() {
     isLoading.value = true
     const response = await api.get(`${API_TRANSACTIONS}/compte/${compteId}`)
     transactions.value = response.data
-    // Note: Pour une visualisation par date, il est crucial que les transactions soient
-    // d'abord triées, idéalement par date décroissante.
     transactions.value.sort((a, b) => new Date(b.dateTransaction) - new Date(a.dateTransaction))
   } catch (error) {
     console.error('❌ Erreur lors du chargement des transactions :', error)
@@ -72,6 +77,52 @@ async function fetchTransactions() {
     isLoading.value = false
   }
 }
+
+async function deleteTransaction(transactionId, description) {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer la transaction "${description}" ? Cette action est irréversible et mettra à jour le solde du compte.`)) {
+        return
+    }
+
+    try {
+        // Désactive l'affichage le temps du traitement
+        isLoading.value = true
+
+        // 1. Appel de l'API DELETE
+        await api.delete(`${API_TRANSACTIONS}/${transactionId}`)
+
+        // 2. Recharger les données pour mettre à jour la liste et le solde du compte
+        await handleRefresh()
+
+        console.log(`✅ Transaction ID ${transactionId} supprimée et compte mis à jour.`)
+    } catch (error) {
+        console.error('❌ Erreur lors de la suppression de la transaction :', error)
+        alert(`Erreur lors de la suppression : ${error.response?.data || error.message}`)
+    } finally {
+        isLoading.value = false
+    }
+}
+
+const openEditModal = (transaction) => {
+    transactionToEdit.value = transaction
+    showModal.value = true
+}
+
+const handleRefresh = async () => {
+    // Ferme la modale et réinitialise l'état d'édition si elle était ouverte
+    showModal.value = false
+    transactionToEdit.value = null
+
+    // Recharge les données
+    await Promise.all([
+        fetchCompte(),
+        fetchTransactions()
+    ])
+}
+
+
+
+
+
 
 // 🔹 Propriété calculée pour extraire les années uniques disponibles
 const availableYears = computed(() => {
@@ -172,7 +223,7 @@ const goBack = () => router.back()
     <div v-else-if="compte">
       <h2 class="text-warning text-center">{{ compte.nom }}</h2>
       <p class="fs-4 text-center">Solde actuel : <span :class="compte.solde < 0 ? 'text-danger' : 'text-success'">{{
-        compte.solde.toFixed(2) }} €</span></p>
+          compte.solde.toFixed(2) }} €</span></p>
       <hr class="border-secondary" />
 
       <h4 class="mt-4 mb-3">Transactions associées</h4>
@@ -225,7 +276,8 @@ const goBack = () => router.back()
               <span class="text-warning me-3">{{ group.groupTitle }}</span>
               <!-- Total Net -->
               <!-- NOTE : Si le filtre est actif (selectedType n'est pas 'all'), on n'affiche plus le "Total Net", mais le "Total" du type sélectionné. -->
-              <span class="badge border rounded-pill fs-6 ms-auto me-3" :class="group.total < 0 ? 'bg-danger' : 'bg-success'">
+              <span class="badge border rounded-pill fs-6 ms-auto me-3"
+                :class="group.total < 0 ? 'bg-danger' : 'bg-success'">
                 {{ selectedType === 'all' ? 'Total Net' : 'Total' }} : {{ group.total.toFixed(2) }} €
               </span>
             </button>
@@ -245,6 +297,8 @@ const goBack = () => router.back()
                     <th>Montant (€)</th>
                     <th>Catégorie</th>
                     <th>Discipline</th>
+                    <th>Sensei</th>
+                    <th class="text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -256,6 +310,15 @@ const goBack = () => router.back()
                     </td>
                     <td>{{ t.categorie?.nom || '-' }}</td>
                     <td>{{ t.discipline?.nom || '-' }}</td>
+                    <td>{{ t.user?.nom ?? '-' }} {{ t.user?.prenom ?? '' }}</td>
+                    <td class="text-center">
+                      <button class="btn btn-sm btn-info me-2" @click="openEditModal(t)">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                      <button class="btn btn-sm btn-danger" @click="deleteTransaction(t.transactionId, t.description)">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -267,7 +330,7 @@ const goBack = () => router.back()
       <div v-else-if="transactions.length > 0" class="text-light mt-5 p-4 border rounded text-center">
         Aucune transaction ne correspond aux filtres Année ({{ selectedYear === 'all' ? 'Toutes' : selectedYear }}),
         Mois ({{monthNames.find(m => m.value === selectedMonth)?.name}}) et Type ({{typeOptions.find(t => t.value ===
-          selectedType)?.name }}).
+        selectedType)?.name}}).
       </div>
 
       <div v-else class="text-light mt-5 p-4 border rounded text-center">
@@ -275,6 +338,11 @@ const goBack = () => router.back()
       </div>
 
     </div>
+
+
+    <ModalAddTransaction :show="showModal" :transaction-to-edit="transactionToEdit" @update:show="showModal = $event"
+      @refresh="handleRefresh"></ModalAddTransaction>
+
   </div>
 </template>
 
@@ -284,7 +352,7 @@ table td {
   vertical-align: middle;
 }
 
-.text-success{
+.text-success {
   color: #88fab2 !important;
 }
 
@@ -292,12 +360,11 @@ table td {
   opacity: 0.6;
 }
 
-/* Styles spécifiques pour l'accordéon */
+
 .accordion-button.bg-secondary:not(.collapsed) {
   color: #fff;
-  /* Texte blanc pour le bouton actif */
   background-color: #4a4a4a !important;
-  /* Une nuance plus foncée pour l'état ouvert */
+
 }
 
 .accordion-button::after {

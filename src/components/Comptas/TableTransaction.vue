@@ -99,6 +99,7 @@ watch(currentCompteId, () => {
           <th>Compte</th>
           <th>Montant (€)</th>
           <th>Description</th>
+          <th>Sensei</th>
         </tr>
       </thead>
       <tbody>
@@ -114,6 +115,8 @@ watch(currentCompteId, () => {
             {{ tx.montant?.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) }} €
           </td>
           <td>{{ tx.description }}</td>
+          <td>{{ tx.user ? `${tx.user.nom} ${tx.user.prenom}` : '-' }}</td>
+
         </tr>
       </tbody>
     </table>
