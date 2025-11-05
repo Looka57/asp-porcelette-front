@@ -205,6 +205,8 @@ async function saveEvent() {
                   </select>
                 </div>
 
+
+
                 <!-- Type d'événement -->
                 <select id="typeEvenement" class="form-select" v-model.number="localEvent.typeEvenementId">
                   <option :value="0">Choisir un événement</option>
@@ -212,6 +214,12 @@ async function saveEvent() {
                     {{ type.nom }}
                   </option>
                 </select>
+
+                <!-- lieu -->
+                <div class="mb-3">
+                  <label for="lieu" class="form-label">Lieu</label>
+                  <input id="lieu" class="form-control" v-model="localEvent.lieu">
+                </div>
 
 
                 <!-- Description -->

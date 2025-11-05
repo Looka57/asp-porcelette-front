@@ -34,6 +34,7 @@ const fetchError = ref('');
 const newEvent = ref({
   titre: '',
   description: '',
+  lieu: '',
   dateDebut: '',
   dateFin: '',
   disciplineId: null,
@@ -104,6 +105,7 @@ function resetForm() {
   newEvent.value = {
     titre: '',
     description: '',
+    lieu: '',
     dateDebut: '',
     dateFin: '',
     disciplineId: null,
@@ -178,6 +180,7 @@ async function handleSubmit() {
   const payload = {
     titre: newEvent.value.titre,
     description: newEvent.value.description,
+    lieu: newEvent.value.lieu,
     dateDebut: formatToIsoDateTime(newEvent.value.dateDebut),
     dateFin: newEvent.value.dateFin ? `${newEvent.value.dateFin}T23:59:59` : null,
     disciplineId: newEvent.value.disciplineId ? Number(newEvent.value.disciplineId) : null,
@@ -300,6 +303,10 @@ function closeAndReset() {
               </div>
             </div>
 
+            <div class="mb-3">
+              <label for="lieu" class="form-label">Lieu</label>
+             <input type="text" class="form-control bg-secondary text-white border-secondary" id="lieu" v-model="newEvent.lieu">
+            </div>
             <div class="mb-3">
               <label for="description" class="form-label">Description</label>
               <textarea class="form-control bg-secondary text-white border-secondary" id="description" rows="3" v-model="newEvent.description"></textarea>

@@ -274,9 +274,6 @@ onMounted(fetchActualites);
           <p class="m-0 text-end text-secondary small">
             Publié le {{ formatDate(article.dateDePublication) }}
           </p>
-          <p class="text-end text-secondary small">
-            Écrit par : <strong>{{ article.user?.nom || 'Utilisateur inconnu' }}</strong>
-          </p>
           <div class="groupBtn d-flex justify-content-between mt-3 gap-2">
             <button class="btn btn-outline-info btn-sm" @click="openUpdateModal(article.actualiteId)">Modifier</button>
             <button class="btn btn-outline-danger btn-sm"

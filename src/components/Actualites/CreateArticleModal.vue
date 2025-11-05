@@ -60,23 +60,38 @@ function currentEvenementMap() {
  * Récupère la liste des types d'événements depuis l'API
  */
 async function fetchEvenements() {
-  if (Object.keys(currentEvenementMap()).length > 0) return; // Ne pas re-fetch si déjà disponible
+  if (Object.keys(currentEvenementMap()).length > 0) return;
 
   try {
     const response = await api.get(API_PATH_EVENEMENT);
     const map = {};
-    response.data.forEach(item => {
-      if (item.evenementId && item.titre) {
-        map[item.evenementId] = item.titre;
-      }
-    });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // On ignore l'heure, on compare juste la date
+
+    response.data
+      .filter(item => {
+        // 🗓️ On prend la date de fin si elle existe, sinon la date de l’événement
+        const eventDate = new Date(item.dateFin || item.dateEvenement || item.dateDebut);
+        eventDate.setHours(0, 0, 0, 0);
+
+        // ✅ On garde l'événement s'il se déroule aujourd’hui ou plus tard
+        return eventDate >= today;
+      })
+      .forEach(item => {
+        if (item.evenementId && item.titre) {
+          map[item.evenementId] = item.titre;
+        }
+      });
+
     localEvenementMap.value = map;
     fetchError.value = '';
   } catch (error) {
-    console.error('Erreur lors de la récupération des types d\'événements:', error);
-    fetchError.value = 'Impossible de charger la liste des types d\'événements.';
+    console.error('Erreur lors de la récupération des événements :', error);
+    fetchError.value = 'Impossible de charger la liste des événements.';
   }
 }
+
 
 /**
  * Réinitialise le formulaire

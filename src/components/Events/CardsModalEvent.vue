@@ -26,6 +26,8 @@ function formatDate(dateString) {
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   event: { type: Object, default: null },
+  // 🎯 CORRECTION 1: Ajouter la prop disciplineMap
+  disciplineMap: { type: Object, default: () => ({}) },
   typeEventMap: { type: Object, default: () => ({}) },
 });
 
@@ -37,12 +39,32 @@ const emit = defineEmits(['update:modelValue']);
 
 // Récupère le nom du type d'événement selon son ID
 const eventTypeName = computed(() => {
-  if (!props.event || !props.event.typeEvenementId) {
-    return 'Non spécifié';
+  if (!props.event) return 'Non spécifié';
+
+  // Tente de lire directement l'objet lié si l'API l'a renvoyé
+  if (props.event.typeEvenement?.libelle) {
+    return props.event.typeEvenement.libelle;
   }
+
+  // Sinon, utilise la map
   const typeId = Number(props.event.typeEvenementId);
   return props.typeEventMap[typeId] || 'Non spécifié';
 });
+
+// 🎯 NOUVEAU: Propriété calculée pour la discipline
+const disciplineName = computed(() => {
+  if (!props.event) return 'Non spécifiée';
+
+  // Tente de lire directement l'objet lié si l'API l'a renvoyé (grâce à la correction C#)
+  if (props.event.discipline?.nom) {
+    return props.event.discipline.nom;
+  }
+
+  // Sinon, utilise la map pour traduire l'ID
+  const disciplineId = Number(props.event.disciplineId);
+  return props.disciplineMap[disciplineId] || 'Non spécifiée';
+});
+
 
 // ===============================
 // 🔹 FONCTIONS MÉTHODES
@@ -67,8 +89,8 @@ watch(
 </script>
 
 <!-- ===============================
-    🔹 TEMPLATE (HTML)
-    =============================== -->
+  🔹 TEMPLATE (HTML)
+  =============================== -->
 <template>
   <transition name="fade">
     <div v-if="modelValue && event" class="modal-overlay" @click.self="closeModal">
@@ -77,8 +99,8 @@ watch(
           <div class="modal-content">
 
             <!-- ===============================
-                🔸 HEADER DE LA MODALE
-                =============================== -->
+        🔸 HEADER DE LA MODALE
+        =============================== -->
             <div class="modal-header bg-dark text-white">
               <h5 class="modal-title mb-5 fs-2">{{ event.titre }}</h5>
               <hr class="my-3" />
@@ -86,12 +108,13 @@ watch(
             </div>
 
             <!-- ===============================
-                🔸 CORPS DE LA MODALE
-                =============================== -->
+        🔸 CORPS DE LA MODALE
+        =============================== -->
             <div class="modal-body bg-light text-dark p-3 mb-3">
               <p class="lead fs-4"><strong>Date de début :</strong> {{ formatDate(event.dateDebut) }}</p>
               <p class="lead fs-4"><strong>Date de fin :</strong> {{ formatDate(event.dateFin) }}</p>
-              <p><strong>Discipline :</strong> {{ event.nom || 'Non spécifiée' }}</p>
+              <!-- 🎯 CORRECTION 2: Utiliser la propriété calculée disciplineName -->
+              <p><strong>Discipline :</strong> {{ disciplineName }}</p>
               <p><strong>Lieu :</strong> {{ event.lieu || 'Complexe Porcelette' }}</p>
               <p><strong>Événement :</strong> {{ eventTypeName }}</p>
               <hr class="my-3" />
@@ -100,8 +123,8 @@ watch(
             </div>
 
             <!-- ===============================
-                🔸 PIED DE PAGE (FOOTER)
-                =============================== -->
+        🔸 PIED DE PAGE (FOOTER)
+        =============================== -->
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="closeModal">Fermer</button>
             </div>
@@ -119,7 +142,7 @@ watch(
 <style scoped>
 /* ===============================
 🔸 Overlay sombre (fond de la modale)
-   =============================== */
+ =============================== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -134,8 +157,8 @@ watch(
 }
 
 /* ===============================
-  🔸 Conteneur de la modale
-   =============================== */
+ 🔸 Conteneur de la modale
+ =============================== */
 .modal-dialogue {
   padding: 20px;
   width: 90%;
@@ -147,8 +170,8 @@ watch(
 }
 
 /* ===============================
-  🔸 Animations de transition
-   =============================== */
+ 🔸 Animations de transition
+ =============================== */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
