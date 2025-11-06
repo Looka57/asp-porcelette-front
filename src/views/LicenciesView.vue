@@ -99,6 +99,34 @@ const fetchLicencie = async () => {
 };
 
 // ===============================
+// 🔹 LOGIQUE DE RENOUVELLEMENT
+// ===============================
+const API_RENEW = '/User/admin/renouvellement'; // Nouvelle constante API
+
+const renewAdhesion = async (userId, nom, prenom) => {
+    if (!confirm(`Êtes-vous sûr de vouloir renouveler l'adhésion de ${prenom} ${nom} à la date d'aujourd'hui ?`)) {
+        return;
+    }
+
+    try {
+        // L'API est une POST qui prend l'ID dans l'URL
+        const response = await api.post(`${API_RENEW}/${userId}`);
+
+      const message = response.data?.Message || 'Renouvellement réussi';
+        const nouvelleDate = response.data?.NouvelleDateRenouvellement || 'Date inconnue';
+
+        // Affichage du succès et rafraîchissement
+        alert(message + ` Nouvelle date : ${nouvelleDate}`);
+
+        // Rafraîchir la liste des utilisateurs si nécessaire
+        await fetchLicencie();
+    } catch (error) {
+        console.error('Erreur lors du renouvellement :', error);
+        alert('Échec du renouvellement : Vérifiez la console et que vous avez les permissions nécessaires (Admin/Sensei).');
+    }
+};
+
+// ===============================
 // 🔹 CHARGEMENT DES DISCIPLINES
 // ===============================
 const fetchDiscipline = async () => {
@@ -179,21 +207,16 @@ onMounted(() => {
   <div class="container-fluid bg-dark text-white min-h-screen p-4">
     <h1 class="m-3 text-center">Liste des Licenciés</h1>
 
- <div class="mb-5 d-flex justify-content-end ">
-    <div class="input-group w-25 ">
-        <input
-            type="text"
-            v-model="searchTerm"
-            class="form-control bg-light text-dark border-warning"
-            placeholder="Rechercher par Nom, Prénom ou Email..."
-            aria-label="Recherche licencié"
-        />
+    <div class="mb-5 d-flex justify-content-end ">
+      <div class="input-group w-25 ">
+        <input type="text" v-model="searchTerm" class="form-control bg-light text-dark border-warning"
+          placeholder="Rechercher par Nom, Prénom ou Email..." aria-label="Recherche licencié" />
 
         <button class="btn btn-secondary" type="button" id="button-addon2">
-            <i class="pi pi-search"></i>
+          <i class="pi pi-search"></i>
         </button>
+      </div>
     </div>
-</div>
 
     <!-- 🔸 Bouton création -->
     <button class="mb-5 btn btn-outline-warning d-flex align-items-center" @click="openModal(null)">
@@ -246,6 +269,7 @@ onMounted(() => {
                         <th>Ville</th>
                         <th>Statut</th>
                         <th>Date inscription</th>
+                        <th>Date de renouvellement</th>
                         <th style="width: 200px;">Action</th>
                       </tr>
                     </thead>
@@ -260,7 +284,14 @@ onMounted(() => {
                         <td>{{ user.ville || 'N/A' }}</td>
                         <td>{{ user.statut || 'N/A' }}</td>
                         <td>{{ formatDate(user.dateAdhesion) }}</td>
+                        <td>{{ formatDate(user.dateRenouvellement) }}</td>
+
                         <td>
+                          <button class="btn btn-outline-success btn-sm me-1"
+                            @click="renewAdhesion(user.id, user.nom, user.prenom)"
+                            title="Renouveler l'adhésion à aujourd'hui">
+                            <i class="pi pi-history"></i>
+                          </button>
                           <button class="btn btn-outline-info btn-sm me-1" @click="openModal(user)">
                             <i class="pi pi-pencil"></i>
                           </button>
