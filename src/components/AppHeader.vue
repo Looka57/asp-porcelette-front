@@ -35,9 +35,6 @@ const userName = computed(() => {
 
       <button type="button" class="btn btn-outline-danger button-logout" @click="handleLogout">
         <i class="pi pi-sign-out"></i>
-        <!-- La classe 'd-none d-sm-inline' masque ce texte par défaut (xs) et
-             l'affiche à partir de la taille 'sm' (576px) et au-delà.
-             Si vous voulez le masquer jusqu'à 768px, utilisez 'd-none d-md-inline' -->
         <span class="d-none d-sm-inline">
           Déconnexion
         </span>
