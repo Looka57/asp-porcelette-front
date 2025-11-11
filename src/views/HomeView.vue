@@ -2,6 +2,8 @@
 import BarnavHome from '@/components/Barnav/BarnavHome.vue';
 import CardsHomes from '@/components/Home/CardsHome.vue';
 import SenseiHome from '@/components/Home/SenseiHome.vue';
+import ChoisirHome from '@/components/Home/ChoisirHome.vue';
+import EventActuHome from '@/components/Home/EventActuHome.vue';
 
 </script>
 
@@ -16,6 +18,15 @@ import SenseiHome from '@/components/Home/SenseiHome.vue';
     </div>
     <CardsHomes></CardsHomes>
     <SenseiHome></SenseiHome>
+
+    <div class="row secondaryPartie d-flex justify-content-around">
+      <div class="col-lg-6 pourquoiNousChoisir">
+        <ChoisirHome></ChoisirHome>
+      </div>
+      <div class="col-lg-6 eventAct">
+        <EventActuHome></EventActuHome>
+      </div>
+    </div>
   </div>
 
 
@@ -23,7 +34,7 @@ import SenseiHome from '@/components/Home/SenseiHome.vue';
   <!-- FOOTER -->
 
   <footer class="bg-dark text-center text-light d-flex flex-column align-items-center">
-    ASP Porcelette © 2024. Tous droits réservés.
+    ASP Porcelette © 2025. Tous droits réservés.
     <router-link to="/login"
       class=" inline-block bg-green-500 text-dark py-2 px-4 rounded hover:bg-green-600 transition">
       Accéder à l'Espace Membre
@@ -41,7 +52,6 @@ import SenseiHome from '@/components/Home/SenseiHome.vue';
   height: 650px;
   display: flex;
   justify-content: center;
-
   align-items: center;
   flex-direction: column;
   color: white;
@@ -49,6 +59,6 @@ import SenseiHome from '@/components/Home/SenseiHome.vue';
 }
 
 .titlePrincipal {
-  margin: 0;
+  margin-top: 100px;
 }
 </style>

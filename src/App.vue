@@ -36,7 +36,7 @@ const isInBackOffice = computed(() => {
         </div>
       </div>
       <footer class="bg-dark p-3 text-center text-light ">
-        ASP Porcelette © 2024. Tous droits réservés.
+        ASP Porcelette © 2025. Tous droits réservés.
       </footer>
     </template>
 

@@ -21,6 +21,7 @@
 <style scoped>
 header {
   position: fixed;
+  width: 100%;
   top: 0;
   left: 0;
   width: 100%;
