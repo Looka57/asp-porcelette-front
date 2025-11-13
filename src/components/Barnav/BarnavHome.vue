@@ -6,16 +6,15 @@
   <header>
     <a href="#" class="logoBarNav">Logo ASP Porcelette</a>
     <nav class="navbar">
-      <a href="#">Accueil</a>
-      <a href="#">Judo</a>
-      <a href="#">Aikido</a>
-      <a href="#">Jujitsu</a>
-      <a href="#">Actualités</a>
-      <a href="#">Evenements</a>
+      <router-link to="/">Accueil</router-link>
+      <router-link to="/Judo">Judo</router-link>
+      <router-link to="/Aikido">Aikido</router-link>
+      <router-link to="/Jujitsu">Jujitsu</router-link>
+      <router-link to="/Actualités">Actualités</router-link>
+      <router-link to="/Evenements">Evenements</router-link>
     </nav>
   </header>
 </template>
-
 
 
 <style scoped>

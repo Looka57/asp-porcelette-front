@@ -1,16 +1,45 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import FrontLayout from '@/FrontLayout.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // --- Routes Publiques ---
-    { path: '/', name: 'home', component: () => import('@/views/HomeView.vue') },
+    // ===============================================
+    // 🎯 NOUVELLE STRUCTURE POUR LE FRONT-OFFICE (LAYOUT)
+    // ===============================================
+    {
+      path: '/',
+      component: FrontLayout, // Ce composant gère l'en-tête, le pied de page, etc.
+      children: [
+        {
+          path: '', // Chemin vide = / (Route "Home")
+          name: 'home',
+          component: () => import('@/views/HomeView.vue')
+        },
+        // ➡️ Ajoutez ici vos routes de discipline :
+        {
+          path: '',
+          name: 'Acceuil',
+          component: () => import('@/views/HomeView.vue')
+        },
+        {
+          path: 'judo',
+          name: 'judo',
+          component: () => import('@/views/JudoView.vue')
+        },
+      ]
+    },
+    // ===============================================
+    // ROUTES NON-LAYOUT (Login, Erreur)
+    // ===============================================
     { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue') },
     { path: '/403', name: 'forbidden', component: () => import('@/views/ForbiddenView.vue') }, // Page 403
 
-    // --- Routes Protégées (Back-Office) ---
+    // ===============================================
+    // ROUTES PROTÉGÉES (BACK-OFFICE)
+    // ===============================================
     {
       path: '/admin/dashboard',
       name: 'admin-dashboard',

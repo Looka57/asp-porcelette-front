@@ -71,10 +71,7 @@ function getIconUrl(disciplineId) {
   return icons[disciplineId] || 'https://img.icons8.com/ios-filled/64/ffffff/star.png';
 }
 
-
-
 onMounted(fetchEvenement);
-
 </script>
 
 
@@ -94,7 +91,6 @@ onMounted(fetchEvenement);
       </div>
 
       <div v-else class="row cards g-3 justify-content-center">
-
         <div v-for="evenement in evenements" :key="evenement.evenementId" class="col-lg-4 col-md-6 col-sm-12">
           <div class="card h-100">
             <div class="card-body">
@@ -126,6 +122,4 @@ onMounted(fetchEvenement);
     align-items: center;
     height: 100%;
 }
-
-
 </style>

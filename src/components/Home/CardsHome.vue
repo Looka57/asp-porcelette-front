@@ -8,8 +8,6 @@ import api from '@/api/axios'
 // 🔹 ÉTATS
 // ===============================
 const disciplines = ref([]);
-// const actualites = ref([]);
-// const evenements = ref([]);
 
 const isLoading = ref(false)
 const errorMessage = ref(null)
@@ -108,29 +106,20 @@ onMounted(fetchDisciplines)
     <div class="container-fluid my-5">
       <h2 class="my-4 fs-1 text-center">Nos disciplines</h2>
       <div class="row p-2">
-        <div
-          v-for="discipline in disciplines"
-          :key="discipline.disciplineId"
-          class="col-lg-4 col-md-12 col-sm-12 p-0 hero"
-          :class="getCardClass(discipline.disciplineId)"
-        >
-          <img
-            :src="getimageDiscipline(discipline.disciplineId)"
-            alt="image de la discipline"
-            class="image"
-          >
+        <div v-for="discipline in disciplines" :key="discipline.disciplineId"
+          class="col-lg-4 col-md-12 col-sm-12 p-0 hero" :class="getCardClass(discipline.disciplineId)">
+          <img :src="getimageDiscipline(discipline.disciplineId)" alt="image de la discipline" class="image">
           <div class="text"></div>
           <div class="logo">
-            <img
-              :src="getIconUrl(discipline.disciplineId)"
-              alt="icone de la discipline"
-            >
+            <img :src="getIconUrl(discipline.disciplineId)" alt="icone de la discipline">
           </div>
           <div class="main-text">
             <p>{{ getTextDiscipline(discipline.disciplineId) }}</p>
           </div>
           <div class="btn btn-outline-light hero-btn">
-            <a href="#">{{ discipline.nom }}</a>
+            <router-link :to="'/' + discipline.nom.toLowerCase().replace(/ /g, '-')">
+              {{ discipline.nom }}
+            </router-link>
           </div>
         </div>
       </div>
@@ -187,7 +176,7 @@ onMounted(fetchDisciplines)
   transform: skew(19deg, -9deg);
 }
 
-.second .text{
+.second .text {
   background-image: linear-gradient(0deg, #091030, #31b3d0);
 }
 
