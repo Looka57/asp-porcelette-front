@@ -56,7 +56,6 @@ onMounted(fetchDiscipline);
     </div>
 
     <div class="container defDisciplineJudo mt-5">
-      <img src="../assets/img/icones/judoIcon.png" alt="logo disciplines judo">
       <div class="defDiscipline ">
         <h2>Qu'est ce le judo ?</h2>
         <p class="fs-5">{{ judoDiscipline.description }}</p>
