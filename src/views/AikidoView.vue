@@ -4,13 +4,13 @@
 // ===============================
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
-import JudoCoursView from '@/components/Judo/JudoCoursView.vue';
-import ActualitesJudo from '@/components/Judo/ActualiteJudo.vue';
+import AikidoCoursView from '@/components/Aikido/AikidoCoursView.vue';
 
 // ===============================
 // 🔹 ÉTATS
 // ===============================
-const judoDiscipline = ref(null);
+const discipline = ref([]);
+const aikidoDiscipline = ref(null);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 
@@ -28,13 +28,13 @@ async function fetchDiscipline() {
     isLoading.value = true;
     const reponse = await api.get(API_PATH_DISCIPLINE)
     const allDiscipline = reponse.data;
-    const foundJudo = allDiscipline.find(d => d.nom === 'Judo');
-    if (foundJudo) {
-      judoDiscipline.value = foundJudo;
+    const foundAikido = allDiscipline.find(d => d.nom === 'Aïkido');
+    if (foundAikido) {
+      aikidoDiscipline.value = foundAikido;
     } else {
-      errorMessage.value = "Discipline Judo non trouvée.";
+      errorMessage.value = "Discipline Aikido non trouvée.";
     }
-    console.log("Discipline chargée", judoDiscipline.value); // Utilisez judoDiscipline ici
+    console.log("Discipline chargés", discipline.value);
   } catch (error) {
     console.error('❌ Erreur lors du chargement des disciplines :', error);
     errorMessage.value = "Erreur lors du chargement des disciplines.";
@@ -51,27 +51,25 @@ onMounted(fetchDiscipline);
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
     <div class="imgBaniereJudo">
       <div class="titlePrincipal">
-        <h2 class="fs-1 text-uppercase ">JUDO</h2>
-        <p class="fs-3 text-uppercase">Discipline, respect et dépassement de soi.</p>
+        <h2 class="fs-1 text-uppercase ">AIKIDO</h2>
+        <p class="fs-3 text-uppercase">L’art de l’harmonie et du mouvement.</p>
       </div>
     </div>
 
-    <div class="container defDisciplineJudo mt-5">
+    <div class="container defDisciplineAikido mt-5">
       <div class="defDiscipline ">
-        <h2>Qu'est ce le judo ?</h2>
-
-        <!-- AJOUT : Affichage conditionnel pour attendre que judoDiscipline soit chargé -->
+        <h2>Qu'est ce que l'Aïkido ?</h2>
         <p v-if="isLoading" class="fs-5 text-warning">Chargement de la description...</p>
         <p v-else-if="errorMessage" class="fs-5 text-danger">{{ errorMessage }}</p>
-        <p v-else-if="judoDiscipline" class="fs-5">
-          {{ judoDiscipline.description }}
+        <p v-else-if="aikidoDiscipline" class="fs-5">
+          {{ aikidoDiscipline.description }}
         </p>
       </div>
     </div>
 
     <div class="container-fluid">
-      <JudoCoursView />
-      <ActualitesJudo />
+      <AikidoCoursView />
+      <ActualitesAikido />
     </div>
   </div>
 </template>
@@ -79,9 +77,9 @@ onMounted(fetchDiscipline);
 
 <style scoped>
 .imgBaniereJudo {
-  background-image: url('@/assets/img/baniereJudo.png');
+  background-image: url('@/assets/img/baniereAikido.png');
   background-size: cover;
-  background-position: center 15%;
+  background-position: center 32%;
   width: 100%;
   height: 650px;
   display: flex;
@@ -94,7 +92,7 @@ onMounted(fetchDiscipline);
 
 .titlePrincipal {
   margin-top: 100px;
-  color: red !important;
+  color: #31b3d0;
 }
 
 

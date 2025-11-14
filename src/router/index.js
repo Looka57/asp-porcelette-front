@@ -29,6 +29,11 @@ const router = createRouter({
           name: 'judo',
           component: () => import('@/views/JudoView.vue')
         },
+        {
+          path: 'aikido',
+          name: 'aikido',
+          component: () => import('@/views/AikidoView.vue')
+        },
       ]
     },
     // ===============================================

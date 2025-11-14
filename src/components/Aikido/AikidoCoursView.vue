@@ -9,7 +9,7 @@ import api from '@/api/axios'
 // 🔹 ÉTATS
 // ===============================
 
-const coursJudo = ref([]);
+const coursAikido = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 
@@ -26,17 +26,17 @@ async function fetchCours() {
   try {
     isLoading.value = true;
     const reponse = await api.get(API_PATH_COURS);
-    const coursAllJudo = reponse.data;
-    console.log("👉 Tous les cours reçus de l'API :", coursAllJudo);
-    const foundCoursJudo = coursAllJudo.filter(c => (c.discipline.disciplineId === 1))
-    if (foundCoursJudo && foundCoursJudo.length > 0) {
+    const coursAllAikido = reponse.data;
+    console.log("👉 Tous les cours reçus de l'API :", coursAllAikido);
+    const foundCoursAikido = coursAllAikido.filter(c => (c.discipline.disciplineId === 2))
+    if (foundCoursAikido && foundCoursAikido.length > 0) {
       // 🎯 Stocker le tableau de résultats filtrés
-      coursJudo.value = foundCoursJudo;
+      coursAikido.value = foundCoursAikido;
     } else {
       errorMessage.value = "Aucun cours de Judo trouvé.";
     }
 
-    console.log("Cours chargés", coursJudo.value);
+    console.log("Cours chargés", coursAikido.value);
   } catch (error) {
     console.error('❌ Erreur lors du chargement des cours :', error);
     errorMessage.value = "Erreur lors du chargement des cours.";
@@ -47,9 +47,11 @@ async function fetchCours() {
 
 
 const imgCours = {
-  17: new URL('@/assets/img/coursbaby.png', import.meta.url).href,
-  18: new URL('@/assets/img/coursenf.png', import.meta.url).href,
-  19: new URL('@/assets/img/coursAdulte.png', import.meta.url).href,
+  9: new URL('@/assets/img/coursbabyAikido.png', import.meta.url).href,
+  10: new URL('@/assets/img/coursenfAikido.png', import.meta.url).href,
+  8: new URL('@/assets/img/coursAdulteAikido.png', import.meta.url).href,
+  11: new URL('@/assets/img/aikitaiso.png', import.meta.url).href,
+  12: new URL('@/assets/img/grade.png', import.meta.url).href,
 }
 
 function getImgCours(coursId) {
@@ -57,9 +59,11 @@ function getImgCours(coursId) {
 }
 
 const descriptionCours = {
-  17: "Le Judo Baby est une approche ludique et sécurisée du judo, spécialement conçue pour les tout-petits. À travers des jeux moteurs, des exercices d’équilibre et des mouvements simples, les enfants découvrent les bases du judo tout en développant leur coordination, leur confiance en eux et le respect des autres.Les séances sont courtes, rythmées et adaptées à leur âge afin de leur offrir un moment de découverte, d’amusement et d’éveil corporel dans un environnement bienveillant.",
-  18: "Le Judo Enfant permet aux jeunes judokas de 6 à 9 ans de découvrir les techniques fondamentales du judo tout en développant leur motricité, leur équilibre et leur coordination. Les exercices deviennent plus précis et structurés, toujours dans un cadre bienveillant et ludique.Les enfants apprennent le respect, la discipline, la maîtrise de soi et la coopération, tout en s’initiant aux premières formes de combat contrôlé.À cet âge, les premières petites compétitions font leur apparition, offrant aux jeunes judokas une occasion motivante de se dépasser, de gagner en confiance et de mettre en pratique tout ce qu’ils ont appris.",
-  19: "Le judo pour les plus de 10 ans et les adultes propose un enseignement complet mêlant technique, condition physique et développement personnel. Les entraînements deviennent plus approfondis, avec un travail détaillé sur les projections, les immobilisations, le ne-waza et la maîtrise du corps.Que l’objectif soit la progression technique, la remise en forme, la compétition ou simplement le plaisir de pratiquer, chacun avance à son rythme dans un cadre respectueux et motivant.Cette catégorie permet également d’aborder des randoris plus poussés, une meilleure connaissance de soi et une vraie montée en puissance sur le plan physique comme mental."
+  9: "  L'Aïkido pour enfant est une initiation ludique et sécurisée à l’Aïkido pour les enfants de 5 à 9 ans. À travers des jeux moteurs, des exercices d’équilibre et des mouvements simples, les enfants découvrent les bases de cette discipline tout en développant leur coordination, leur motricité et leur confiance en eux. Les séances, rythmées et adaptées à leur âge, favorisent l’éveil corporel, le respect des autres et le plaisir de bouger dans un cadre bienveillant",
+  10: "  L'Aïkido pour les enfants de 10 à 13 ans permet de renforcer les bases de la discipline tout en abordant des techniques plus précises et structurées. Les jeunes pratiquants apprennent à coordonner mouvements et respiration, à contrôler leurs gestes et à travailler avec un partenaire en toute sécurité. Les séances favorisent le respect, la discipline, la concentration et la coopération, tout en offrant aux enfants l'occasion de participer à leurs premières démonstrations ou rencontres amicales pour mettre en pratique ce qu’ils ont appris.",
+  8: "  L'Aïkido pour les adolescents et adultes (+14 ans) propose un apprentissage complet mêlant technique, maîtrise du corps et fluidité des mouvements. Les pratiquants approfondissent les projections, immobilisations et enchaînements, tout en développant leur souplesse, leur force et leur coordination. Que ce soit pour progresser techniquement, se remettre en forme ou pratiquer régulièrement, chacun avance à son rythme dans un cadre respectueux, motivant et sécurisant.",
+  11:"  L'Aïkitaiso est une pratique douce et accessible qui combine les principes de l’Aïkido avec des exercices de gym corporelle. Elle permet de développer la souplesse, l’équilibre, la coordination et la tonicité musculaire, tout en favorisant la concentration et la relaxation. Adaptée à tous les âges et tous les niveaux, cette discipline offre un moment de bien-être physique et mental dans un cadre sécurisant et respectueux.",
+  12:"  Le passage de grade permet aux pratiquants d’évaluer leurs acquis et de progresser dans leur discipline, que ce soit le Judo, l’Aïkido ou l’Aïkitaiso. Il s’agit d’un moment important où technique, discipline, concentration et respect sont mis en valeur. Chaque participant présente les compétences apprises lors des cours, sous le regard attentif des enseignants, et reçoit un retour constructif pour continuer à évoluer à son rythme."
 }
 
 function getDescriptionCours(coursId) {
@@ -68,18 +72,16 @@ function getDescriptionCours(coursId) {
 
 onMounted(fetchCours);
 </script>
-
 <template>
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
-    <h2 class="mb-5 text-center">NOS COURS DE JUDO</h2>
+    <h2 class="mb-5 text-center">NOS COURS D'AIKIDO</h2>
 
     <div v-if="isLoading" class="text-center p-4">Chargement des cours...</div>
     <div v-else-if="errorMessage" class="text-danger text-center p-4">{{ errorMessage }}</div>
 
     <div v-else class="container-fluid cours-quinconce-container">
 
-      <div v-for="(cours, index) in coursJudo" :key="cours.coursId" class="row align-items-center course-row">
-
+      <div v-for="(cours, index) in coursAikido" :key="cours.coursId" class="row align-items-center course-row">
         <div class="col-lg-4 col-md-6" :class="{ 'order-lg-2': index % 2 === 1 }">
           <div class="designer-card h-100">
             <div class="image-wrapper">
@@ -169,6 +171,7 @@ h2 {
 
 
 
+
   /* Centrage du Texte */
   display: flex;
   justify-content: center;
@@ -236,7 +239,7 @@ h2 {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: #ef3838;
+  background: #31b3d0;;
   padding: 1.5rem;
   text-align: left;
   display: flex;
