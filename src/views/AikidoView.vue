@@ -5,6 +5,7 @@
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
 import AikidoCoursView from '@/components/Aikido/AikidoCoursView.vue';
+import ActEventAikidoView from '@/components/Aikido/ActEventAikidoView.vue';
 
 // ===============================
 // 🔹 ÉTATS
@@ -69,7 +70,7 @@ onMounted(fetchDiscipline);
 
     <div class="container-fluid">
       <AikidoCoursView />
-      <ActualitesAikido />
+      <ActEventAikidoView />
     </div>
   </div>
 </template>
