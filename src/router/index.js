@@ -34,6 +34,16 @@ const router = createRouter({
           name: 'aikido',
           component: () => import('@/views/AikidoView.vue')
         },
+        {
+          path: 'jujitsu',
+          name: 'jujitsu',
+          component: () => import('@/views/JujitsuView.vue')
+        },
+        {
+          path: 'judo-detente',
+          name: 'judo-detente',
+          component: () => import('@/views/JudoDetenteView.vue')
+        },
       ]
     },
     // ===============================================

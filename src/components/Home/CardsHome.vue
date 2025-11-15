@@ -117,7 +117,14 @@ onMounted(fetchDisciplines)
             <p>{{ getTextDiscipline(discipline.disciplineId) }}</p>
           </div>
           <div class="btn btn-outline-light hero-btn">
-            <router-link :to="'/' + discipline.nom.toLowerCase().replace(/ /g, '-')">
+           <router-link :to="
+              '/' + discipline.nom
+                .toLowerCase()
+                // Ajout des remplacements pour les accents (ï, é)
+                .replace('ï', 'i')
+                .replace('é', 'e')
+                .replace(/ /g, '-')
+            ">
               {{ discipline.nom }}
             </router-link>
           </div>

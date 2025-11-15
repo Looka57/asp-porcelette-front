@@ -66,7 +66,7 @@ async function fetchActualites() {
 
 
 /* ===============================
- 🔹 ÉVÉNEMENTS JUDO
+ 🔹 ÉVÉNEMENTS JUJITSU
  =============================== */
 
 const evenements = ref([]);
@@ -74,7 +74,7 @@ const isLoading = ref(true);
 const errorMessage = ref(null);
 
 const API_PATH_EVENEMENT = 'Evenement';
-const JUDO_DISCIPLINE_ID = 1;
+const JUJITSU_DISCIPLINE_ID = 3;
 
 /* Icônes */
 const iconMap = {
@@ -96,12 +96,12 @@ async function fetchEvenement() {
     const evenementsAPI = reponse.data;
     const maintenant = new Date();
     const evenementsFiltres = evenementsAPI.filter(e =>
-      e.disciplineId === JUDO_DISCIPLINE_ID &&
+      e.disciplineId === JUJITSU_DISCIPLINE_ID &&
       new Date(e.dateDebut) >= maintenant
     );
 
     if (evenementsFiltres.length === 0) {
-      errorMessage.value = "Aucun événement de Judo à venir trouvé.";
+      errorMessage.value = "Aucun événement de Jujitsu à venir trouvé.";
       evenements.value = [];
       return;
     }
@@ -132,7 +132,7 @@ onMounted(() => {
     <div class="row">
       <!-- Colonne Actualités -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 news-section">
-        <h2 class="text-center text-warning mb-5 display-5">Actualités de Judo à venir</h2>
+        <h2 class="text-center text-warning mb-5 display-5">Actualités</h2>
 
         <div v-if="isLoadingActu" class="text-center text-light p-4">
           Chargement des actualités... 🔄
@@ -168,7 +168,7 @@ onMounted(() => {
                   : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" alt="Événement"
                   class="w-100 mb-3">
 
-                <a href="#" class="btn btn-danger fw-bold mt-auto stretched-link">Lire l’article</a>
+                <a href="#" class="btn btn-success font-bold mt-auto stretched-link">Lire l’article</a>
               </div>
             </div>
           </div>
@@ -178,7 +178,7 @@ onMounted(() => {
 
       <!-- Colonne Événements -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 events-section border-start border-secondary">
-        <h2 class="text-center text-warning mb-5 display-5">Événements de Judo à Venir</h2>
+        <h2 class="text-center text-warning mb-5 display-5">Événements de Jujitsu à Venir</h2>
         <div v-if="isLoading" class="text-center text-light p-4">
           Chargement des événements... 🔄
         </div>
@@ -204,7 +204,7 @@ onMounted(() => {
                 <p class="card-text text-light description-text">{{ evenement.description || 'Pas de description disponible.' }}</p>
 
                 <!-- Bouton -->
-                <a href="#" class="btn btn-danger fw-bold mt-auto stretched-link">En savoir plus</a>
+                <a href="#" class="btn btn-success font-bold mt-auto stretched-link">En savoir plus</a>
               </div>
             </div>
           </div>
@@ -277,6 +277,11 @@ onMounted(() => {
   font-size: 0.9rem;
 }
 
+.btn-success{
+  background-color: #38ef7d;
+  color: #2b2e31;
+  font-weight: 600;
+}
 
 
 /* Responsive pour la bordure de séparation */

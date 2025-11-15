@@ -168,7 +168,7 @@ onMounted(() => {
                   : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" alt="Événement"
                   class="w-100 mb-3">
 
-                <a href="#" class="btn btn-info mt-auto stretched-link">Lire l’article</a>
+                <a href="#" class="btn btn-info fw-bold mt-auto stretched-link">Lire l’article</a>
               </div>
             </div>
           </div>
@@ -204,7 +204,7 @@ onMounted(() => {
                 <p class="card-text text-light description-text">{{ evenement.description || 'Pas de description disponible.' }}</p>
 
                 <!-- Bouton -->
-                <a href="#" class="btn btn-info mt-auto stretched-link">En savoir plus</a>
+                <a href="#" class="btn btn-info fw-bold mt-auto stretched-link">En savoir plus</a>
               </div>
             </div>
           </div>
