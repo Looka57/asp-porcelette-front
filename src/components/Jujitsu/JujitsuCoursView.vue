@@ -67,7 +67,7 @@ onMounted(fetchCours);
 
 <template>
   <div class="container-fluid p-0 bg-dark text-light max-vh-100">
-    <h2 class="mb-5 text-center">NOS COURS DE JUJITSU</h2>
+    <h2 class="mb-5 text-center text-warning display-3">NOS COURS</h2>
 
     <div v-if="isLoading" class="text-center p-4">Chargement des cours...</div>
     <div v-else-if="errorMessage" class="text-danger text-center p-4">{{ errorMessage }}</div>

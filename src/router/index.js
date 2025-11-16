@@ -44,6 +44,18 @@ const router = createRouter({
           name: 'judo-detente',
           component: () => import('@/views/JudoDetenteView.vue')
         },
+        {
+          path: 'actualites',
+          name: 'actualites',
+          component: () => import('@/views/ActualiteSiteView.vue')
+        },
+        {
+          path: '/actualite/:id',
+          name: 'ActualiteDetail',
+          component: () => import('@/views/ActualiteDetail.vue'),
+          props: true
+        }
+
       ]
     },
     // ===============================================
