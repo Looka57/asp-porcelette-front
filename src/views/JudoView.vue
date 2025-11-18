@@ -51,8 +51,10 @@ onMounted(fetchDiscipline);
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
     <div class="imgBaniereJudo">
       <div class="titlePrincipal">
-        <h2 class="fs-1 text-uppercase ">JUDO</h2>
-        <p class="fs-3 text-uppercase">Discipline, respect et dépassement de soi.</p>
+          <div class="overlay">
+            <h1 class="fs-1 text-uppercase ">JUDO</h1>
+            <p class="fs-3 text-uppercase">Discipline, respect et dépassement de soi.</p>
+          </div>
       </div>
     </div>
 
@@ -79,6 +81,7 @@ onMounted(fetchDiscipline);
 
 <style scoped>
 .imgBaniereJudo {
+    position: relative;
   background-image: url('@/assets/img/baniereJudo.png');
   background-size: cover;
   background-position: center 15%;
@@ -95,6 +98,28 @@ onMounted(fetchDiscipline);
 .titlePrincipal {
   margin-top: 100px;
   color: red !important;
+}
+
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.45); /* Overlay sombre plus prononcé */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 2rem;
+}
+
+.overlay h1, .overlay p {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 4px #000;
 }
 
 

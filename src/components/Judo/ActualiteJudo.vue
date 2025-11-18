@@ -132,7 +132,7 @@ onMounted(() => {
     <div class="row">
       <!-- Colonne Actualités -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 news-section">
-        <h2 class="text-center text-warning mb-5 display-5">Actualités de Judo à venir</h2>
+        <h2 class="text-center text-warning mb-5 display-5">Actualités</h2>
 
         <div v-if="isLoadingActu" class="text-center text-light p-4">
           Chargement des actualités... 🔄
@@ -167,8 +167,9 @@ onMounted(() => {
                   ? `http://localhost:5067${actu.imageUrl}`
                   : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" alt="Événement"
                   class="w-100 mb-3">
-
-                <a href="#" class="btn btn-danger fw-bold mt-auto stretched-link">Lire l’article</a>
+                    <router-link :to="`/actualite/${actu.actualiteId}`"  class="btn btn-danger fw-bold">
+                   Lire l'actualité
+                  </router-link>
               </div>
             </div>
           </div>
@@ -204,7 +205,9 @@ onMounted(() => {
                 <p class="card-text text-light description-text">{{ evenement.description || 'Pas de description disponible.' }}</p>
 
                 <!-- Bouton -->
-                <a href="#" class="btn btn-danger fw-bold mt-auto stretched-link">En savoir plus</a>
+                  <router-link :to="`/evenement/${evenements.evenementId}`"  class="btn btn-danger fw-bold mt-auto stretched-link">
+                   Lire l'actualité
+                  </router-link>
               </div>
             </div>
           </div>

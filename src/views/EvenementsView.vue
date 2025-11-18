@@ -1,11 +1,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '@/api/axios';
-
-
+// Assurez-vous que le chemin d'accès à l'image par défaut est correct
 import PlaceholderImage from '@/assets/img/placeholder-styling.jpg';
 
-const actualites = ref([]);
+const evenements = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 const selectedDiscipline = ref('all');
@@ -21,7 +20,8 @@ const DISCIPLINE_MAPPING = {
     4: 'judo-detente',
 };
 
-const API_PATH_ACTUALITE = '/Actualite';
+// **CHEMIN API CORRIGÉ**
+const API_PATH_EVENEMENT = '/Evenement';
 
 // Format date FR
 function formatDate(dateString) {
@@ -33,58 +33,62 @@ function formatDate(dateString) {
     }).format(new Date(dateString));
 }
 
-async function fetchActualites() {
+async function fetchEvenements() {
     try {
         isLoading.value = true;
-        const response = await api.get(API_PATH_ACTUALITE);
+        const response = await api.get(API_PATH_EVENEMENT);
 
-        actualites.value = response.data
-            // 1. S'assurer que les clés critiques existent
-            .filter(a => a.actualiteId && a.dateDePublication)
+        evenements.value = response.data
+            // 1. FILTRE : S'assurer que les clés critiques existent (EvenementId et DateDebut)
+            .filter(e => e.evenementId && e.dateDebut)
 
-            // 2. MAPPING : Ajouter la disciplineId et le nom au niveau racine via l'objet user
-            .map(actu => ({
-                ...actu,
-                disciplineId: actu.user?.disciplineId,
-                discipline: actu.user?.disciplineId
-                    ? DISCIPLINE_MAPPING[actu.user.disciplineId]?.toLowerCase()
+            // 2. MAPPING : Reformater l'objet pour la compatibilité du template
+            .map(event => ({
+                ...event,
+                // Clés renommées pour la clarté dans le template (mais EventId n'a pas bougé)
+                evenementId: event.evenementId,
+                titre: event.titre,
+                contenu: event.description, // Mappe la description au "contenu" utilisé dans le template
+                dateDePublication: event.dateDebut, // Utilise la DateDebut comme date principale pour le tri/affichage
+                discipline: event.disciplineId
+                    ? DISCIPLINE_MAPPING[event.disciplineId]?.toLowerCase()
                     : 'unknown',
             }))
 
-            // 3. Trier par date de publication décroissante par défaut (la plus récente d'abord)
+            // 3. Trier par date de début (dateDePublication) décroissante par défaut (la plus récente d'abord)
             .sort((a, b) => new Date(b.dateDePublication) - new Date(a.dateDePublication));
 
     } catch (_error) {
         console.error("Erreur API:", _error);
-        errorMessage.value = "Impossible de charger les actualités.";
+        errorMessage.value = "Impossible de charger les événements.";
     } finally {
         isLoading.value = false;
     }
 }
 
 // 1. La liste filtrée par DISCIPLINE
-const filteredActualites = computed(() => {
-    if (selectedDiscipline.value === 'all') return actualites.value;
+const filteredEvenements = computed(() => {
+    if (selectedDiscipline.value === 'all') return evenements.value;
 
-    return actualites.value.filter(a =>
+    return evenements.value.filter(a =>
         a.discipline?.toLowerCase() === selectedDiscipline.value
     );
 });
 
-// --- Séparation des Actualités Passées et Futures au sein du filtre de discipline ---
+// --- Séparation des Événements Passés et Futures au sein du filtre de discipline ---
 
-// Liste des actualités Passées (DateDePublication < Aujourd'hui)
-const actualitesPassees = computed(() => {
-    return filteredActualites.value
+// Liste des événements Passés (DateDePublication < Aujourd'hui)
+const evenementsPasses = computed(() => {
+    return filteredEvenements.value
         .filter(a => new Date(a.dateDePublication) < today)
         .sort((a, b) => new Date(b.dateDePublication) - new Date(a.dateDePublication));
 });
 
-// Liste des actualités Futures (DateDePublication >= Aujourd'hui), triées de la plus proche à la plus éloignée
-const actualitesFutures = computed(() => {
-    return filteredActualites.value
+// Liste des événements Futures (DateDePublication >= Aujourd'hui), triées de la plus proche à la plus éloignée
+const evenementsFutures = computed(() => {
+    return filteredEvenements.value
         .filter(a => {
-            // Rendre la date de l'actualité 'J-J' pour la comparaison
+            // Rendre la date de l'événement 'J-J' pour la comparaison
             const actuDate = new Date(a.dateDePublication);
             actuDate.setHours(0, 0, 0, 0);
             return actuDate >= today;
@@ -94,12 +98,12 @@ const actualitesFutures = computed(() => {
 
 
 // 2. À la une (Le prochain événement de la discipline sélectionnée)
-const actualitePrincipale = computed(() => actualitesFutures.value[0]);
+const evenementPrincipal = computed(() => evenementsFutures.value[0]);
 
-// 3. Actus secondaires (4 max - Les 4 actualités passées les plus récentes)
-const actualitesSecondaires = computed(() => {
-    // On prend les 4 premières actualités passées
-    return actualitesPassees.value.slice(0, 4);
+// 3. Actus secondaires (4 max - Les 4 événements passés les plus récents)
+const evenementsSecondaires = computed(() => {
+    // On prend les 4 premiers événements passés
+    return evenementsPasses.value.slice(0, 4);
 });
 
 
@@ -148,14 +152,14 @@ function getButtonClass(discipline) {
 }
 
 
-onMounted(fetchActualites);
+onMounted(fetchEvenements);
 </script>
 
 <template>
     <div class="container-fluid p-0 bg-dark text-light min-vh-100">
         <div class="imgBaniereJudo">
             <div class="overlay">
-                <h1 class="display-3 text-white text-center">ACTUALITÉS DU CLUB</h1>
+                <h1 class="display-3 text-white text-center">ÉVÉNEMENTS DU CLUB</h1>
                 <p class="lead text-white text-center mb-4">
                     Restez informés des événements à venir et des nouvelles récentes de l'ASP Porcelette.
                 </p>
@@ -180,16 +184,16 @@ onMounted(fetchActualites);
                 @click="selectedDiscipline = 'judo-detente'">Judo Détente</button>
         </div>
 
-        <div v-if="isLoading" class="text-center text-danger p-5">
+      <div v-if="isLoading" class="text-center text-danger p-5">
             <div class="spinner-border text-warning" role="status">
                 <span class="visually-hidden">Chargement...</span>
             </div>
-            <p>Chargement des actualités...</p>
+            <p>Chargement des événements...</p>
         </div>
         <div v-else-if="errorMessage" class="alert alert-danger mx-5">{{ errorMessage }}</div>
 
-        <div v-else-if="filteredActualites.length === 0" class="alert alert-info mx-5 text-center">
-            Aucune actualité trouvée pour cette discipline.
+        <div v-else-if="filteredEvenements.length === 0" class="alert alert-info mx-5 text-center">
+            Aucun événement trouvé pour cette discipline.
         </div>
 
         <div v-else class="container-fluid p-5 my-5">
@@ -197,31 +201,31 @@ onMounted(fetchActualites);
 
                 <div class="col-lg-7 mb-4 mb-lg-0">
                     <h2 class="text-warning border-bottom border-danger pb-2 mb-4 display-5">
-                        <i class="bi bi-calendar-check-fill"></i> ÉVÉNEMENT À VENIR
+                        <i class="bi bi-calendar-check-fill"></i> PROCHAIN ÉVÉNEMENT
                     </h2>
 
-                    <div v-if="actualitePrincipale" class="card bg-dark border-secondary shadow-lg actu-principale-card">
+                    <div v-if="evenementPrincipal" class="card bg-dark border-secondary shadow-lg actu-principale-card">
                         <div class="card-body p-0 d-flex flex-column">
-                            <img :src="getPhotoUrl(actualitePrincipale.imageUrl) || PlaceholderImage"
-                                class="card-img-top object-fit-cover actu-principale-img" :alt="actualitePrincipale.titre" />
+                            <img :src="getPhotoUrl(evenementPrincipal.imageUrl) || PlaceholderImage"
+                                class="card-img-top object-fit-cover actu-principale-img" :alt="evenementPrincipal.titre" />
 
                             <div class="p-4 flex-grow-1">
-                                <span :class="['badge mb-2', getBadgeClass(actualitePrincipale.discipline)]">
-                                    {{ actualitePrincipale.discipline }}
+                                <span :class="['badge mb-2', getBadgeClass(evenementPrincipal.discipline)]">
+                                    {{ evenementPrincipal.discipline }}
                                 </span>
                                 <h3 class="card-title text-warning mb-2 display-6">
-                                    {{ actualitePrincipale.titre }}
+                                    {{ evenementPrincipal.titre }}
                                 </h3>
                                 <p class="text-light small mb-3 fw-bold">
-                                    Prévu le : {{ formatDate(actualitePrincipale.dateDePublication) }}
+                                    Prévu le : {{ formatDate(evenementPrincipal.dateDePublication) }}
                                 </p>
 
                                 <p class="card-text text-light description-text mb-4">
-                                    {{ actualitePrincipale.contenu || 'Description de l’événement à venir...' }}
+                                    {{ evenementPrincipal.contenu || 'Description de l’événement à venir...' }}
                                 </p>
 
-                                <router-link :to="`/actualite/${actualitePrincipale.actualiteId}`"
-                                    :class="['btn btn-lg w-100 fw-bold', getButtonClass(actualitePrincipale.discipline)]">
+                                <router-link :to="`/evenement/${evenementPrincipal.evenementId}`"
+                                    :class="['btn btn-lg w-100 fw-bold', getButtonClass(evenementPrincipal.discipline)]">
                                     Voir les détails de l'événement
                                 </router-link>
                             </div>
@@ -230,7 +234,7 @@ onMounted(fetchActualites);
 
                     <div v-else class="card bg-dark border-secondary shadow-lg actu-principale-card text-center p-5">
                         <i class="bi bi-info-circle-fill text-warning display-1 mb-3"></i>
-                        <h3 class="text-light mt-3">Aucun événement ou actualité à venir.</h3>
+                        <h3 class="text-light mt-3">Aucun événement à venir.</h3>
                         <p class="text-light">
                             De nouveaux événements seront bientôt disponibles pour cette discipline.
                         </p>
@@ -240,34 +244,34 @@ onMounted(fetchActualites);
 
                 <div class="col-lg-5">
                     <h2 class="text-warning border-bottom border-danger pb-2 mb-4 display-5">
-                        <i class="bi bi-clock-history"></i> NEWS RÉCENTES
+                        <i class="bi bi-clock-history"></i> ARCHIVES RÉCENTES
                     </h2>
 
-                    <div v-for="actu in actualitesSecondaires" :key="actu.actualiteId"
+                    <div v-for="event in evenementsSecondaires" :key="event.evenementId"
                         class="card bg-dark border-secondary mb-3 shadow-sm actu-secondaire-card">
                         <div class="row g-0 align-items-center">
                             <div class="col-5 actu-secondaire-img-container">
-                                <img :src="getPhotoUrl(actu.imageUrl) || PlaceholderImage"
-                                    class="img-fluid rounded-start object-fit-cover w-100 h-100 actu-secondaire-img" :alt="actu.titre" />
+                                <img :src="getPhotoUrl(event.imageUrl) || PlaceholderImage"
+                                    class="img-fluid rounded-start object-fit-cover w-100 h-100 actu-secondaire-img" :alt="event.titre" />
                             </div>
                             <div class="col-7">
                                 <div class="card-body p-3">
-                                    <span :class="['badge mb-1', getBadgeClass(actu.discipline)]">
-                                        {{ actu.discipline }}
+                                    <span :class="['badge mb-1', getBadgeClass(event.discipline)]">
+                                        {{ event.discipline }}
                                     </span>
-                                    <h5 class="card-title text-light actu-secondaire-title">{{ actu.titre }}</h5>
-                                    <p class="card-text text-light small mb-2">{{ formatDate(actu.dateDePublication) }}</p>
-                                    <router-link :to="`/actualite/${actu.actualiteId}`"
-                                        :class="['btn btn-outline', 'btn-sm', getButtonClass(actu.discipline)]">
-                                        Lire l'article
+                                    <h5 class="card-title text-light actu-secondaire-title">{{ event.titre }}</h5>
+                                    <p class="card-text text-light small mb-2">{{ formatDate(event.dateDePublication) }}</p>
+                                    <router-link :to="`/evenement/${event.evenementId}`"
+                                        :class="['btn btn-outline', 'btn-sm', getButtonClass(event.discipline)]">
+                                        Voir l'archive
                                     </router-link>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="actualitesSecondaires.length === 0 && actualitePrincipale" class="alert alert-secondary text-center">
-                        Aucune archive d'actualité trouvée pour cette discipline.
+                    <div v-if="evenementsSecondaires.length === 0 && evenementPrincipal" class="alert alert-secondary text-center">
+                        Aucune archive d'événement trouvée pour cette discipline.
                     </div>
                 </div>
             </div>
@@ -276,11 +280,12 @@ onMounted(fetchActualites);
 </template>
 
 <style scoped>
+/* Les styles CSS n'ont pas été modifiés car ils utilisent des classes Bootstrap et des classes custom qui n'étaient pas liées aux noms des variables JS. */
 /* --- BANNIÈRE --- */
 .imgBaniereJudo {
-    background-image: url('@/assets/img/banniereActualite.png'); /* Utilisez votre image */
+    background-image: url('@/assets/img/banniereEvent.png'); /* Utilisez votre image */
     background-size: cover;
-    background-position: center 30%;
+    background-position: center 45%;
     width: 100%;
     height: 600px;
     display: flex;
@@ -312,7 +317,6 @@ onMounted(fetchActualites);
     letter-spacing: 3px;
     text-shadow: 2px 2px 4px #000;
 }
-
 
 
 
@@ -381,7 +385,7 @@ onMounted(fetchActualites);
     -webkit-box-orient: vertical;
 }
 
-/* --- CARTES SECONDAIRES (NEWS RÉCENTES) --- */
+/* --- CARTES SECONDAIRES (NEWS RÉCENTES/ARCHIVES) --- */
 .actu-secondaire-card {
     border-radius: 8px;
     overflow: hidden;
@@ -457,7 +461,7 @@ onMounted(fetchActualites);
     .actu-principale-img {
         height: 250px;
     }
-
+    /* Les deux colonnes s'empilent naturellement sur mobile */
 }
 
 @media (max-width: 767.98px) {

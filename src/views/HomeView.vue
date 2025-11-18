@@ -11,7 +11,7 @@ import EventActuHome from '@/components/Home/EventActuHome.vue';
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
     <div class="imgBaniereHome">
       <div class="titlePrincipal">
-        <h2 class="fs-1 text-uppercase">L'art du mouvement <br> L'esprit des disciplines.</h2>
+        <h1 class="fs-1 text-uppercase display-3 text-white text-center">L'art du mouvement <br> L'esprit des disciplines.</h1>
         <p class="fs-3">Judo - Aikido - Jujitsu</p>
       </div>
     </div>
@@ -47,5 +47,12 @@ import EventActuHome from '@/components/Home/EventActuHome.vue';
 
 .titlePrincipal {
   margin-top: 100px;
+}
+
+h1{
+     font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 4px #000;
 }
 </style>
