@@ -178,7 +178,7 @@ onMounted(() => {
 
       <!-- Colonne Événements -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 events-section border-start border-secondary">
-        <h2 class="text-center text-warning mb-5 display-5">Événements de l'Aikido à Venir</h2>
+        <h2 class="text-center text-warning mb-5 display-5">Actualité de l'Aikido à Venir</h2>
         <div v-if="isLoading" class="text-center text-light p-4">
           Chargement des événements... 🔄
         </div>
