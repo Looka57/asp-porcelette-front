@@ -16,6 +16,7 @@
           <router-link to="/judo-detente">Judo Détente</router-link>
         </div>
       </div>
+      <router-link to="/sensei">Sensei</router-link>
       <router-link to="/actualites">Actualités</router-link>
       <router-link to="/evenements">Evenements</router-link>
       <router-link to="/tarifs">Tarifs</router-link>

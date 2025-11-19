@@ -45,6 +45,18 @@ const router = createRouter({
           component: () => import('@/views/JudoDetenteView.vue')
         },
         {
+          path: 'sensei',
+          name: 'sensei',
+          component: () => import('@/views/SenseiSiteView.vue')
+        },
+        {
+          path: '/senseiDetailView/:id',
+          name: 'senseiDetailView',
+          component: () => import('@/views/SenseiDetailView.vue'),
+          props: true
+        },
+        // ...
+        {
           path: 'actualites',
           name: 'actualites',
           component: () => import('@/views/ActualiteSiteView.vue')

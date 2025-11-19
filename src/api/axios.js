@@ -3,7 +3,8 @@ import axios from 'axios';
 
 // URL de base de votre API C# (port 5067 dans vos captures)
 const api = axios.create({
-    baseURL: 'http://localhost:5067/api/'
+    baseURL: 'http://localhost:5067/api/',
+    
 });
 
 // INTERCEPTEUR : Ajoute automatiquement le JWT
