@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '@/api/axios';
+import SenseiBulleLogoView from '@/components/Senseis/SenseiBulleLogoView.vue';
+import SenseiBulleView from '@/components/Senseis/SenseiBulleView.vue';
 
 // 1. Déclarer l'ID comme prop. Nécessite props: true dans le routeur.
 const props = defineProps({
@@ -14,15 +16,17 @@ const props = defineProps({
 // 🔹 ÉTATS
 // ===============================
 const sensei = ref(null);
+const disciplines = ref([]);
+const horaires = ref([]);
+const cours = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
-const disciplines = ref([]); // Nécessaire pour obtenir le nom de la discipline
 
 // ===============================
 // 🔹 FONCTIONS DE DATA
 // ===============================
 
-// Fetch les données de la discipline pour le nom
+
 async function fetchDisciplines() {
   try {
     const response = await api.get('Discipline');
@@ -32,33 +36,50 @@ async function fetchDisciplines() {
   }
 }
 
-// Fetch les données du Sensei
-// Fetch les données du Sensei
-async function fetchSensei() {
-try {
-  const senseiId = props.id;
-
-  if (!senseiId) {
-    errorMessage.value = "ID du Sensei manquant.";
-    isLoading.value = false;
-    return;
+async function fetchHoraire() {
+  try {
+    const response = await api.get('Horaire');
+    horaires.value = response.data;
+  } catch (error) {
+    console.error("Erreur lors du chargement des horaires :", error);
   }
-
-  // 💡 CORRECTION APPLIQUÉE : On utilise la route d'administration nécessaire
-    // pour que l'API trouve l'utilisateur : /api/User/admin/{id}
-const response = await api.get(`User/${senseiId}`);
-  sensei.value = response.data;
-
-} catch (error) {
- console.error("Erreur chargement Sensei :", error);
- // Important : Si le 404 persiste, vérifiez que l'ID est bien un Sensei ou Adhérent existant.
- // Si c'est un 401, vérifiez que l'utilisateur est bien connecté avec le rôle Admin/Sensei.
- errorMessage.value = "Sensei introuvable ou erreur de chargement. (Vérifiez l'authentification si vous utilisez la route /admin/)";
-} finally {
- isLoading.value = false;
 }
 
-console.log('Liste des senseis:', sensei.value);
+async function fetchCours() {
+  try {
+    const response = await api.get('Cours');
+    cours.value = response.data;
+  } catch (error) {
+    console.error("Erreur lors du chargement des cours :", error);
+  }
+}
+
+
+
+async function fetchSensei() {
+  try {
+    const senseiId = props.id;
+
+    if (!senseiId) {
+      errorMessage.value = "ID du Sensei manquant.";
+      isLoading.value = false;
+      return;
+    }
+
+
+    const response = await api.get(`User/${senseiId}`);
+    sensei.value = response.data;
+
+  } catch (error) {
+    console.error("Erreur chargement Sensei :", error);
+    // Important : Si le 404 persiste, vérifiez que l'ID est bien un Sensei ou Adhérent existant.
+    // Si c'est un 401, vérifiez que l'utilisateur est bien connecté avec le rôle Admin/Sensei.
+    errorMessage.value = "Sensei introuvable ou erreur de chargement. (Vérifiez l'authentification si vous utilisez la route /admin/)";
+  } finally {
+    isLoading.value = false;
+  }
+
+  console.log('Liste des senseis:', sensei.value);
 }
 
 // ===============================
@@ -82,13 +103,35 @@ function getDisciplineColorId(id) {
   }
 }
 
+// ===============================
+// 🔹 LOGIQUE DISCIPLINE
+// ===============================
+function getHorairesForSensei() {
+  const coursSensei = getCoursForSensei();
+  const horairesSensei = [];
+
+  for (const c of coursSensei) {
+    const h = horaires.value.filter(h => h.coursId === c.coursId);
+    horairesSensei.push(...h);
+  }
+
+  return horairesSensei;
+}
+
+function getCoursForSensei() {
+  if (!sensei.value) return [];
+  return cours.value.filter(c => c.sensei?.id === sensei.value.id);
+}
 
 onMounted(async () => {
-  // Lance le chargement des données en parallèle
-  await Promise.all([fetchDisciplines(), fetchSensei()]);
+  await Promise.all([
+    fetchDisciplines(),
+    fetchSensei(),
+    fetchHoraire(),
+    fetchCours()
+  ]);
 });
 </script>
-
 
 <template>
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
@@ -109,46 +152,61 @@ onMounted(async () => {
         <p class="mt-3">Chargement des détails...</p>
       </div>
       <div v-else-if="errorMessage" class="alert alert-danger text-center">{{ errorMessage }}</div>
-
-      <div v-else-if="sensei" class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
+      <div v-else-if="sensei" class="row justify-content-center ">
+        <div class="col-lg-10 col-md-12">
           <div class="profile-card bg-dark text-light p-4 rounded shadow-lg"
             :style="{ border: '3px solid ' + getDisciplineColorId(sensei.disciplineId) }">
-
             <div class="text-center mb-4">
               <img :src="'http://localhost:5067' + sensei.photoUrl" :alt="sensei.prenom + ' ' + sensei.nom"
                 class="profile-img rounded-circle" :style="{
                   'border': '5px solid ' + getDisciplineColorId(sensei.disciplineId)
                 }" />
             </div>
-
             <div class="text-center">
               <h2 class="fw-bold display-5 mb-1">{{ sensei.prenom }} {{ sensei.nom }}</h2>
-
               <p class="grade-text lead mb-4" :style="{ color: getDisciplineColorId(sensei.disciplineId) }">
                 {{ sensei.grade || "Grade non renseigné" }}
               </p>
-
               <hr class="text-warning">
-
               <div class="row text-start details-row">
-                <div class="col-sm-6 mb-3">
+                <div class="col-sm-6 mb-3 bob">
                   <h6 class="text-muted">Discipline principale</h6>
-                  <p class="fw-bold">{{ getDisciplineName(sensei.disciplineId) }}</p>
+                  <p class="fw-bold ">{{ getDisciplineName(sensei.disciplineId) }}</p>
+                  <SenseiBulleView class="iconDiscipline" :discipline-id="sensei.disciplineId" />
                 </div>
                 <div class="col-sm-6 mb-3">
-                  <h6 class="text-muted">Téléphone</h6>
-                  <p class="fw-bold">{{ sensei.telephone || 'Non renseigné' }}</p>
+                  <h4 class="text-warning  mt-4 mb-2">Biographie</h4>
+                  <p class="bio-text text-justify">{{ sensei.bio || "Aucune biographie disponible pour l'instant." }}
+                  </p>
                 </div>
-                <div class="col-12 mb-4">
-                  <h6 class="text-muted">Adresse</h6>
-                  <p class="fw-bold">{{ sensei.rueEtNumero }}, {{ sensei.codePostal }} {{ sensei.ville }}</p>
+                <div class="col-6 mb-4">
+                  <h6 class="text-muted">Horaires Entrainements</h6>
+                  <div v-if="getHorairesForSensei().length > 0">
+                    <table class="table table-dark table-striped">
+                      <thead>
+                        <tr>
+                          <th class="text-warning">Jour</th>
+                          <th class="text-warning">Début</th>
+                          <th class="text-warning">Fin</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="h in getHorairesForSensei()" :key="h.horaireId">
+                          <td>{{ h.jour }}</td>
+                          <td>{{ h.heureDebut.substring(0, 5) }}</td>
+                          <td>{{ h.heureFin.substring(0, 5) }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p v-else class="fw-bold">
+                    Aucun horaire disponible
+                  </p>
+                </div>
+                <div class="logoDiscipline col-sm-6 mb-3 ">
+                  <SenseiBulleLogoView :discipline-id="sensei.disciplineId" />
                 </div>
               </div>
-
-              <h4 class="text-warning mt-4 mb-2">Biographie</h4>
-              <p class="bio-text text-start">{{ sensei.bio || "Aucune biographie disponible pour l'instant." }}</p>
-
               <button @click="$router.back()" class="btn btn-warning mt-4">
                 Retour aux Sensei
               </button>
@@ -231,7 +289,6 @@ onMounted(async () => {
   line-height: 1.6;
   color: #ccc;
   white-space: pre-wrap;
-  /* Maintient le formatage si le texte contient des sauts de ligne */
 }
 
 .btn-warning {
@@ -245,5 +302,29 @@ onMounted(async () => {
 .btn-warning:hover {
   background-color: #e0b320;
   border-color: #e0b320;
+}
+
+.bob {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+}
+
+.logoDiscipline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  border-radius: 8px;
+}
+
+
+.iconDiscipline {
+  margin-top: 15px;
+  align-items: center;
+  justify-content: center;
 }
 </style>

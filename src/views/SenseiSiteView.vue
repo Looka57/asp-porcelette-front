@@ -83,7 +83,7 @@ onMounted(async () => {
     <div class="imgBaniereJudo">
       <div class="titlePrincipal">
         <div class="overlay">
-          <h1 class="display-3 text-uppercase text-warning">Nos Sensei</h1>
+          <h1 class="display-3 text-uppercase text-warning">Nos Senseis</h1>
           <p class="lead text-white fw-light mb-4">Expertise, passion et transmission.</p>
           <p class="text-white px-5 intro-text">
             Découvrez l'équipe d'encadrement de l'AS Porcelette qui vous guidera tout au long de votre parcours.
@@ -115,7 +115,7 @@ onMounted(async () => {
                 <h5 class="card-title fw-bold">{{ sensei.prenom }} {{ sensei.nom }}</h5>
                 <p class="card-subtitle mb-2">{{ sensei.grade || 'Ceinture Noire - Grade non précisé' }}</p>
                 <p class="card-text disciplines">
-                  Discipline : <span>{{ getDisciplineName(sensei.id) }}</span>
+                  Discipline : <span>{{ getDisciplineName(sensei.disciplineId) }}</span>
                 </p>
 
           <router-link :to="`/senseiDetailView/${sensei.id}`"
