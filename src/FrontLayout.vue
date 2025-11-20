@@ -17,6 +17,11 @@ import { RouterView } from 'vue-router';
   <!-- FOOTER -->
   <footer class="bg-dark text-center text-light d-flex flex-column align-items-center">
     ASP Porcelette © 2025. Tous droits réservés.
+    <div class="reseau">
+      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/facebook-new.png" alt="facebook-new"/></a>
+      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/instagram-new--v2.png" alt="instagram-new--v2"/></a>
+      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/facebook-new.png" alt="facebook-new"/></a>
+    </div>
     <router-link to="/login"
       class=" inline-block bg-green-500 text-dark py-2 px-4 rounded hover:bg-green-600 transition">
       Accéder à l'Espace Membre

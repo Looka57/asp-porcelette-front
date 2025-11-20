@@ -72,7 +72,7 @@ onMounted(fetchActualite);
     <div v-else-if="actualite">
 
       <header class="mb-5">
-        <h1 class="text-danger display-4">{{ actualite.titre }}</h1>
+        <h1 class="text-warning display-4">{{ actualite.titre }}</h1>
 
         <p class="text-light small">Publié le
           <time :datetime="actualite.dateDePublication">{{ formatDate(actualite.dateDePublication) }}</time>
