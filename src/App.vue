@@ -47,6 +47,20 @@ const isInBackOffice = computed(() => {
 </template>
 
 <style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+html, body {
+  overflow-x: hidden !important;
+}
+
+
+
 .custom-shadow {
   box-shadow: -5px -2px 40px rgba(238, 238, 238, 0.266);
 }

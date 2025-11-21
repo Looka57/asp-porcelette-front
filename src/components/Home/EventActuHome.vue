@@ -78,7 +78,7 @@ onMounted(fetchEvenement);
 <template>
   <div class="container-fluid p-0 bg-dark text-light ">
     <div class="container my-5">
-      <h3 class="text-center mb-5">Evenements</h3>
+      <h3 class="text-center text-warning display-5 mb-5">Évènements</h3>
       <div v-if="isLoading" class="text-center text-light p-4">
         Chargement des événements... 🔄
       </div>

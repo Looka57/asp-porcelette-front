@@ -85,6 +85,7 @@ onMounted(fetchCours);
         <div class="col-lg-4 col-md-6" :class="{ 'order-lg-2': index % 2 === 1 }">
           <div class="designer-card h-100">
             <div class="image-wrapper">
+              <div class="text"></div>
               <img :src="getImgCours(cours.coursId)" :alt="'Image du cours ' + cours.libelle"
                 class="w-100 course-image">
               <div class="card-content-overlay">
@@ -96,13 +97,13 @@ onMounted(fetchCours);
         <div class="col-lg-8 col-md-6 mb-4">
           <div class="course-description-block text-justify">
             <h3 class="display-5 mb-4 text-warning">{{ cours.libelle }}</h3>
-            <p class="mb-5">
+            <p class="mb-5 fs-5">
               {{ getDescriptionCours(cours.coursId) }}
             </p>
             <div class="horaireSenseiCours">
               <div class="horaireCours row">
                 <h4 class="display-6 text-warning mb-3">Horaires</h4>
-                <ul class="list-unstyled horaire-list">
+                <ul class="list-unstyled fs-5 horaire-list">
                   <li v-for="horaire in cours.horaires" :key="horaire.horaireId">
                     <i class="pi pi-calendar-clock me-2 text-warning"></i>
                     Le {{ horaire.jour }} : de {{ horaire.heureDebut }} à {{ horaire.heureFin }}
@@ -202,8 +203,9 @@ h2 {
   position: relative;
   transition: transform 0.3s ease;
   padding: 0;
-
 }
+
+
 
 .designer-card:hover {
   transform: translateY(-5px);
@@ -240,7 +242,7 @@ h2 {
   left: 0;
   width: 100%;
   background: #31b3d0;;
-  padding: 1.5rem;
+  padding: 2rem;
   text-align: left;
   display: flex;
   align-items: center;

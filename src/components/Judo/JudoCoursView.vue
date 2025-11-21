@@ -237,7 +237,7 @@ h2 {
   left: 0;
   width: 100%;
   background: #ef3838;
-  padding: 1.5rem;
+  padding: 2rem;
   text-align: left;
   display: flex;
   align-items: center;

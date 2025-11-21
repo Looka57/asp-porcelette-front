@@ -179,7 +179,7 @@ onMounted(() => {
 
       <!-- Colonne Événements -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 events-section border-start border-secondary">
-        <h2 class="text-center text-warning mb-5 display-5">Événements de Judo à Venir</h2>
+        <h2 class="text-center text-warning mb-5 display-5">Évènements de Judo à Venir</h2>
         <div v-if="isLoading" class="text-center text-light p-4">
           Chargement des événements... 🔄
         </div>
@@ -187,7 +187,7 @@ onMounted(() => {
           {{ errorMessage }}
         </div>
         <div v-else-if="evenements.length === 0" class="text-center text-secondary p-4">
-          Aucun événement de Judo à venir n'est planifié. Restez à l'affût !
+          Aucun évènement de Judo à venir n'est planifié. Restez à l'affût !
         </div>
 
         <div v-else class="row cards g-4 justify-content-center">
@@ -205,7 +205,7 @@ onMounted(() => {
                 <p class="card-text text-light description-text">{{ evenement.description || 'Pas de description disponible.' }}</p>
 
                 <!-- Bouton -->
-                  <router-link :to="`/evenement/${evenements.evenementId}`"  class="btn btn-danger fw-bold mt-auto stretched-link">
+                  <router-link :to="`/evenement/${evenement.evenementId}`"  class="btn btn-danger fw-bold mt-auto stretched-link">
                    Lire l'actualité
                   </router-link>
               </div>

@@ -77,9 +77,9 @@ onMounted(fetchSensei)
     <p>{{ errorMessage }}</p>
   </div>
   <div class="container my-5 text-center">
-    <h2 class="my-4 fs-1 text-center text-light">Nos Sensei</h2>
+    <h2 class="my-4 text-center text-warning display-2">Nos Senseis</h2>
     <div class="row justify-content-center">
-      <div v-for="sensei in senseis" :key="sensei.userId" class="col-lg-3 col-md-6 col-sm-12 teacher-card">
+      <div v-for="sensei in senseis" :key="sensei.userId" class="col-lg-3 col-md-6 col-sm-6 teacher-card">
         <div class="sensei-photo-container" :class="getBorderClass(sensei.disciplineId)">
           <img :src="getPhotoUrl(sensei.photoUrl)" alt="Photo du Sensei" class="sensei-photo" />
 

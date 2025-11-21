@@ -23,7 +23,7 @@ import { RouterView } from 'vue-router';
       <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/facebook-new.png" alt="facebook-new"/></a>
     </div>
     <router-link to="/login"
-      class=" inline-block bg-green-500 text-dark py-2 px-4 rounded hover:bg-green-600 transition">
+      class=" inline-block bg-green-500 text-dark py-2 px-4 rounded hover:bg-green-600 transition" target="_blank">
       Accéder à l'Espace Membre
     </router-link>
   </footer>

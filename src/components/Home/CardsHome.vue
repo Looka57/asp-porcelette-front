@@ -38,10 +38,10 @@ async function fetchDisciplines() {
 // 🔹 ICONES + TEXTE PAR DÉFAUT
 // ===============================
 const textDiscipline = {
-  1: "Force technique et maîtrise délivre le corps et d'esprit.",
-  2: "Harmonie énergie et contrôle de soi.",
-  3: "Self-défense complète, adaptabilité et résilience.",
-  4: "Entretien du corps et de l'esprit."
+  1: "Force technique délivre le corps et l'esprit.",
+  2: "Harmonie, énergie et contrôle de soi.",
+  3: "Self-défense, maitrise, stratégie et puissance.",
+  4: "Entretien du corps complet et de l'esprit."
 }
 
 function getTextDiscipline(disciplineId) {
@@ -104,7 +104,7 @@ onMounted(fetchDisciplines)
 
   <div v-else class="container-fluid p-0 bg-dark text-light">
     <div class="container-fluid my-5">
-      <h2 class="my-4 fs-1 text-center">Nos disciplines</h2>
+      <h2 class="my-4 text-center text-warning display-2">Nos disciplines</h2>
       <div class="row p-2">
         <div v-for="discipline in disciplines" :key="discipline.disciplineId"
           class="col-lg-4 col-md-12 col-sm-12 p-0 hero" :class="getCardClass(discipline.disciplineId)">
@@ -120,7 +120,6 @@ onMounted(fetchDisciplines)
            <router-link :to="
               '/' + discipline.nom
                 .toLowerCase()
-                // Ajout des remplacements pour les accents (ï, é)
                 .replace('ï', 'i')
                 .replace('é', 'e')
                 .replace(/ /g, '-')
@@ -248,5 +247,16 @@ onMounted(fetchDisciplines)
   color: #1e2f84;
   /* ou autre couleur selon la carte */
   text-decoration: none;
+}
+
+
+
+@media (max-width: 767.98px) {
+  .main-text {
+  position: absolute;
+  color: #fff;
+  font-weight: 600;
+
+}
 }
 </style>

@@ -42,7 +42,6 @@ async function fetchDiscipline() {
     isLoading.value = false;
   }
 }
-
 onMounted(fetchDiscipline);
 
 </script>

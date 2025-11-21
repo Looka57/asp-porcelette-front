@@ -168,7 +168,9 @@ onMounted(() => {
                   : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" alt="Événement"
                   class="w-100 mb-3">
 
-                <a href="#" class="btn btn-success font-bold mt-auto stretched-link">Lire l’article</a>
+                 <router-link :to="`/actualite/${actu.actualiteId}`"  class="btn btn-success fw-bold">
+                   Lire l'actualité
+                  </router-link>
               </div>
             </div>
           </div>
@@ -178,7 +180,7 @@ onMounted(() => {
 
       <!-- Colonne Événements -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 events-section border-start border-secondary">
-        <h2 class="text-center text-warning mb-5 display-5">Événements de Jujitsu à Venir</h2>
+        <h2 class="text-center text-warning mb-5 display-5">Évènements de Jujitsu à Venir</h2>
         <div v-if="isLoading" class="text-center text-light p-4">
           Chargement des événements... 🔄
         </div>
@@ -204,7 +206,9 @@ onMounted(() => {
                 <p class="card-text text-light description-text">{{ evenement.description || 'Pas de description disponible.' }}</p>
 
                 <!-- Bouton -->
-                <a href="#" class="btn btn-success font-bold mt-auto stretched-link">En savoir plus</a>
+               <router-link :to="`/evenement/${evenement.evenementId}`"  class="btn btn-danger fw-bold mt-auto stretched-link">
+                   Lire l'actualité
+                  </router-link>
               </div>
             </div>
           </div>

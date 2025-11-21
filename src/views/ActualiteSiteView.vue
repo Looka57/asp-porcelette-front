@@ -161,24 +161,25 @@ onMounted(fetchActualites);
         </p>
       </div>
     </div>
-
-    <div class="text-center my-5">
-      <button
-        :class="['btn mx-2 btn-lg', selectedDiscipline === 'all' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-        @click="selectedDiscipline = 'all'">Toutes</button>
-      <button
-        :class="['btn mx-2 btn-lg', selectedDiscipline === 'judo' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-        @click="selectedDiscipline = 'judo'">Judo</button>
-      <button
-        :class="['btn mx-2 btn-lg', selectedDiscipline === 'aikido' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-        @click="selectedDiscipline = 'aikido'">Aïkido</button>
-      <button
-        :class="['btn mx-2 btn-lg', selectedDiscipline === 'jujitsu' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-        @click="selectedDiscipline = 'jujitsu'">Jujitsu</button>
-      <button
-        :class="['btn mx-2 btn-lg', selectedDiscipline === 'judo-detente' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-        @click="selectedDiscipline = 'judo-detente'">Judo Détente</button>
+<div class="text-center my-5">
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+        <button
+            :class="['btn btn-lg', selectedDiscipline === 'all' ? 'btn-warning text-dark' : 'btn-outline-warning']"
+            @click="selectedDiscipline = 'all'">Toutes</button>
+        <button
+            :class="['btn btn-lg', selectedDiscipline === 'judo' ? 'btn-warning text-dark' : 'btn-outline-warning']"
+            @click="selectedDiscipline = 'judo'">Judo</button>
+        <button
+            :class="['btn btn-lg', selectedDiscipline === 'aikido' ? 'btn-warning text-dark' : 'btn-outline-warning']"
+            @click="selectedDiscipline = 'aikido'">Aïkido</button>
+        <button
+            :class="['btn btn-lg', selectedDiscipline === 'jujitsu' ? 'btn-warning text-dark' : 'btn-outline-warning']"
+            @click="selectedDiscipline = 'jujitsu'">Jujitsu</button>
+        <button
+            :class="['btn btn-lg', selectedDiscipline === 'judo-detente' ? 'btn-warning text-dark' : 'btn-outline-warning']"
+            @click="selectedDiscipline = 'judo-detente'">Judo Détente</button>
     </div>
+</div>
 
     <div v-if="isLoading" class="text-center text-danger p-5">
       <div class="spinner-border text-warning" role="status">

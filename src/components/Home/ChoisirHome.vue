@@ -3,7 +3,7 @@
 <template>
   <div class="container-fluid p-0 bg-dark text-light ">
     <div class="container my-5">
-      <h3 class="text-center mb-5">Pourquoi nous choisir ?</h3>
+      <h3 class="text-center text-warning display-5 mb-5">Pourquoi nous choisir ?</h3>
       <div class="row text-center">
         <div class="col-lg-3 col-md-6 col-sm-6 p-0 icons mb-4">
           <img width="100" height="100" src="https://img.icons8.com/bubbles/100/handshake.png" alt="handshake" />
