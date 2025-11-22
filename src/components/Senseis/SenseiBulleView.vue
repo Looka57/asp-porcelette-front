@@ -51,5 +51,6 @@ function getIconsForDiscipline(disciplineId) {
   width: 150px;
   height: 150px;
   object-fit: contain;
+  flex-wrap: wrap;
 }
 </style>

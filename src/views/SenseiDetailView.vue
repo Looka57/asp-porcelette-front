@@ -323,8 +323,8 @@ onMounted(async () => {
 
 
 .iconDiscipline {
-  margin-top: 15px;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
 }
 </style>
