@@ -58,7 +58,7 @@ function getDisciplineName(id) {
   return disciplineFound ? disciplineFound.nom : 'Toutes disciplines';
 }
 
-console.log('sensei',senseis.value)
+console.log('sensei', senseis.value)
 
 
 
@@ -118,8 +118,7 @@ onMounted(async () => {
                   Discipline : <span>{{ getDisciplineName(sensei.disciplineId) }}</span>
                 </p>
 
-          <router-link :to="`/senseiDetailView/${sensei.id}`"
- class="btn mt-3"
+                <router-link :to="`/equipeDetailView/${sensei.id}`" class="btn mt-3"
                   :class="`btn-discipline-${sensei.disciplineId}`" :style="{
                     backgroundColor: 'var(--discipline-color)',
                     borderColor: 'var(--discipline-color)',

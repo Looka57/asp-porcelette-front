@@ -45,12 +45,12 @@ const router = createRouter({
           component: () => import('@/views/JudoDetenteView.vue')
         },
         {
-          path: 'sensei',
+          path: 'equipe',
           name: 'sensei',
           component: () => import('@/views/SenseiSiteView.vue')
         },
         {
-          path: '/senseiDetailView/:id',
+          path: '/equipeDetailView/:id',
           name: 'senseiDetailView',
           component: () => import('@/views/SenseiDetailView.vue'),
           props: true
@@ -206,13 +206,9 @@ const router = createRouter({
         roles: ['Admin', 'Sensei']
       }
     },
-  ],
-  scrollBehavior() {
-    return { top: 0, behavior: 'smooth' };
-  }
 
 
-
+  ]
 });
 
 // Le GUARD de NAVIGATION

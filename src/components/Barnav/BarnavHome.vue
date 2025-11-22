@@ -42,7 +42,7 @@ const closeMenu = () => {
           </div>
         </div>
 
-        <router-link to="/sensei" @click="closeMenu">Sensei</router-link>
+        <router-link to="/equipe" @click="closeMenu">Sensei</router-link>
         <router-link to="/actualites" @click="closeMenu">Actualités</router-link>
         <router-link to="/evenements" @click="closeMenu">Évènements</router-link>
         <router-link to="/tarifs" @click="closeMenu">Tarifs</router-link>
@@ -53,11 +53,10 @@ const closeMenu = () => {
 
 
 <style scoped>
-/* GENERAL STYLES - HEADER & BOX-SIZING */
 header {
   position: fixed;
   width: 100%;
-  box-sizing: border-box; /* IMPORTANT: box-sizing: border-box est suffisant, le !important n'est pas nécessaire */
+  box-sizing: border-box;
   top: 0;
   left: 0;
   background: rgba(28, 28, 28, 0.394);
@@ -68,7 +67,7 @@ header {
   align-items: center;
   backdrop-filter: blur(10px);
   border-bottom: 2px solid rgba(255, 255, 255, .2);
-  z-index: 100; /* Augmenté pour s'assurer que le menu est toujours au-dessus */
+  z-index: 100;
 }
 
 .logoBarNav {
@@ -77,17 +76,15 @@ header {
   text-decoration: none;
   color: white;
   cursor: default;
-  z-index: 101; /* Doit être au-dessus du menu burger */
+  z-index: 101;
 }
 
 /* NAVIGATION DESKTOP */
 .navbar {
-  display: flex; /* Maintient l'affichage horizontal sur desktop */
-  align-items: center;
+  display: flex;
   transition: all 0.3s ease;
 }
 
-/* Style des liens de la barre de navigation et du bouton déroulant */
 .navbar a,
 .dropbtn {
   margin-left: 15px;

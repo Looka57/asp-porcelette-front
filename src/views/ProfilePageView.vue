@@ -12,8 +12,6 @@ const confirmPassword = ref('');
 const passwordError = ref('');
 const passwordSuccess = ref('');
 
-// Cette constante ne semble pas utilisée ici, mais pas d'impact
-// const API_PATH_PASSWORD = '/api/User/{userId}/profile';
 
 
 const userDetails = computed(() => {

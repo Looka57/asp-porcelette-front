@@ -1,317 +1,323 @@
 <script setup>
-import { ref, onMounted } from 'vue'; // Ajout de 'computed'
+import { ref, onMounted } from 'vue';
 import api from '@/api/axios';
-import SenseiFormFields from '@/components/Senseis/SenseiFormFields.vue';
-import UserFormFields from '@/components/Users/UserFormFields.vue';
-import UserTable from '@/components/Users/UserTable.vue';
 
-// --------------------
-// Références / état local
-// --------------------
-const userList = ref([]);
-const selectedDiscipline = ref('');
-const disciplineList = ref([]);
-const loading = ref(true);
-const error = ref(null);
-const photoFile = ref(null);
-const validationError = ref(''); // erreurs de validation affichées dans le modal
-const editingUserId = ref(null); // ID de l'utilisateur en cours d'édition
+const senseis = ref([]);
+const isLoading = ref(true);
+const errorMessage = ref(null);
 
-// --------------------
-// Helpers utilitaires
-// --------------------
-const getTodayDateISO = () => {
-  const now = new Date();
-  return now.toISOString().split('T')[0];
-};
+const disciplines = ref([]);
 
-const onFileChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    photoFile.value = file;
-  }
-};
+// NOTE: L'API 'User/admin/list' pourrait nécessiter une authentification.
+// Si cette page est publique, assurez-vous que cette route est accessible SANS jeton JWT.
+const API_PATH_USER = 'User/admin/list';
 
-// --------------------
-// Modèle du formulaire (nouveau Sensei)
-// --------------------
-const newSensei = ref({
-  nom: '',
-  prenom: '',
-  rueEtNumero: '', // 🟢 Utilise RueEtNumero
-  ville: '',
-  codePostal: '',
-  telephone: '',
-  email: '',
-  password: '',
-  grade: '',
-  dateNaissance: '',
-  disciplineId: '',
-  bio: '',
-  photoUrl: '',
-  dateAdhesion: getTodayDateISO(),
-  dateRenouvellement: getTodayDateISO(),
-  isSensei: true,
-  statut: 1,
-  roles: ['Sensei']
-});
-
-// --------------------
-// Fonctions utilitaires liées aux données
-// --------------------
-const getDisciplineName = (disciplineId) => {
-  const discipline = disciplineList.value.find(d => d.disciplineId === disciplineId);
-  return discipline ? discipline.nom : 'N/A';
-};
-
-const resetForm = () => {
-  newSensei.value = {
-    nom: '',
-    prenom: '',
-    email: '',
-    password: '',
-    rueEtNumero: '', // 🟢 CORRECTION: Doit être 'rueEtNumero' pour correspondre au modèle initial
-    ville: '',
-    codePostal: '',
-    telephone: '',
-    grade: '',
-    dateNaissance: '',
-    bio: '',
-    photoUrl: '',
-    disciplineId: '',
-    dateAdhesion: getTodayDateISO(),
-    dateRenouvellement: getTodayDateISO(),
-    isSensei: true,
-    statut: 1,
-    roles: ['Sensei']
-  };
-  selectedDiscipline.value = '';
-  validationError.value = '';
-  editingUserId.value = null; // Réinitialiser l'ID en cours d'édition
-  photoFile.value = null; // Réinitialiser la photo
-};
-
-// --------------------
-// Événements from child components / actions utilisateur
-// --------------------
-const handleEdit = (user) => {
-  console.log("Valeur de la biographie reçue de l'API :", user.bio);
-  editingUserId.value = user.id || user.userId; // Stocker l'ID de l'utilisateur en cours d'édition
-console.log('Utilisateur en édition:', user);
-  // Copier les données de l'utilisateur. L'opérateur de décomposition gère
-  // ville et codePostal si les noms correspondent (camelCase).
-  newSensei.value = {
-    ...user,
-    // Assurer que le champ d'adresse est mis à jour avec le bon nom
-    rueEtNumero: user.rueEtNumero || user.adresse || '',
-    bio: user.bio,
-    password: '' // Ne pas préremplir le mot de passe
-  };
-
-  selectedDiscipline.value = user.disciplineId ? String(user.disciplineId) : ''; // Mettre à jour la discipline sélectionnée
-  newSensei.value.password = ''; // Re-vérification de sécurité (déjà dans le spread)
-
-  const modalElement = document.getElementById('createAdherent');
-  if (modalElement) {
-    // L'objet window.bootstrap est normalement disponible si vous utilisez la librairie JS
-    const modal = new window.bootstrap.Modal(modalElement);
-    modal.show();
-  }
-  console.log('Utilisateur en édition:', user);
-};
-
-const handleDelete = async (userId) => {
-  if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-    return;
-  }
+// --- Fetch des sensei
+async function fetchSensei() {
   try {
-    await api.delete(`User/admin/${userId}`);
-    alert('Utilisateur supprimé avec succès.');
-    await loadSenseiData();
-  } catch (err) {
-    alert('Erreur lors de la suppression de l\'utilisateur.');
-    console.error(err);
-  }
-};
+    isLoading.value = true;
 
-// --------------------
-// Chargement / rechargement des données
-// --------------------
-const loadSenseiData = async () => {
-  try {
-    const response = await api.get('User/admin/list');
-    const allUsers = response.data || [];
-    userList.value = allUsers.filter(user => user.roles.includes('Admin') || user.roles.includes('Sensei'));
-    console.log("Liste des Senseis/Admins reçue:", userList.value);
-  } catch (err) {
-    error.value = 'Échec du rechargement de la liste des Sensei.';
-    console.error(err);
-  } finally {
-    loading.value = false;
-  }
-};
+    const response = await api.get(API_PATH_USER);
+    const allUsers = response.data;
 
-// --------------------
-// Soumission du formulaire (création / modification Sensei)
-// --------------------
-const saveNewSensei = async () => {
-  validationError.value = '';
-  const disciplineIdNum = Number(selectedDiscipline.value);
-  newSensei.value.disciplineId = disciplineIdNum;
+    // Filtrer les Sensei
+    const foundSensei = allUsers.filter(u => u.roles && u.roles.includes("Sensei"));
 
-  const isPasswordRequired = !editingUserId.value;
-
-  if (!newSensei.value.nom || !newSensei.value.email || !disciplineIdNum || (isPasswordRequired && !newSensei.value.password)) {
-    validationError.value = 'Veuillez remplir tous les champs obligatoires (Mot de passe requis pour l\'ajout).';
-    return;
-  }
-
-  try {
-    const formData = new FormData();
-    for (const key in newSensei.value) {
-      const value = newSensei.value[key];
-
-      // Ignorer les clés non pertinentes
-      if (key === 'roles' || key === 'adresse') { // 🟢 AJOUT: Ignorer l'ancien nom 'adresse'
-        continue;
-      }
-
-      // Ignorer le mot de passe s'il est vide (uniquement en mode édition)
-      if (key === 'password' && value === '') {
-        continue;
-      }
-
-      if (value !== null) {
-        // Envoie les clés en camelCase (nom, prenom, rueEtNumero, ville, codePostal, etc.)
-        formData.append(key, value);
-      }
-    }
-
-    if (photoFile.value) {
-      formData.append('PhotoFile', photoFile.value);
-    }
-
-    let response; // Déclaration unique de la variable de portée de bloc
-    let successMessage;
-
-    if (editingUserId.value) {
-      // REQUÊTE PUT (MODIFICATION)
-      response = await api.put(`User/admin/${editingUserId.value}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      successMessage = 'Sensei mis à jour avec succès !';
+    if (foundSensei.length > 0) {
+      senseis.value = foundSensei;
     } else {
-      // REQUÊTE POST (CRÉATION)
-      response = await api.post('/User/register/sensei', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      successMessage = 'Nouveau Sensei créé avec succès !';
+      errorMessage.value = "Aucun Sensei trouvé.";
     }
 
-    console.log('Réponse de l\'API:', response.data);
-    alert(successMessage);
-
-    // Fermeture du modal (nécessite l'API JS de Bootstrap)
-    const modalElement = document.getElementById('createAdherent');
-    if (modalElement) {
-      const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) modalInstance.hide();
-    }
-
-    await loadSenseiData();
-    resetForm(); // Réinitialise l'état d'édition
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement des Sensei :', error);
+    errorMessage.value = "Erreur lors du chargement des Sensei.";
+  } finally {
+    isLoading.value = false;
   }
-  catch (err) {
-    let errorMessage = 'Erreur lors de la création/modification du Sensei. Veuillez réessayer.';
-    if (err.response && err.response.data) {
-      if (err.response.data.message) {
-        errorMessage = `Erreur API: ${err.response.data.message}`;
-      } else if (typeof err.response.data === 'string') {
-        errorMessage = `Erreur de validation: ${err.response.data}`;
-      } else if (err.response.data.errors) {
-        const errorKeys = Object.keys(err.response.data.errors);
-        errorMessage = 'Erreur(s) de validation des champs: ' + errorKeys.map(key => `${key}: ${err.response.data.errors[key].join(', ')}`).join('; ');
-      }
-    }
-    validationError.value = errorMessage;
-    console.error('Erreur API détaillée:', err);
-  }
-};
+}
 
-// --------------------
-// Cycle de vie : montage
-// --------------------
-onMounted(async () => {
-  await loadSenseiData();
-
+async function fetchDisciplines() {
   try {
-    const reponse = await api.get('/Discipline');
-    disciplineList.value = reponse.data || [];
-  } catch (err) {
-    console.error("Erreur lors du chargement des disciplines:", err);
+    const response = await api.get('Discipline');
+    disciplines.value = response.data;
+  } catch (error) {
+    console.error("Erreur lors du chargement des disciplines :", error);
   }
+}
+// --- Construction de l’URL de la photo
+function getPhotoUrl(photoPath) {
+  const baseUrl = 'http://localhost:5067';
+  if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
+    return `${baseUrl}${photoPath}`;
+  }
+  return '../assets/img/denki.webp';
+}
+
+// Retourne le nom de la discipline selon l'id
+function getDisciplineName(id) {
+  const disciplineFound = disciplines.value.find(d => d.disciplineId === id);
+  return disciplineFound ? disciplineFound.nom : 'Toutes disciplines';
+}
+
+// console.log('sensei',senseis.value) // Gardé pour le débogage si besoin
+
+// --- Couleur selon disciplineId
+function getDisciplineColorId(id) {
+  switch (id) {
+    case 1: return '#d9534f';       // Judo
+    case 2: return '#0275d8';       // Aikido
+    case 3: return '#5cb85c';       // Jujitsu
+    case 4: return '#f0ad4e';       // Judo détente
+    default: return '#ffc107';      // Jaune par défaut
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([fetchSensei(), fetchDisciplines()]);
 });
 </script>
 
 <template>
-  <div class="container-fluid bg-dark text-white min-h-screen p-4">
-    <h1 class="m-3 text-center">Liste des Senseis</h1>
-    <button class="mb-3 btn btn-outline-warning d-flex align-items-center" data-bs-toggle="modal"
-      data-bs-target="#createAdherent">
-      <i class="pi pi-plus-circle me-2"></i> Ajout Sensei
-    </button>
-
-    <div class="modal fade" id="createAdherent" tabindex="-1" aria-labelledby="createAdherentLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content modalDesign bg-light text-dark rounded-lg shadow-2xl">
-          <div class="modal-header border-b-2 border-gray-200">
-            <h1 class="modal-title fs-5" id="createrAdherentHeader">
-              {{ editingUserId ? 'Modifier le Sensei' : 'Créer un nouveau Sensei' }}
-            </h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-              @click="resetForm"></button>
-          </div>
-          <div class="modal-body">
-            <div v-if="validationError" class="alert alert-danger" role="alert">
-              {{ validationError }}
-            </div>
-
-            <form @submit.prevent="saveNewSensei">
-              <UserFormFields v-model="newSensei" :isPasswordRequired="!editingUserId" />
-              <SenseiFormFields v-model="newSensei" v-model:selectedDiscipline="selectedDiscipline"
-                :disciplineList="disciplineList" @file-change="onFileChange" />
-              <div class="modal-footer border-t-2 border-gray-200">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                  @click="resetForm">Fermer</button>
-                <button type="submit" class="btn btn-warning">Sauvegarder</button>
-              </div>
-            </form>
-          </div>
+  <!-- 🛑 SUPPRESSION DU CONTENEUR DE LAYOUT REDONDANT 🛑 -->
+  <!-- Le FrontLayout.vue parent fournit déjà l'enveloppe bg-dark et min-vh-100 -->
+  <!-- Nous laissons uniquement le contenu de la page : -->
+  <div class="sensei-page-content">
+    <div class="imgBaniereJudo">
+      <div class="titlePrincipal">
+        <div class="overlay">
+          <h1 class="display-3 text-uppercase text-warning">Nos Senseis</h1>
+          <p class="lead text-white fw-light mb-4">Expertise, passion et transmission.</p>
+          <p class="text-white px-5 intro-text">
+            Découvrez l'équipe d'encadrement de l'AS Porcelette qui vous guidera tout au long de votre parcours.
+          </p>
         </div>
       </div>
     </div>
 
-    <div v-if="loading" class="text-secondary p-4 text-center">Chargement de la liste des Sensei...</div>
-    <div v-else-if="error" class="text-red-600 p-4 border rounded bg-danger bg-opacity-10">{{ error }}</div>
-    <div v-else>
-      <div v-if="userList.length === 0" class="text-light p-4 border rounded bg-dark-subtle text-center">
-        Aucun Sensei ou Admin trouvé pour le moment.
-      </div>
-      <div v-else>
-        <UserTable :userList="userList" :getDisciplineName="getDisciplineName" @edit="handleEdit"
-          @delete="handleDelete" />
+    <div class="container-fluid py-5">
+      <div class="containerSensei">
+        <h3 class="section-title text-uppercase display-5 text-warning text-center mb-5">L'ÉQUIPE PÉDAGOGIQUE</h3>
 
+        <div v-if="isLoading" class="text-center py-5">
+          <div class="spinner-border text-warning" role="status"></div>
+          <p class="mt-3">Chargement des Sensei...</p>
+        </div>
+        <div v-else-if="errorMessage" class="alert alert-danger text-center">{{ errorMessage }}</div>
+
+        <div v-else class="row g-4 justify-content-center">
+          <div v-for="sensei in senseis" :key="sensei.userId" class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card card-sensei h-100 bg-dark text-light" :style="{
+              border: '3px solid ' + getDisciplineColorId(sensei.disciplineId),
+              '--discipline-color': getDisciplineColorId(sensei.disciplineId)
+            }">
+              <div class="card-img-container">
+                <img :src="getPhotoUrl(sensei.photoUrl)" :alt="sensei.nom" class="card-img-top-sensei" />
+              </div>
+              <div class="card-body text-center pt-4">
+                <h5 class="card-title fw-bold">{{ sensei.prenom }} {{ sensei.nom }}</h5>
+                <p class="card-subtitle mb-2">{{ sensei.grade || 'Ceinture Noire - Grade non précisé' }}</p>
+                <p class="card-text disciplines">
+                  Discipline : <span>{{ getDisciplineName(sensei.disciplineId) }}</span>
+                </p>
+
+                <router-link :to="`/equipeDetailView/${sensei.id}`"
+                  class="btn mt-3"
+                  :class="`btn-discipline-${sensei.disciplineId}`" :style="{
+                    backgroundColor: 'var(--discipline-color)',
+                    borderColor: 'var(--discipline-color)',
+                    color: '#1a1a1a'
+                  }">
+                  VOIR LE PROFIL
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* --------------------
-Styles locaux du composant
--------------------- */
-.modalDesign {
-  background-color: #f8f9fa;
-  color: #212529;
+/* Le conteneur principal a été supprimé du template, mais on peut garder les styles */
+.sensei-page-content {
+    /* Style wrapper si nécessaire, mais ici on le laisse vide car le layout parent gère le fond */
+    padding: 0;
+    margin: 0;
+}
+
+.imgBaniereJudo {
+  position: relative;
+  background-image: url('@/assets/img/banniereSensei.png');
+  background-size: cover;
+  background-position: center 22%;
+  width: 100%;
+  height: 650px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  text-align: center;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 2rem;
+}
+
+.overlay h1 {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 6px #000;
+}
+
+.overlay p {
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px #000;
+}
+
+.overlay .intro-text {
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin-top: 15px;
+}
+
+
+
+
+
+.containerSensei {
+  width: 90%;
+  max-width: 1200px;
+  margin: 50px auto;
+}
+
+.card-sensei {
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  background-color: #1a1a1a !important;
+}
+
+.card-sensei:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(255, 254, 252, 0.2);
+}
+
+.card-img-container {
+  position: relative;
+  padding: 15px;
+  overflow: hidden;
+  border-radius: 12px;
+  filter: grayscale(1);
+  margin: 15px;
+}
+
+.card-img-top-sensei {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px;
+  filter: brightness(0.9);
+}
+
+.card-body {
+  padding: 1.5rem;
+  padding-top: 0;
+}
+
+.card-title {
+  font-size: 1.6rem;
+  color: #fff;
+  text-shadow: 0 1px 2px #000;
+}
+
+.card-subtitle {
+  font-style: normal;
+  font-size: 0.9rem;
+  color: #ccc;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.disciplines {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #999;
+}
+
+.disciplines span {
+  font-weight: bold;
+}
+
+/* Styles généraux des boutons outline */
+.btn[class^="btn-discipline-"] {
+  background-color: transparent;
+  border-width: 2px;
+  border-style: solid;
+  color: inherit;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+/* Couleurs par discipline */
+.btn-discipline-1 {
+  border-color: #d9534f;
+  color: #d9534f;
+}
+
+/* Judo */
+.btn-discipline-2 {
+  border-color: #0275d8;
+  color: #0275d8;
+}
+
+/* Aikido */
+.btn-discipline-3 {
+  border-color: #5cb85c;
+  color: #5cb85c;
+}
+
+/* Jujitsu */
+.btn-discipline-4 {
+  border-color: #f0ad4e;
+  color: #f0ad4e;
+}
+
+/* Judo détente */
+
+/* Hover */
+.btn-discipline-1:hover {
+  background-color: #d9534f;
+  color: #1a1a1a;
+}
+
+.btn-discipline-2:hover {
+  background-color: #0275d8;
+  color: #1a1a1a;
+}
+
+.btn-discipline-3:hover {
+  background-color: #5cb85c;
+  color: #1a1a1a;
+}
+
+.btn-discipline-4:hover {
+  background-color: #f0ad4e;
+  color: #1a1a1a;
 }
 </style>
