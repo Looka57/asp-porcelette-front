@@ -3,12 +3,31 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/axios';
 
+// Assurez-vous que le chemin d'accès à l'image par défaut est correct
 import PlaceholderImage from '@/assets/img/placeholder-styling.jpg';
 
 const route = useRoute();
 const evenement = ref(null);
 const isLoading = ref(true);
 const errorMessage = ref(null);
+
+// **AJOUT D'OBJETS ET FONCTIONS POUR LES ICÔNES DE DISCIPLINE**
+
+
+const imageDiscipline = {
+  1: new URL('@/assets/img/icones/judo.png', import.meta.url).href,
+  2: new URL('@/assets/img//icones/aikido.png', import.meta.url).href,
+  3: new URL('@/assets/img//icones/jujitsu.png', import.meta.url).href,
+  4: new URL('@/assets/img//icones/judo-detente.png', import.meta.url).href
+}
+
+function getImageIconDiscipline(disciplineId) {
+  // Utilise l'icône de la discipline si l'ID est valide, sinon l'image par défaut générique
+  return imageDiscipline[disciplineId] || PlaceholderImage;
+}
+
+// **FIN AJOUT**
+
 
 async function fetchEvenement() {
   const evenementId = route.params.id;
@@ -22,6 +41,7 @@ async function fetchEvenement() {
     isLoading.value = true;
     const response = await api.get(`/Evenement/${evenementId}`);
     evenement.value = response.data;
+    // NOTE: L'objet evenement.value doit contenir 'disciplineId' pour que l'icône fonctionne.
 
   } catch (_error) {
     console.error("Erreur API lors du chargement de l'evenement:", _error);
@@ -81,9 +101,9 @@ onMounted(fetchEvenement);
         </p>
       </header>
 
-      <figure class="mb-5">
-        <img :src="getPhotoUrl(evenement.imageUrl) || PlaceholderImage" class="img-fluid rounded shadow-lg"
-          alt="Image de l'actualité" style="max-height: 500px; width: 100%; object-fit: cover;" />
+      <figure class="mb-5 imageDiscipline">
+        <img :src="getPhotoUrl(evenement.imageUrl) || getImageIconDiscipline(evenement.disciplineId)"
+          class="img-fluid rounded shadow-lg" alt="Image de l'actualité" />
       </figure>
 
       <article class="evenement-contenu mb-5">
@@ -124,6 +144,17 @@ onMounted(fetchEvenement);
 
 .text-danger {
   color: #dc3545 !important;
+}
+
+.imageDiscipline{
+ display: flex;
+ justify-content: center;
+}
+
+.imageDiscipline img{
+      max-height: 500px;
+      width: 50%;
+      object-fit: cover;
 }
 
 .retour {

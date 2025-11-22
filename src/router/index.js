@@ -86,6 +86,7 @@ const router = createRouter({
         }
 
       ]
+
     },
     // ===============================================
     // ROUTES NON-LAYOUT (Login, Erreur)
@@ -205,9 +206,13 @@ const router = createRouter({
         roles: ['Admin', 'Sensei']
       }
     },
+  ],
+  scrollBehavior() {
+    return { top: 0, behavior: 'smooth' };
+  }
 
-    // ... autres routes (ex: /profile, /admin/users)
-  ]
+
+
 });
 
 // Le GUARD de NAVIGATION

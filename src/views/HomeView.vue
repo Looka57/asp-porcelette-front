@@ -47,7 +47,7 @@ const closeModal = () => {
                     <hr>
                     <p class="mb-1 fw-bold">📍 Nouvelle Adresse Temporaire :</p>
                     <p class="mb-3 fs-5">
-                        Complexe de Tennis <br>
+                        Complexe Sportif de Tennis <br>
                     </p>
                     <p class="small text-muted">
                         Cette disposition est en vigueur jusqu'à nouvel ordre. Veuillez consulter la section "Actualités" pour les mises à jour.
