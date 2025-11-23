@@ -207,8 +207,8 @@ onMounted(async () => {
                   <SenseiBulleLogoView :discipline-id="sensei.disciplineId" />
                 </div>
               </div>
-              <button @click="$router.back()" class="btn btn-warning mt-4">
-                Retour aux Sensei
+              <button @click="$router.back()" class="btn btn-outline-warning mt-4">
+                Retour aux Senseis
               </button>
             </div>
           </div>

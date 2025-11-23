@@ -113,6 +113,7 @@ onMounted(fetchCours);
               <div class="senseiCours ">
                 <h4 class="display-6 text-warning mb-3">Sensei</h4>
                 <p class="fs-5" v-if="cours.sensei">
+                      <i class="pi pi-user me-2 text-warning"></i>
                   {{ cours.sensei.prenom }} {{ cours.sensei.nom }}
                 </p>
                 <p v-else class="text-secondary">

@@ -160,14 +160,14 @@ onMounted(() => {
                   {{ actu.titre || 'Actualité' }}
                 </h5>
 
-                <p class="card-text text-light description-text">
+                <p class="card-text text-light description-text text-truncate">
                   {{ actu.contenu || 'Aucune description disponible.' }}
                 </p>
 
-                <img :src="actu.imageUrl
+                <img  :src="actu.imageUrl
                   ? `http://localhost:5067${actu.imageUrl}`
                   : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" alt="Événement"
-                  class="w-100 mb-3">
+                  class="news-image mb-3">
 
                   <router-link :to="`/actualite/${actu.actualiteId}`"  class="btn btn-success fw-bold">
                    Lire l'actualité
@@ -275,11 +275,18 @@ onMounted(() => {
   font-size: 1.3rem;
 }
 
+.news-image {
+width: 100%;
+height: 200px;
+object-fit: cover;
+border-radius: 6px;
+}
+
 .description-text {
   flex-grow: 1;
-  /* Permet à la description de prendre tout l'espace avant le bouton */
   margin-bottom: 15px;
   font-size: 0.9rem;
+
 }
 
 .btn-success{

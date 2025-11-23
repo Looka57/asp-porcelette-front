@@ -42,7 +42,7 @@ const closeMenu = () => {
           </div>
         </div>
 
-        <router-link to="/equipe" @click="closeMenu">Sensei</router-link>
+        <router-link to="/equipe" @click="closeMenu">Senseis</router-link>
         <router-link to="/actualites" @click="closeMenu">Actualités</router-link>
         <router-link to="/evenements" @click="closeMenu">Évènements</router-link>
         <router-link to="/tarifs" @click="closeMenu">Tarifs</router-link>
