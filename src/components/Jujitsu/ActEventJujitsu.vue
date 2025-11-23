@@ -206,7 +206,7 @@ onMounted(() => {
                 <p class="card-text text-light description-text ">{{ evenement.description || 'Pas de description disponible.' }}</p>
 
                 <!-- Bouton -->
-               <router-link :to="`/evenement/${evenement.evenementId}`"  class="btn btn-danger fw-bold mt-auto stretched-link">
+               <router-link :to="`/evenement/${evenement.evenementId}`"  class="btn btn-success fw-bold mt-auto stretched-link">
                    Lire l'actualité
                   </router-link>
               </div>

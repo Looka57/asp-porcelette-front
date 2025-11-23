@@ -125,12 +125,14 @@ onMounted(fetchSensei)
 }
 
 .border-jujitsu {
-  border: 5px solid #e7d25c;
+  border: 5px solid #38ef7d;
+  border: 5px solid #38ef7d;
+  border: 5px solid #38ef7d;
 
 }
 
 .border-detente {
-  border: 5px solid #38ef7d;
+  border: 5px solid #e7d25c;
 
 }
 

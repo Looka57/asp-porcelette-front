@@ -119,8 +119,8 @@ const { depensesDisciplinesData, chartOptions: chartOptionsDisciplines } =
 // 🔹 ICONES PAR DÉFAUT
 // ===============================
 const comptaIcons = {
-    2: 'https://img.icons8.com/bubbles/100/money.png', // Compte courant
-    3: 'https://img.icons8.com/bubbles/100/stack-of-money.png', // Compte épargne
+    1: 'https://img.icons8.com/bubbles/100/money.png', // Compte courant
+    2: 'https://img.icons8.com/bubbles/100/stack-of-money.png', // Compte épargne
 };
 function getIconUrl(compteId) {
     return comptaIcons[compteId] || 'https://img.icons8.com/color/96/money.png';

@@ -54,8 +54,8 @@ const currentYearGlobal = computed(() => {
 
 // 🔹 Icônes
 const comptaIcons = {
-  2: 'https://img.icons8.com/bubbles/100/bank.png',
-  3: 'https://img.icons8.com/bubbles/100/stack-of-money.png',
+  1: 'https://img.icons8.com/bubbles/100/bank.png',
+  2: 'https://img.icons8.com/bubbles/100/stack-of-money.png',
 };
 function getIconUrl(compteId) {
   return comptaIcons[compteId] || 'https://img.icons8.com/color/96/money.png';
