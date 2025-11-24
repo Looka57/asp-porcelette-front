@@ -37,7 +37,7 @@ onMounted(() => {
       <h2 class="mb-0">Gestion des Transactions</h2>
       <button class="btn btn-outline-warning d-flex align-items-center" @click="showModal = true">
         <i class="pi pi-plus-circle me-2"></i>
-        Ajouter une dépense
+        Ajouter une transaction
       </button>
     </div>
       <button class="btn btn-outline-warning d-flex align-items-center" @click="$router.back()">
