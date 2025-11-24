@@ -39,21 +39,33 @@ watch(
   () => props.user,
   (newUser) => {
     if (newUser) {
+      // Formatter la date de naissance correctement
+      let dateNaissance = '';
+      if (newUser.dateNaissance) {
+        dateNaissance = newUser.dateNaissance.includes('T')
+          ? newUser.dateNaissance.split('T')[0]
+          : newUser.dateNaissance.substring(0, 10);
+      }
+
       form.value = {
         nom: newUser.nom || '',
         prenom: newUser.prenom || '',
         email: newUser.email || '',
         telephone: newUser.telephone || '',
-        adresse: newUser.rueEtNumero || '',
+        adresse: newUser.rueEtNumero || '',  // ✅ Mapper RueEtNumero → adresse
         ville: newUser.ville || '',
         codePostal: newUser.codePostal || '',
         disciplineId: newUser.disciplineId || null,
-        dateDeNaissance: newUser.dateNaissance || '',
-        dateAdhesion: newUser.dateAdhesion || new Date().toISOString(),
-        dateRenouvellement: newUser.dateRenouvellement || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
-        statut: newUser.statut || "Actif"
+        dateDeNaissance: dateNaissance,
+        dateAdhesion: newUser.dateAdhesion || new Date().toISOString().split('T')[0],
+        dateRenouvellement: newUser.dateRenouvellement || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+        statut: newUser.statut === 1 ? "Actif" : "Inactif"
       };
+
+      console.log('📋 Formulaire initialisé avec:', form.value);
+      console.log('📅 Date de naissance chargée:', form.value.dateDeNaissance);
     } else {
+      // Réinitialisation pour création
       form.value = {
         nom: '',
         prenom: '',
@@ -64,8 +76,8 @@ watch(
         codePostal: '',
         disciplineId: null,
         dateDeNaissance: '',
-        dateAdhesion: new Date().toISOString(),
-        dateRenouvellement: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+        dateAdhesion: new Date().toISOString().split('T')[0],
+        dateRenouvellement: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
         statut: "Actif"
       };
     }
@@ -78,87 +90,143 @@ watch(
 // Fichier : CreateLicencierModal.vue
 
 const submitAdherent = async () => {
-    loading.value = true;
-    error.value = null;
+  console.log('🚀 ========== FONCTION submitAdherent APPELÉE ==========');
+  console.log('👤 props.user:', props.user);
+  console.log('📋 form.value:', form.value);
+  console.log('🆔 userId:', props.user?.userId);
+  loading.value = true;
+  error.value = null;
 
-    // Si c'est une MODIFICATION (PUT)
-    if (props.user && props.user.userId) {
+  // =============================
+  // 🔹 MODIFICATION (PUT)
+  // =============================
+  if (props.user && props.user.userId) {
+    console.log('📤 === DÉBUT MODIFICATION ===');
+    console.log('📦 Données du formulaire:', form.value);
+    console.log('📅 Date de naissance:', form.value.dateDeNaissance);
 
-        const formData = new FormData();
+    const formData = new FormData();
 
-        // 2. Ajoutez chaque champ du payload au FormData
-        // Note : J'ai retiré le UserId de la route PUT car il est déjà dans l'URL,
-        // mais nous allons le laisser car votre DTO C# pourrait l'exiger.
-        formData.append('UserId', props.user.userId);
-        formData.append('Nom', form.value.nom);
-        formData.append('Prenom', form.value.prenom);
-        formData.append('Email', form.value.email);
-        formData.append('Telephone', form.value.telephone);
+    // ✅ MAPPING CORRECT : Vue → C# DTO
+    formData.append('Nom', form.value.nom || '');
+    formData.append('Prenom', form.value.prenom || '');
+    formData.append('Email', form.value.email || '');
+    formData.append('Telephone', form.value.telephone || '');
 
-        // Assurez-vous que les dates sont envoyées dans un format correct, idéalement YYYY-MM-DD
-        // Utilisez le format de date ISO pour les dates
-        formData.append('DateDeNaissance', form.value.dateDeNaissance);
+    // 🎯 CORRECTION : Mapper correctement l'adresse
+    formData.append('RueEtNumero', form.value.adresse || '');  // ✅ Était 'Adresse'
+    formData.append('Ville', form.value.ville || '');
+    formData.append('CodePostal', form.value.codePostal || '');
 
-        // Mappage d'adresse/ville/code postal
-        formData.append('Adresse', form.value.adresse);
-        formData.append('Ville', form.value.ville);
-        formData.append('CodePostal', form.value.codePostal);
+    // 🎯 CORRECTION : Date de naissance
+    if (form.value.dateDeNaissance) {
+      // Assurez-vous que la date est au format YYYY-MM-DD
+      const dateFormatted = form.value.dateDeNaissance.includes('T')
+        ? form.value.dateDeNaissance.split('T')[0]
+        : form.value.dateDeNaissance;
 
-        // Mappage de DisciplineId
-        if (form.value.disciplineId) {
-            // Assurez-vous que l'ID est un nombre ou une chaîne simple
-            formData.append('DisciplineId', form.value.disciplineId);
-        } else {
-            // Si la DisciplineId est requise mais manquante (cela pourrait causer un 400)
-            formData.append('DisciplineId', '');
+      formData.append('DateDeNaissance', dateFormatted);
+      console.log('✅ DateDeNaissance ajoutée:', dateFormatted);
+    } else {
+      console.warn('⚠️ Pas de date de naissance à envoyer');
+    }
+
+    // Dates d'adhésion et renouvellement
+    if (form.value.dateAdhesion) {
+      const dateAdhesion = form.value.dateAdhesion.includes('T')
+        ? form.value.dateAdhesion.split('T')[0]
+        : form.value.dateAdhesion;
+      formData.append('DateAdhesion', dateAdhesion);
+    }
+
+    if (form.value.dateRenouvellement) {
+      const dateRenouvellement = form.value.dateRenouvellement.includes('T')
+        ? form.value.dateRenouvellement.split('T')[0]
+        : form.value.dateRenouvellement;
+      formData.append('DateRenouvellement', dateRenouvellement);
+    }
+
+    // Discipline
+    if (form.value.disciplineId) {
+      formData.append('DisciplineId', form.value.disciplineId);
+    }
+
+    // Statut (convertir "Actif" en 1, "Inactif" en 0)
+    // const statutValue = form.value.statut === 'Actif' || form.value.statut === 1 ? 1 : 0;
+    // formData.append('Statut', statutValue);
+
+    // Autres champs optionnels
+    formData.append('Username', props.user.userName || props.user.email || '');
+    formData.append('Grade', props.user.grade || '');
+    formData.append('Bio', props.user.bio || '');
+
+    // Ne pas envoyer PhotoUrl si vide (laisser le backend gérer)
+    if (props.user.photoUrl) {
+      formData.append('PhotoUrl', props.user.photoUrl);
+    }
+
+    // 🔍 DEBUG : Afficher le contenu du FormData
+    console.log('📦 === CONTENU FORMDATA ===');
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}:`, value);
+    }
+
+    try {
+      const response = await api.put(`/User/admin/${props.user.userId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
         }
+      });
 
-        // Mappage des autres champs pour le DTO C# (UserAdminUpdateDto)
-        formData.append('Statut', form.value.statut);
-        formData.append('Username', props.user.userName || props.user.email);
-        formData.append('Grade', props.user.grade || '');
-        formData.append('Bio', props.user.bio || '');
-        formData.append('PhotoUrl', props.user.photoUrl || '');
-        formData.append('DateAdhesion', form.value.dateAdhesion);
-        formData.append('DateRenouvellement', form.value.dateRenouvellement);
+      console.log('✅ Réponse du serveur:', response.data);
+      alert('✅ Adhérent modifié avec succès !');
+      emit('refresh');
+      emit('close');
 
-
-        try {
-            // PUT /api/User/admin/{id}
-            await api.put(`/User/admin/${props.user.userId}`, formData);
-        } catch (err) { // <--- Bloc catch correctement placé
-            console.error('Erreur lors de la mise à jour :', err);
-            // Si le serveur retourne un message d'erreur spécifique, essayez de l'afficher
-            error.value = err.response?.data?.message || "Erreur lors de la mise à jour de l'adhérent.";
-        }
+    } catch (err) {
+      console.error('❌ Erreur lors de la mise à jour:', err);
+      console.error('❌ Détails:', err.response?.data);
+      error.value = err.response?.data?.message ||
+                    err.response?.data?.Message ||
+                    "Erreur lors de la mise à jour de l'adhérent.";
+      alert(error.value);
     }
-    // Si c'est une CRÉATION (POST)
-    else {
-        // Pour la création, vous pouvez laisser le spread car le backend attend généralement le formulaire complet.
-        const createPayload = { ...form.value };
-        try {
-            // Note: Si la route POST /User/register/adherent attend aussi du [FromForm], vous devrez utiliser FormData ici aussi !
-            await api.post('User/register/adherent', createPayload);
-        } catch (err) {
-    console.error('Erreur lors de l\'enregistrement :', err);
+  }
 
-    const apiMessage =
-        err.response?.data?.Message ||
-        err.response?.data?.message ||
-        "Erreur lors de l'enregistrement du nouvel adhérent.";
+  // =============================
+  // 🔹 CRÉATION (POST)
+  // =============================
+  else {
+    try {
+      const createPayload = {
+        Nom: form.value.nom,
+        Prenom: form.value.prenom,
+        Email: form.value.email,
+        Telephone: form.value.telephone,
+        Adresse: form.value.adresse,  // Pour la création, le backend attend 'Adresse'
+        Ville: form.value.ville,
+        CodePostal: form.value.codePostal,
+        DisciplineId: form.value.disciplineId,
+        DateDeNaissance: form.value.dateDeNaissance,
+        DateAdhesion: form.value.dateAdhesion,
+      };
 
-    error.value = apiMessage;
-    alert(apiMessage); // ou ton système de notification
-}
+      await api.post('User/register/adherent', createPayload);
+      alert('✅ Adhérent créé avec succès !');
+      emit('refresh');
+      emit('close');
+
+    } catch (err) {
+      console.error('❌ Erreur lors de la création:', err);
+      const apiMessage = err.response?.data?.Message ||
+                        err.response?.data?.message ||
+                        "Erreur lors de l'enregistrement du nouvel adhérent.";
+      error.value = apiMessage;
+      alert(apiMessage);
     }
+  }
 
-    // Gestion du succès / nettoyage
-    if (!error.value) {
-        emit('refresh');
-        emit('close');
-        console.log("✅ Adhérent enregistré/modifié avec succès !");
-    }
-    loading.value = false;
+  loading.value = false;
 };
 
 

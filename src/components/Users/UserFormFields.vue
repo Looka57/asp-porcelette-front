@@ -36,6 +36,11 @@ const updateField = (field, value) => {
     [field]: value
   });
 };
+
+const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    return dateString.substring(0, 10);
+};
 </script>
 
 <template>
@@ -165,7 +170,7 @@ const updateField = (field, value) => {
     <div class="col-md-6">
       <label for="Birth" class="form-label">Date de naissance</label>
       <input
-        :value="modelValue.dateNaissance"
+        :value="formatDateForInput(modelValue.dateNaissance)"
         @input="e => updateField('dateNaissance', e.target.value)"
         type="date"
         class="form-control"

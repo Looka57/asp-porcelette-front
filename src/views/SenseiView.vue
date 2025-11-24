@@ -45,7 +45,7 @@ const newSensei = ref({
   email: '',
   password: '',
   grade: '',
-  dateNaissance: '',
+  dateDeNaissance: '',
   disciplineId: '',
   bio: '',
   photoUrl: '',
@@ -75,7 +75,7 @@ const resetForm = () => {
     codePostal: '',
     telephone: '',
     grade: '',
-    dateNaissance: '',
+    dateDeNaissance: '',
     bio: '',
     photoUrl: '',
     disciplineId: '',
@@ -97,7 +97,7 @@ const resetForm = () => {
 const handleEdit = (user) => {
   console.log("Valeur de la biographie reçue de l'API :", user.bio);
   editingUserId.value = user.id || user.userId; // Stocker l'ID de l'utilisateur en cours d'édition
-console.log('Utilisateur en édition:', user);
+  console.log('Utilisateur en édition:', user);
   // Copier les données de l'utilisateur. L'opérateur de décomposition gère
   // ville et codePostal si les noms correspondent (camelCase).
   newSensei.value = {
@@ -105,7 +105,8 @@ console.log('Utilisateur en édition:', user);
     // Assurer que le champ d'adresse est mis à jour avec le bon nom
     rueEtNumero: user.rueEtNumero || user.adresse || '',
     bio: user.bio,
-    password: '' // Ne pas préremplir le mot de passe
+    password: '', // Ne pas préremplir le mot de passe
+    dateDeNaissance: user.dateDeNaissance || ''
   };
 
   selectedDiscipline.value = user.disciplineId ? String(user.disciplineId) : ''; // Mettre à jour la discipline sélectionnée
@@ -169,7 +170,7 @@ const saveNewSensei = async () => {
   try {
     const formData = new FormData();
     for (const key in newSensei.value) {
-      const value = newSensei.value[key];
+      let value = newSensei.value[key];
 
       // Ignorer les clés non pertinentes
       if (key === 'roles' || key === 'adresse') { // 🟢 AJOUT: Ignorer l'ancien nom 'adresse'
@@ -180,6 +181,26 @@ const saveNewSensei = async () => {
       if (key === 'password' && value === '') {
         continue;
       }
+
+      // 💡 CORRECTION POUR LA DATE DE NAISSANCE
+     if (key === 'dateDeNaissance' && value) {
+        // 'value' est au format 'YYYY-MM-DD'.
+        const dateObj = new Date(value);
+        if (!isNaN(dateObj)) {
+            // Envoyer la date au format ISO 8601 complet (ex: 1985-05-17T00:00:00.000Z)
+            // C# gère mieux la désérialisation de ce format
+            value = dateObj.toISOString();
+        } else {
+            console.warn(`Date de naissance invalide trouvée : ${value}`);
+            continue;
+        }
+    }
+    // ...
+
+    if (value !== null) {
+        // C'est ici que la valeur ISO formatée sera ajoutée si 'key' était 'dateDeNaissance'
+        formData.append(key, value);
+    }
 
       if (value !== null) {
         // Envoie les clés en camelCase (nom, prenom, rueEtNumero, ville, codePostal, etc.)
