@@ -212,8 +212,8 @@ onMounted(fetchActualites);
           <div class="mt-2 ms-3 cards-grid">
             <div v-for="article in articles" :key="article.actualiteId" class="card card-actualite">
               <img :src="article.imageUrl
-                ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)
-                : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" class="card-img-top"
+                ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5070' + article.imageUrl)
+                : 'http://localhost:5070/images/actualites/placeholder-styling.jpg'" class="card-img-top"
                 alt="Image Actualité" />
               <div class="card-body">
                 <h5 class="card-title text-warning">{{ article.titre }}</h5>
@@ -241,8 +241,8 @@ onMounted(fetchActualites);
           <div class="mt-2 ms-3 cards-grid">
             <div v-for="article in articles" :key="article.actualiteId" class="card card-actualite">
               <img :src="article.imageUrl
-                ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)
-                : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" class="card-img-top"
+                ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5070' + article.imageUrl)
+                : 'http://localhost:5070/images/actualites/placeholder-styling.jpg'" class="card-img-top"
                 alt="Image Actualité" />
               <div class="card-body">
                 <h5 class="card-title text-warning">{{ article.titre }}</h5>
@@ -262,8 +262,8 @@ onMounted(fetchActualites);
   <div v-else class="cards-grid cardsActualite">
     <div v-for="article in filteredListUnpaged" :key="article.actualiteId" class="card card-actualite">
       <img :src="article.imageUrl
-        ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5067' + article.imageUrl)
-        : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" class="card-img-top"
+        ? (article.imageUrl.startsWith('http') ? article.imageUrl : 'http://localhost:5070' + article.imageUrl)
+        : 'http://localhost:5070/images/actualites/placeholder-styling.jpg'" class="card-img-top"
         alt="Image Actualité" />
       <div class="card-body d-flex flex-column justify-content-between">
         <div>

@@ -45,7 +45,7 @@ async function fetchDisciplines() {
 }
 // --- Construction de l’URL de la photo
 function getPhotoUrl(photoPath) {
-  const baseUrl = 'http://localhost:5067';
+  const baseUrl = 'http://localhost:5070';
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
     return `${baseUrl}${photoPath}`;
   }

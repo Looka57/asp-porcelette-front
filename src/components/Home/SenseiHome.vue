@@ -57,7 +57,7 @@ function getBorderClass(disciplineId) {
 // 🔹 CONSTRUCTION DE L’URL DE LA PHOTO
 // ===============================
 function getPhotoUrl(photoPath) {
-  const baseUrl = 'http://localhost:5067'; // ✅ pas de https
+  const baseUrl = 'http://localhost:5070'; // ✅ pas de https
 
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
     return `${baseUrl}${photoPath}`;

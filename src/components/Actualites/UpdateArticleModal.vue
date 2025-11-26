@@ -260,7 +260,7 @@ watch(() => [props.modelValue, props.articleId], ([isOpen, id]) => {
 
                   <div v-if="articleToUpdate.imageUrl" class="mb-3 d-flex align-items-center">
                     <img :src="articleToUpdate.imageUrl.startsWith('/')
-                      ? 'http://localhost:5067' + articleToUpdate.imageUrl
+                      ? 'http://localhost:5070' + articleToUpdate.imageUrl
                       : articleToUpdate.imageUrl" alt="Image actuelle" class="img-thumbnail"
                       style="max-height: 80px; max-width: 80px; object-fit: cover; margin-right: 15px;">
                     <div class="form-check">

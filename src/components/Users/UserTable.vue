@@ -1,7 +1,7 @@
 
 <script setup>
 
-const API_BASE_URL = 'http://localhost:5067'; // 🟢 UTILISEZ LE PORT HTTP
+const API_BASE_URL = 'http://localhost:5070'; // 🟢 UTILISEZ LE PORT HTTP
 // Définissez ce chemin après avoir déplacé l'image dans /public/img/
 const DEFAULT_PHOTO_PATH = '/img/default-profile.png';
 

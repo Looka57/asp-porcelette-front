@@ -1,11 +1,10 @@
 import axios from 'axios';
 
 // Détection Docker vs local
-const isDocker = window.location.hostname !== 'localhost';
-const baseURL = isDocker
-  ? 'http://backend:8080/api/'   // FRONTEND -> BACKEND (réseau Docker)
-  : 'http://localhost:5067/api/'; // PC local (BDD pleine)
-
+// const isDocker = window.location.hostname !== 'localhost';
+const baseURL = window.location.port === '8080'
+  ? 'http://localhost:5070/api/'  // Via Docker (frontend sur port 8080)
+  : 'http://localhost:5070/api/'; // En local direct
 
 const api = axios.create({
   baseURL,

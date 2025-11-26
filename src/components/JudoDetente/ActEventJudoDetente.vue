@@ -165,8 +165,8 @@ onMounted(() => {
                 </p>
 
                 <img  :src="actu.imageUrl
-                  ? `http://localhost:5067${actu.imageUrl}`
-                  : 'http://localhost:5067/images/actualites/placeholder-styling.jpg'" alt="Événement"
+                  ? `http://localhost:5070${actu.imageUrl}`
+                  : 'http://localhost:5070/images/actualites/placeholder-styling.jpg'" alt="Événement"
                   class="news-image mb-3">
 
                   <router-link :to="`/actualite/${actu.actualiteId}`"  class="btn btn-success fw-bold">
