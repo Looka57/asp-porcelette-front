@@ -179,7 +179,7 @@ onMounted(async () => {
                   <p class="bio-text text-justify">{{ sensei.bio || "Aucune biographie disponible pour l'instant." }}
                   </p>
                 </div>
-                <div class="col-6 mb-4">
+                <div class="col-lg-6 col-md-12 mb-4">
                   <h6 class="text-muted">Horaires Entrainements</h6>
                   <div v-if="getHorairesForSensei().length > 0">
                     <table class="table table-dark table-striped">
