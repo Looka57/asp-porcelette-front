@@ -22,32 +22,25 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
   function calculateMonthlyData() {
     // ✅ Vérifications renforcées
     if (!transactionsRef?.value || !Array.isArray(transactionsRef.value) || transactionsRef.value.length === 0) {
-      console.log("⚠️ Pas de transactions disponibles");
+
       fluxComptaChart.value.datasets = [];
       return;
     }
 
     if (!comptesRef?.value || !Array.isArray(comptesRef.value) || comptesRef.value.length === 0) {
-      console.log("⚠️ Pas de comptes disponibles");
       fluxComptaChart.value.datasets = [];
       return;
     }
 
-    console.log("✅ LONGEUR DES TRANSACTIONS REÇUES:", transactionsRef.value.length);
-    console.log("✅ Première transaction:", transactionsRef.value[0]);
 
     const months = [...Array(12).keys()];
     const year = parseInt(currentYearRef.value, 10);
 
-    console.log("📅 Année de référence:", year);
 
     fluxComptaChart.value.datasets = comptesRef.value.map(compte => {
       if (!compte?.compteId || !compte?.nom) {
-        console.log("⚠️ Compte invalide:", compte);
         return null;
       }
-
-      console.log(`\n🔍 Traitement du compte: ${compte.nom} (ID: ${compte.compteId})`);
 
       // ✅ Parser robuste qui gère les formats ISO avec timezone
       const parseTransactionDate = (dateString) => {
@@ -61,14 +54,12 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
           const [y, m, d] = dateOnly.split('-').map(Number);
 
           if (!y || !m || !d) {
-            console.log(`  ⚠️ Date invalide après parsing: ${dateString} → ${dateOnly}`);
             return null;
           }
 
           const date = new Date(y, m - 1, d);
 
           if (isNaN(date.getTime())) {
-            console.log(`  ⚠️ Date invalide (NaN): ${dateString}`);
             return null;
           }
 
@@ -93,7 +84,6 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
         const tCompteId = transaction?.compte?.compteId || transaction?.compteId?.compteId;
         const cCompteId = compte.compteId;
 
-        console.log(`  🔍 Comparaison: transaction.compteId=${tCompteId} vs compte.compteId=${cCompteId}`);
 
         const match = tCompteId === cCompteId;
         if (match) {
@@ -125,7 +115,6 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
         .filter(t => t !== null && t.transactionYear === year)
         .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
 
-      console.log(`  ✅ Transactions en ${year}: ${transactionsYear.length}`);
 
       if (transactionsYear.length > 0) {
         console.log(`  📝 Détail:`, transactionsYear.map(t =>
@@ -139,10 +128,6 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
       // 🔹 Solde de départ (1er janvier)
       const soldeCurrent = parseFloat(compte.solde) || 0;
       const soldeInitialAnnee = soldeCurrent - totalFluxAnnee;
-
-      console.log(`  💰 Solde actuel: ${soldeCurrent}€`);
-      console.log(`  💰 Flux total année: ${totalFluxAnnee}€`);
-      console.log(`  💰 Solde initial (1er jan): ${soldeInitialAnnee}€`);
 
       // 🔹 Calculer les soldes mensuels
       let cumulative = soldeInitialAnnee;
@@ -164,8 +149,6 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
         }
       });
 
-      console.log(`  📈 Données mensuelles:`, monthlyData);
-
       const colors = compte.compteId === 2
         ? { border: 'rgb(75, 192, 192)', background: 'rgba(75, 192, 192, 0.2)' }
         : { border: 'rgb(255, 99, 132)', background: 'rgba(255, 99, 132, 0.2)' };
@@ -184,14 +167,12 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
       };
     }).filter(d => d !== null);
 
-    console.log(`\n✅ Datasets créés: ${fluxComptaChart.value.datasets.length}`);
   }
 
   // ✅ Watch avec deep pour détecter les changements dans les tableaux
   watch(
     [transactionsRef, comptesRef, currentYearRef],
     () => {
-      console.log("\n🔄 RECALCUL DU GRAPHIQUE");
       calculateMonthlyData();
     },
     { immediate: true, deep: true }

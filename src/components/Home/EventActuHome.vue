@@ -43,7 +43,6 @@ async function fetchEvenement() {
     evenements.value = evenementsFuturs.slice(0, 3);
     // ----------------------------------
 
-    console.log("Evenements chargés et filtrés", evenements.value);
   } catch (error) {
     console.error('❌ Erreur lors du chargement des événements :', error);
     errorMessage.value = "Erreur lors du chargement des événements.";

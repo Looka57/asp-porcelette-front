@@ -26,15 +26,22 @@ const isInBackOffice = computed(() => {
         <AppSidebar />
 
         <!-- Main content -->
-        <div class="flex-grow-1 d-flex flex-column bg-dark">
+
+        <div class="flex-grow-1 d-flex flex-column bg-dark overflow-hidden">
           <AppHeader />
 
-          <main class="custom-shadow flex-grow-1 max-vh-100 p-3 border border-1 border-light border-opacity-50 rounded text-light mt-3 mx-3 overflow-auto ">
-            <RouterView />
-          </main>
+          <div class="flex-grow-1 p-3 overflow-hidden">
+            <main class="custom-shadow h-100 p-3 border border-1 border-light border-opacity-50 rounded text-light overflow-auto">
+              <RouterView />
+            </main>
+          </div>
 
         </div>
       </div>
+
+
+
+
       <footer class="bg-dark p-3 text-center text-light ">
         ASP Porcelette © 2025. Tous droits réservés.
       </footer>

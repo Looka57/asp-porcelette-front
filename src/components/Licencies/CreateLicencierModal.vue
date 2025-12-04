@@ -61,9 +61,6 @@ watch(
         dateRenouvellement: newUser.dateRenouvellement || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
         statut: newUser.statut === 1 ? "Actif" : "Inactif"
       };
-
-      console.log('📋 Formulaire initialisé avec:', form.value);
-      console.log('📅 Date de naissance chargée:', form.value.dateDeNaissance);
     } else {
       // Réinitialisation pour création
       form.value = {
@@ -90,10 +87,6 @@ watch(
 // Fichier : CreateLicencierModal.vue
 
 const submitAdherent = async () => {
-  console.log('🚀 ========== FONCTION submitAdherent APPELÉE ==========');
-  console.log('👤 props.user:', props.user);
-  console.log('📋 form.value:', form.value);
-  console.log('🆔 userId:', props.user?.userId);
   loading.value = true;
   error.value = null;
 
@@ -101,9 +94,6 @@ const submitAdherent = async () => {
   // 🔹 MODIFICATION (PUT)
   // =============================
   if (props.user && props.user.userId) {
-    console.log('📤 === DÉBUT MODIFICATION ===');
-    console.log('📦 Données du formulaire:', form.value);
-    console.log('📅 Date de naissance:', form.value.dateDeNaissance);
 
     const formData = new FormData();
 
@@ -126,7 +116,6 @@ const submitAdherent = async () => {
         : form.value.dateDeNaissance;
 
       formData.append('DateDeNaissance', dateFormatted);
-      console.log('✅ DateDeNaissance ajoutée:', dateFormatted);
     } else {
       console.warn('⚠️ Pas de date de naissance à envoyer');
     }
@@ -163,12 +152,6 @@ const submitAdherent = async () => {
     // Ne pas envoyer PhotoUrl si vide (laisser le backend gérer)
     if (props.user.photoUrl) {
       formData.append('PhotoUrl', props.user.photoUrl);
-    }
-
-    // 🔍 DEBUG : Afficher le contenu du FormData
-    console.log('📦 === CONTENU FORMDATA ===');
-    for (let [key, value] of formData.entries()) {
-      console.log(`  ${key}:`, value);
     }
 
     try {

@@ -25,7 +25,6 @@ async function fetchDisciplines() {
     isLoading.value = true
     const response = await api.get(API_PATH_DISCIPLINE)
     disciplines.value = response.data
-    console.log('✅ Disciplines chargées :', disciplines.value)
   } catch (error) {
     console.error('❌ Erreur lors du chargement des disciplines :', error)
     errorMessage.value = "Erreur lors du chargement des disciplines."
@@ -87,9 +86,9 @@ onMounted(fetchDisciplines)
         </p>
       </div>
     </div>
- 
+
     <!-- 🔘 Boutons CRUD -->
-    <div class="boutonCrud m-5 d-flex justify-content-around">
+    <!-- <div class="boutonCrud m-5 d-flex justify-content-around">
       <div class="crud">
         <button class="btn btn-outline-warning">
           <i class="pi pi-plus-circle me-2"></i> Ajouter
@@ -105,7 +104,7 @@ onMounted(fetchDisciplines)
           <i class="pi pi-trash me-2"></i> Supprimer
         </button>
       </div>
-    </div>
+    </div> -->
 
   </div>
 </template>

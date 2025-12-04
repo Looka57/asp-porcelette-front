@@ -27,8 +27,6 @@ async function fetchActualites() {
     // Utilisation de 'api' pour l'appel à l'API
     const reponse = await api.get(API_PATH_ACTUALITES);
     const actuAPI = reponse.data;
-    console.log(actuAPI)
-
 
     if (!Array.isArray(actuAPI)) {
       errorMessageActu.value = "Erreur : données invalides reçues.";

@@ -38,11 +38,6 @@ async function resetPassword() {
         return;
     }
 
-    // --- STUB/SIMULATION API (À REMPLACER) ---
-    console.log(`Tentative de réinitialisation avec Token: ${token.value}`);
-
-    // Ici, vous mettrez votre vrai appel HTTP (ex: axios.post('VOTRE_ENDPOINT/reset-password', { token: token.value, newPassword: newPassword.value }))
-
     await new Promise(resolve => setTimeout(resolve, 2000));
     // ----------------------------------------
 

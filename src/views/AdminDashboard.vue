@@ -49,7 +49,6 @@ const processInscriptionsData = (allUsers) => {
   // 📢 DÉBOGAGE CRITIQUE : Affiche le premier utilisateur pour vérifier les noms de propriétés
   if (allUsers.length > 0) {
     console.log("--- INSPECTION UTILISATEUR ---");
-    console.log("Premier utilisateur reçu (vérifiez roles, disciplineId, dateAdhesion) :", allUsers[0]);
     console.log("-----------------------------");
   }
 

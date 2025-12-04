@@ -33,7 +33,7 @@ async function fetchDiscipline() {
     } else {
       errorMessage.value = "Discipline Jujitsu non trouvée.";
     }
-    console.log("Discipline chargée", jujitsuDiscipline.value); // Utilisez judoDiscipline ici
+ // Utilisez judoDiscipline ici
   } catch (error) {
     console.error('❌ Erreur lors du chargement des disciplines :', error);
     errorMessage.value = "Erreur lors du chargement des disciplines.";

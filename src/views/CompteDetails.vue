@@ -79,44 +79,42 @@ async function fetchTransactions() {
 }
 
 async function deleteTransaction(transactionId, description) {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer la transaction "${description}" ? Cette action est irréversible et mettra à jour le solde du compte.`)) {
-        return
-    }
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer la transaction "${description}" ? Cette action est irréversible et mettra à jour le solde du compte.`)) {
+    return
+  }
 
-    try {
-        // Désactive l'affichage le temps du traitement
-        isLoading.value = true
+  try {
+    // Désactive l'affichage le temps du traitement
+    isLoading.value = true
 
-        // 1. Appel de l'API DELETE
-        await api.delete(`${API_TRANSACTIONS}/${transactionId}`)
+    // 1. Appel de l'API DELETE
+    await api.delete(`${API_TRANSACTIONS}/${transactionId}`)
 
-        // 2. Recharger les données pour mettre à jour la liste et le solde du compte
-        await handleRefresh()
-
-        console.log(`✅ Transaction ID ${transactionId} supprimée et compte mis à jour.`)
-    } catch (error) {
-        console.error('❌ Erreur lors de la suppression de la transaction :', error)
-        alert(`Erreur lors de la suppression : ${error.response?.data || error.message}`)
-    } finally {
-        isLoading.value = false
-    }
+    // 2. Recharger les données pour mettre à jour la liste et le solde du compte
+    await handleRefresh()
+  } catch (error) {
+    console.error('❌ Erreur lors de la suppression de la transaction :', error)
+    alert(`Erreur lors de la suppression : ${error.response?.data || error.message}`)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const openEditModal = (transaction) => {
-    transactionToEdit.value = transaction
-    showModal.value = true
+  transactionToEdit.value = transaction
+  showModal.value = true
 }
 
 const handleRefresh = async () => {
-    // Ferme la modale et réinitialise l'état d'édition si elle était ouverte
-    showModal.value = false
-    transactionToEdit.value = null
+  // Ferme la modale et réinitialise l'état d'édition si elle était ouverte
+  showModal.value = false
+  transactionToEdit.value = null
 
-    // Recharge les données
-    await Promise.all([
-        fetchCompte(),
-        fetchTransactions()
-    ])
+  // Recharge les données
+  await Promise.all([
+    fetchCompte(),
+    fetchTransactions()
+  ])
 }
 
 
@@ -223,7 +221,7 @@ const goBack = () => router.back()
     <div v-else-if="compte">
       <h2 class="text-warning text-center">{{ compte.nom }}</h2>
       <p class="fs-4 text-center">Solde actuel : <span :class="compte.solde < 0 ? 'text-danger' : 'text-success'">{{
-          compte.solde.toFixed(2) }} €</span></p>
+        compte.solde.toFixed(2) }} €</span></p>
       <hr class="border-secondary" />
 
       <h4 class="mt-4 mb-3">Transactions associées</h4>
@@ -293,25 +291,25 @@ const goBack = () => router.back()
                 <thead>
                   <tr class="text-warning">
                     <th>Date</th>
-                    <th>Libellé</th>
+                    <th class="d-none d-md-table-cell">Libellé</th>
                     <th>Montant (€)</th>
-                    <th>Catégorie</th>
+                    <th class="d-none d-md-table-cell">Catégorie</th>
                     <th>Discipline</th>
-                    <th>Sensei</th>
-                    <th class="text-center">Actions</th>
+                    <th class="d-none d-md-table-cell">Sensei</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="t in group.items" :key="t.transactionId">
                     <td>{{ new Date(t.dateTransaction).toLocaleDateString() }}</td>
-                    <td>{{ t.description }}</td>
+                    <td class="d-none d-md-table-cell">{{ t.description }}</td>
                     <td :class="t.montant < 0 ? 'text-danger fw-bold' : 'text-success fw-bold'">
                       {{ t.montant.toFixed(2) }}
                     </td>
-                    <td>{{ t.categorie?.nom || '-' }}</td>
+                    <td class="d-none d-md-table-cell">{{ t.categorie?.nom || '-' }}</td>
                     <td>{{ t.discipline?.nom || '-' }}</td>
-                    <td>{{ t.user?.nom ?? '-' }} {{ t.user?.prenom ?? '' }}</td>
-                    <td class="text-center">
+                    <td class="d-none d-md-table-cell">{{ t.user?.nom ?? '-' }} {{ t.user?.prenom ?? '' }}</td>
+                    <td>
                       <button class="btn btn-sm btn-info me-2" @click="openEditModal(t)">
                         <i class="pi pi-pencil"></i>
                       </button>
@@ -322,6 +320,7 @@ const goBack = () => router.back()
                   </tr>
                 </tbody>
               </table>
+
             </div>
           </div>
         </div>
@@ -330,7 +329,7 @@ const goBack = () => router.back()
       <div v-else-if="transactions.length > 0" class="text-light mt-5 p-4 border rounded text-center">
         Aucune transaction ne correspond aux filtres Année ({{ selectedYear === 'all' ? 'Toutes' : selectedYear }}),
         Mois ({{monthNames.find(m => m.value === selectedMonth)?.name}}) et Type ({{typeOptions.find(t => t.value ===
-        selectedType)?.name}}).
+          selectedType)?.name}}).
       </div>
 
       <div v-else class="text-light mt-5 p-4 border rounded text-center">

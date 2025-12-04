@@ -13,7 +13,6 @@ async function fetchDisciplines() {
   try {
     const res = await api.get(API_PATH_DISCIPLINE);
     disciplines.value = res.data;
-    console.log('✅ Données disciplines chargées :', disciplines.value);
   } catch (error) {
     console.error('❌ Erreur :', error);
     errorMessage.value = "Erreur lors du chargement des disciplines.";

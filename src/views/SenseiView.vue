@@ -95,9 +95,8 @@ const resetForm = () => {
 // Événements from child components / actions utilisateur
 // --------------------
 const handleEdit = (user) => {
-  console.log("Valeur de la biographie reçue de l'API :", user.bio);
   editingUserId.value = user.id || user.userId; // Stocker l'ID de l'utilisateur en cours d'édition
-  console.log('Utilisateur en édition:', user);
+
   // Copier les données de l'utilisateur. L'opérateur de décomposition gère
   // ville et codePostal si les noms correspondent (camelCase).
   newSensei.value = {
@@ -118,7 +117,7 @@ const handleEdit = (user) => {
     const modal = new window.bootstrap.Modal(modalElement);
     modal.show();
   }
-  console.log('Utilisateur en édition:', user);
+
 };
 
 const handleDelete = async (userId) => {
@@ -143,7 +142,6 @@ const loadSenseiData = async () => {
     const response = await api.get('User/admin/list');
     const allUsers = response.data || [];
     userList.value = allUsers.filter(user => user.roles.includes('Admin') || user.roles.includes('Sensei'));
-    console.log("Liste des Senseis/Admins reçue:", userList.value);
   } catch (err) {
     error.value = 'Échec du rechargement de la liste des Sensei.';
     console.error(err);

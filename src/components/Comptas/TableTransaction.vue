@@ -60,7 +60,6 @@ const computeLastTransactions = () => {
 
   // Limite aux 5 premières
   lastTransactions.value = sortedTransactions.slice(0, 5);
-  console.log(`📦 Transactions filtrées pour compte ${currentCompteId.value} :`, lastTransactions.value);
 }
 
 
@@ -88,35 +87,34 @@ watch(currentCompteId, () => {
 </script>
 
 <template>
-   <h2 class="">Dernières transactions effectuées sur le compte {{ compteNomAffiche }}</h2>
-   <div class="table-responsive mt-4">
+  <h2 class="">Dernières transactions effectuées sur le compte {{ compteNomAffiche }}</h2>
+  <div class="table-responsive mt-4">
     <table class="table table-dark table-hover align-middle">
       <thead class="table-secondary text-dark">
         <tr>
-          <th>#</th>
+          <th class="d-none d-md-table-cell">#</th>
           <th>Date</th>
-          <th>Type</th>
-          <th>Compte</th>
+          <th class="d-none d-md-table-cell">Type</th>
+          <th class="d-none d-md-table-cell">Compte</th>
           <th>Montant (€)</th>
-          <th>Description</th>
+          <th class="d-none d-md-table-cell">Description</th>
           <th>Sensei</th>
         </tr>
       </thead>
       <tbody>
         <tr v-if="isLoading">
-          <td colspan="6" class="text-center">Chargement des transactions...</td>
+          <td colspan="7" class="text-center">Chargement des transactions...</td>
         </tr>
         <tr v-for="tx in lastTransactions" :key="tx.transactionId">
-          <th scope="row">{{ tx.transactionId }}</th>
+          <th scope="row" class="d-none d-md-table-cell">{{ tx.transactionId }}</th>
           <td>{{ formatDate(tx.dateTransaction) }}</td>
-          <td>{{ tx.categorie?.nom ?? 'Inconnue' }}</td>
-          <td>{{ tx.compte?.nom ?? 'Inconnu' }}</td>
+          <td class="d-none d-md-table-cell">{{ tx.categorie?.nom ?? 'Inconnue' }}</td>
+          <td class="d-none d-md-table-cell">{{ tx.compte?.nom ?? 'Inconnu' }}</td>
           <td :class="{ 'text-success': tx.montant > 0, 'text-danger': tx.montant < 0 }">
             {{ tx.montant?.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) }} €
           </td>
-          <td>{{ tx.description }}</td>
+          <td class="d-none d-md-table-cell">{{ tx.description }}</td>
           <td>{{ tx.user ? `${tx.user.nom} ${tx.user.prenom}` : '-' }}</td>
-
         </tr>
       </tbody>
     </table>
@@ -124,9 +122,9 @@ watch(currentCompteId, () => {
     <div v-if="lastTransactions.length === 0 && !isLoading" class="text-center text-secondary mt-3">
       Aucune transaction récente pour ce compte.
     </div>
-
   </div>
 </template>
+
 
 <style scoped>
 .table-hover tbody tr:hover {

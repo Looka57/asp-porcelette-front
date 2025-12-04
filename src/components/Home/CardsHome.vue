@@ -25,7 +25,6 @@ async function fetchDisciplines() {
     isLoading.value = true
     const reponse = await api.get(API_PATH_DISCIPLINE);
     disciplines.value = reponse.data;
-    console.log('Discipline chargé', disciplines.value)
   } catch (error) {
     console.error('❌ Erreur lors du chargement des disciplines :', error)
     errorMessage.value = "Erreur lors du chargement des disciplines."

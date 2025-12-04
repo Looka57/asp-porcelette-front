@@ -79,7 +79,6 @@ async function fetchSensei() {
     isLoading.value = false;
   }
 
-  console.log('Liste des senseis:', sensei.value);
 }
 
 // ===============================
@@ -108,14 +107,24 @@ function getDisciplineColorId(id) {
 // ===============================
 function getHorairesForSensei() {
   const coursSensei = getCoursForSensei();
-  const horairesSensei = [];
+  const horairesSenseiEnrichis = [];
 
-  for (const c of coursSensei) {
-    const h = horaires.value.filter(h => h.coursId === c.coursId);
-    horairesSensei.push(...h);
+  // Parcourir chaque horaire pour trouver son cours correspondant
+  for (const h of horaires.value) {
+    // Vérifier si cet horaire appartient à un cours enseigné par ce sensei
+    const coursCorrespondant = coursSensei.find(c => c.coursId === h.coursId);
+
+    if (coursCorrespondant) {
+      horairesSenseiEnrichis.push({
+        ...h, // Garde toutes les propriétés de l'horaire (horaireId, jour, heureDebut, etc.)
+        // AJOUT DE L'INFORMATION DU COURS :
+        nomDuCours: coursCorrespondant.libelle || 'Cours sans nom', // Utilise la propriété 'nom' du cours
+        disciplineIdCours: coursCorrespondant.disciplineId // Utile pour la couleur si besoin
+      });
+    }
   }
 
-  return horairesSensei;
+  return horairesSenseiEnrichis;
 }
 
 function getCoursForSensei() {
@@ -185,6 +194,7 @@ onMounted(async () => {
                     <table class="table table-dark table-striped">
                       <thead>
                         <tr>
+                          <th class="text-warning">Cours</th>
                           <th class="text-warning">Jour</th>
                           <th class="text-warning">Début</th>
                           <th class="text-warning">Fin</th>
@@ -192,6 +202,7 @@ onMounted(async () => {
                       </thead>
                       <tbody>
                         <tr v-for="h in getHorairesForSensei()" :key="h.horaireId">
+                          <td>{{ h.nomDuCours }}</td>
                           <td>{{ h.jour }}</td>
                           <td>{{ h.heureDebut.substring(0, 5) }}</td>
                           <td>{{ h.heureFin.substring(0, 5) }}</td>

@@ -29,7 +29,6 @@ async function fetchSensei() {
     });
 
     senseis.value = listSensei;
-    console.log('Sensei chargé', senseis.value)
   } catch (error) {
     console.error('❌ Erreur lors du chargement des senseis :', error)
     errorMessage.value = "Erreur lors du chargement des senseis."

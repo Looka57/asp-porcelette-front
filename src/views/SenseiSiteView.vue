@@ -49,7 +49,7 @@ function getPhotoUrl(photoPath) {
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
     return `${baseUrl}${photoPath}`;
   }
-  return '../assets/img/denki.webp';
+  return '/img/default-profile.png';
 }
 
 // Retourne le nom de la discipline selon l'id
@@ -57,9 +57,6 @@ function getDisciplineName(id) {
   const disciplineFound = disciplines.value.find(d => d.disciplineId === id);
   return disciplineFound ? disciplineFound.nom : 'Toutes disciplines';
 }
-
-console.log('sensei', senseis.value)
-
 
 
 // --- Couleur selon disciplineId

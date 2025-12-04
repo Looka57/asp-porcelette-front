@@ -82,7 +82,6 @@ watch(
       typeEvenementId: Number(typeId),
     };
 
-    console.log('✅ localEvent prérempli :', localEvent.value);
   },
   { immediate: true }
 );
@@ -143,7 +142,6 @@ async function saveEvent() {
 
     const response = await api.put(`/Evenement/${eventId}`, payload);
 
-    console.log('Événement modifié avec succès:', response.data);
     successMessage.value = 'Événement modifié avec succès !';
 
     emit('event-updated', response.data);

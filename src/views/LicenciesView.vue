@@ -208,7 +208,7 @@ onMounted(() => {
     <h1 class="m-3 text-center">Liste des Licenciés</h1>
 
     <div class="mb-5 d-flex justify-content-end ">
-      <div class="input-group w-25 ">
+      <div class="input-group w-50 ">
         <input type="text" v-model="searchTerm" class="form-control bg-light text-dark border-warning"
           placeholder="Rechercher par Nom, Prénom ou Email..." aria-label="Recherche licencié" />
 
@@ -257,48 +257,52 @@ onMounted(() => {
                     Aucun adhérent dans cette discipline.
                   </div>
 
-                  <table v-else class="table table-dark table-striped table-hover mb-0 text-center">
+                 <table class="table table-dark table-striped table-hover mb-0 text-center">
                     <thead>
                       <tr>
-                        <th>#</th>
+                        <th class="d-none d-md-table-cell">#</th>
                         <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Email</th>
-                        <th>Téléphone</th>
-                        <th>Adresse</th>
-                        <th>Ville</th>
-                        <th>Statut</th>
-                        <th>Date inscription</th>
-                        <th>Date de renouvellement</th>
+                        <th class="d-none d-md-table-cell">Prénom</th>
+                        <th class="d-none d-md-table-cell">Email</th>
+                        <th class="d-none d-md-table-cell">Téléphone</th>
+                        <th class="d-none d-md-table-cell">Adresse</th>
+                        <th class="d-none d-md-table-cell">Ville</th>
+                        <th class="d-none d-md-table-cell">Statut</th>
+                        <th class="d-none d-md-table-cell">Date inscription</th>
+                        <th class="d-none d-md-table-cell">Date de renouvellement</th>
+
                         <th style="width: 200px;">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(user, index) in groupedUsersByDiscipline[discipline.nom]" :key="user.userId">
-                        <th>{{ index + 1 }}</th>
+                        <th class="d-none d-md-table-cell">{{ index + 1 }}</th>
+
                         <td>{{ user.nom }}</td>
-                        <td>{{ user.prenom }}</td>
-                        <td>{{ user.email || 'N/A' }}</td>
-                        <td>{{ user.telephone || 'N/A' }}</td>
-                        <td>{{ user.rueEtNumero || 'N/A' }}</td>
-                        <td>{{ user.ville || 'N/A' }}</td>
-                        <td>{{ user.statut || 'N/A' }}</td>
-                        <td>{{ formatDate(user.dateAdhesion) }}</td>
-                        <td>{{ formatDate(user.dateRenouvellement) }}</td>
+                        <td class="d-none d-md-table-cell">{{ user.prenom }}</td>
+                        <td class="d-none d-md-table-cell">{{ user.email || 'N/A' }}</td>
+                        <td class="d-none d-md-table-cell">{{ user.telephone || 'N/A' }}</td>
+                        <td class="d-none d-md-table-cell">{{ user.rueEtNumero || 'N/A' }}</td>
+                        <td class="d-none d-md-table-cell">{{ user.ville || 'N/A' }}</td>
+                        <td class="d-none d-md-table-cell">{{ user.statut || 'N/A' }}</td>
+                        <td class="d-none d-md-table-cell">{{ formatDate(user.dateAdhesion) }}</td>
+                        <td class="d-none d-md-table-cell">{{ formatDate(user.dateRenouvellement) }}</td>
 
                         <td>
-                          <button class="btn btn-outline-success btn-sm me-1"
-                            @click="renewAdhesion(user.id, user.nom, user.prenom)"
-                            title="Renouveler l'adhésion à aujourd'hui">
-                            <i class="pi pi-history"></i>
-                          </button>
-                          <button class="btn btn-outline-info btn-sm me-1" @click="openModal(user)">
-                            <i class="pi pi-pencil"></i>
-                          </button>
-                          <button class="btn btn-outline-danger btn-sm"
-                            @click="deleteAdherent(user.id, user.nom, user.prenom)">
-                            <i class="pi pi-trash"></i>
-                          </button>
+                          <div class="d-flex justify-content-center">
+                            <button class="btn btn-outline-success btn-sm me-1"
+                              @click="renewAdhesion(user.id, user.nom, user.prenom)"
+                              title="Renouveler l'adhésion à aujourd'hui">
+                              <i class="pi pi-history"></i>
+                            </button>
+                            <button class="btn btn-outline-info btn-sm me-1" @click="openModal(user)">
+                              <i class="pi pi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm"
+                              @click="deleteAdherent(user.id, user.nom, user.prenom)">
+                              <i class="pi pi-trash"></i>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     </tbody>

@@ -27,7 +27,6 @@ async function fetchCours() {
     isLoading.value = true;
     const reponse = await api.get(API_PATH_COURS);
     const coursAllJudo = reponse.data;
-    console.log("👉 Tous les cours reçus de l'API :", coursAllJudo);
     const foundCoursJudo = coursAllJudo.filter(c => (c.discipline.disciplineId === 1))
     if (foundCoursJudo && foundCoursJudo.length > 0) {
       // 🎯 Stocker le tableau de résultats filtrés
@@ -36,7 +35,6 @@ async function fetchCours() {
       errorMessage.value = "Aucun cours de Judo trouvé.";
     }
 
-    console.log("Cours chargés", coursJudo.value);
   } catch (error) {
     console.error('❌ Erreur lors du chargement des cours :', error);
     errorMessage.value = "Erreur lors du chargement des cours.";

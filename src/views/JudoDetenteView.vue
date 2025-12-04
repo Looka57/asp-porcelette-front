@@ -33,7 +33,6 @@ async function fetchDiscipline() {
     } else {
       errorMessage.value = "Discipline Judo detente non trouvée.";
     }
-    console.log("Discipline chargée", judoDetenteDiscipline.value); // Utilisez judoDiscipline ici
   } catch (error) {
     console.error('❌ Erreur lors du chargement des disciplines :', error);
     errorMessage.value = "Erreur lors du chargement des disciplines.";

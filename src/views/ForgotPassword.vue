@@ -9,11 +9,6 @@ async function sendResetLink() {
     message.value = '';
     error.value = '';
 
-    // --- STUB/SIMULATION API (À REMPLACER) ---
-    // Simule un appel API avec un délai de 2 secondes
-    console.log(`Tentative d'envoi du lien à : ${email.value}`);
-
-    // Ici, vous mettrez votre vrai appel HTTP (ex: axios.post('VOTRE_ENDPOINT/forgot-password', { email: email.value }))
 
     await new Promise(resolve => setTimeout(resolve, 2000));
     // ----------------------------------------

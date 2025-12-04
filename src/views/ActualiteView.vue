@@ -25,7 +25,6 @@ const stats = ref({
 /* ════════════════════════════════════════════════════════════════════════ */
 function handleOpenCreateModal() {
   isCreateModalOpen.value = true;
-  console.log('📢 PageActualite : Ouverture de la modale de création déclenchée');
 }
 
 /**
