@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Déclare l'emplacement de votre sitemap
+Sitemap: https://asporcelette-art-martiaux.fr/sitemap.xml

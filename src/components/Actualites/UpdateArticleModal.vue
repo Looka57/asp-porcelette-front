@@ -259,9 +259,7 @@ watch(() => [props.modelValue, props.articleId], ([isOpen, id]) => {
                   <label class="form-label mb-2">Image Actuelle</label>
 
                   <div v-if="articleToUpdate.imageUrl" class="mb-3 d-flex align-items-center">
-                    <img :src="articleToUpdate.imageUrl.startsWith('/')
-                      ? 'http://localhost:5070' + articleToUpdate.imageUrl
-                      : articleToUpdate.imageUrl" alt="Image actuelle" class="img-thumbnail"
+                    <img :src="articleToUpdate.imageUrl" alt="Image actuelle" class="img-thumbnail"
                       style="max-height: 80px; max-width: 80px; object-fit: cover; margin-right: 15px;">
                     <div class="form-check">
                       <input class="form-check-input" type="checkbox" id="deleteImageCheck"

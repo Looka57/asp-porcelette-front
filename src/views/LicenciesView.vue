@@ -267,7 +267,6 @@ onMounted(() => {
                         <th class="d-none d-md-table-cell">Téléphone</th>
                         <th class="d-none d-md-table-cell">Adresse</th>
                         <th class="d-none d-md-table-cell">Ville</th>
-                        <th class="d-none d-md-table-cell">Statut</th>
                         <th class="d-none d-md-table-cell">Date inscription</th>
                         <th class="d-none d-md-table-cell">Date de renouvellement</th>
 
@@ -284,7 +283,6 @@ onMounted(() => {
                         <td class="d-none d-md-table-cell">{{ user.telephone || 'N/A' }}</td>
                         <td class="d-none d-md-table-cell">{{ user.rueEtNumero || 'N/A' }}</td>
                         <td class="d-none d-md-table-cell">{{ user.ville || 'N/A' }}</td>
-                        <td class="d-none d-md-table-cell">{{ user.statut || 'N/A' }}</td>
                         <td class="d-none d-md-table-cell">{{ formatDate(user.dateAdhesion) }}</td>
                         <td class="d-none d-md-table-cell">{{ formatDate(user.dateRenouvellement) }}</td>
 

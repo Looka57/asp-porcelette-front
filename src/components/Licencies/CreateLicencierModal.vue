@@ -34,6 +34,29 @@ const form = ref({
   statut: "Actif"
 });
 
+/* -------------------------------------------------------------------------- */
+/* 🔒 FONCTIONS UTILES /
+/* -------------------------------------------------------------------------- */
+
+// 💡 NOUVEAU : Fonction pour réinitialiser le formulaire
+const clearForm = () => {
+    form.value = {
+        nom: '',
+        prenom: '',
+        email: '',
+        telephone: '',
+        adresse: '',
+        ville: '',
+        codePostal: '',
+        disciplineId: null,
+        dateDeNaissance: '',
+        dateAdhesion: new Date().toISOString().split('T')[0],
+        dateRenouvellement: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+        statut: "Actif"
+    };
+    error.value = null; // Nettoyer aussi les messages d'erreur
+};
+
 // 🔹 Watch pour préremplir ou réinitialiser
 watch(
   () => props.user,
@@ -63,20 +86,8 @@ watch(
       };
     } else {
       // Réinitialisation pour création
-      form.value = {
-        nom: '',
-        prenom: '',
-        email: '',
-        telephone: '',
-        adresse: '',
-        ville: '',
-        codePostal: '',
-        disciplineId: null,
-        dateDeNaissance: '',
-        dateAdhesion: new Date().toISOString().split('T')[0],
-        dateRenouvellement: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-        statut: "Actif"
-      };
+      // 💡 APPEL pour vider le formulaire
+      clearForm();
     }
   },
   { immediate: true }
@@ -196,6 +207,7 @@ const submitAdherent = async () => {
 
       await api.post('User/register/adherent', createPayload);
       alert('✅ Adhérent créé avec succès !');
+      clearForm();
       emit('refresh');
       emit('close');
 

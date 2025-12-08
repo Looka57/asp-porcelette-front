@@ -162,14 +162,13 @@ onMounted(() => {
                   {{ actu.contenu || 'Aucune description disponible.' }}
                 </p>
 
-                <img  :src="actu.imageUrl
-                  ? `http://localhost:5070${actu.imageUrl}`
-                  : 'http://localhost:5070/images/actualites/placeholder-styling.jpg'" alt="Événement"
-                  class="news-image mb-3">
+                <img :src="actu.imageUrl
+                  ? actu.imageUrl // Laisse le chemin relatif pur (/images/...)
+                  : '/images/actualites/placeholder-styling.jpg'" alt="Événement" class="news-image mb-3">
 
-                  <router-link :to="`/actualite/${actu.actualiteId}`"  class="btn btn-success fw-bold">
-                   Lire l'actualité
-                  </router-link>
+                <router-link :to="`/actualite/${actu.actualiteId}`" class="btn btn-success fw-bold">
+                  Lire l'actualité
+                </router-link>
               </div>
             </div>
           </div>
@@ -205,9 +204,10 @@ onMounted(() => {
                 <p class="card-text text-light description-text">{{ evenement.description || 'Pas de description disponible.' }}</p>
 
                 <!-- Bouton -->
-              <router-link :to="`/evenement/${evenement.evenementId}`"  class="btn btn-success fw-bold mt-auto stretched-link">
-                   Lire l'actualité
-                  </router-link>
+                <router-link :to="`/evenement/${evenement.evenementId}`"
+                  class="btn btn-success fw-bold mt-auto stretched-link">
+                  Lire l'actualité
+                </router-link>
               </div>
             </div>
           </div>

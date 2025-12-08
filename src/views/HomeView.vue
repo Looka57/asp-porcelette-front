@@ -89,14 +89,15 @@ const closeModal = () => {
 <style scoped>
 .imgBaniereHome {
   background-image: url('@/assets/img/baniereHome.png');
-  background-size: cover;
+ background-size: cover;
   background-position: center 15%;
   width: 100%;
-  height: 650px;
+  height: 600px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  position: relative;
   color: white;
   text-align: center;
 }

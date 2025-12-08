@@ -52,12 +52,15 @@ async function fetchEvenement() {
 }
 
 function getPhotoUrl(photoPath) {
-  const baseUrl = 'http://localhost:5070';
+  // L'URL de base n'est plus nécessaire en production derrière Nginx/HTTPS.
 
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
-    return `${baseUrl}${photoPath}`;
+    // Si le chemin est déjà relatif (ex: /images/profiles/...), on le retourne directement.
+    return photoPath;
   }
-  return null;
+
+  // Retourne le chemin original (soit null, soit une URL complète externe)
+  return photoPath;
 }
 
 function formatDate(dateString) {

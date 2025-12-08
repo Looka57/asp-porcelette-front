@@ -56,10 +56,13 @@ function getBorderClass(disciplineId) {
 // 🔹 CONSTRUCTION DE L’URL DE LA PHOTO
 // ===============================
 function getPhotoUrl(photoPath) {
-  const baseUrl = 'http://localhost:5070'; // ✅ pas de https
+  // L'URL de base n'est plus nécessaire. Le chemin d'image est maintenant
+  // considéré comme absolu par rapport à la racine du domaine.
 
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
-    return `${baseUrl}${photoPath}`;
+    // Si le chemin commence par '/', on le retourne tel quel.
+    // Ex: /images/profiles/img.jpg
+    return photoPath;
   }
   return '/img/default-profile.png';
 }

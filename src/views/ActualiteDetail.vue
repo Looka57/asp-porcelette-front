@@ -32,12 +32,15 @@ async function fetchActualite() {
 }
 
 function getPhotoUrl(photoPath) {
-  const baseUrl = 'http://localhost:5070';
+  // L'URL de base n'est plus nécessaire en production derrière Nginx.
 
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
-    return `${baseUrl}${photoPath}`;
+    // Si le chemin est déjà relatif (ex: /images/profiles/...), on le retourne directement.
+    return photoPath;
   }
-  return null;
+
+  // Si l'URL n'était pas relative, elle est peut-être déjà complète (ou null, si pas d'image)
+  return photoPath; // Retourne l'original (qui peut être null ou une URL complète externe)
 }
 
 function formatDate(dateString) {

@@ -15,7 +15,7 @@ const props = defineProps({
   typeEventMap: { type: Object, default: () => ({}) },
 });
 
-const emit = defineEmits(['update:modelValue', 'event-updated']);
+const emit = defineEmits(['update:modelValue', 'event-updated', 'refresh']);
 
 /* -------------------------------------------------------------------------- */
 /* 💾 VARIABLES RÉACTIVES                                                     */
@@ -145,6 +145,7 @@ async function saveEvent() {
     successMessage.value = 'Événement modifié avec succès !';
 
     emit('event-updated', response.data);
+    emit('refresh');
 
     setTimeout(() => {
       closeModal();

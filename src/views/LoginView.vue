@@ -32,8 +32,8 @@ async function handleLogin() {
     <div class="loginWrapper">
       <div class="loginForm">
         <div class="appHeader">
-          <img src="../assets/img/Blason_Ville_fr_Porcelette.svg" alt="Blason AS Porcelette">
-          <h1 class="text-2xl font-bold text-light mt-4">AS PORCELETTE</h1>
+          <img src="../assets/img/logo.png" alt="Blason AS Porcelette">
+          <h1 class="text-2xl font-bold text-light mt-4">AS PORCELETTE ART MARTIAUX </h1>
           <h2 class="text-xl font-extrabold text-primary mt-1">ARTS MARTIAUX</h2>
         </div>
 
@@ -140,8 +140,7 @@ async function handleLogin() {
 }
 
 .appHeader img {
-  height: 150px;
-  /* Ajustez la taille de votre blason ici */
+  height: 250px;
   width: auto;
   margin-bottom: 10px;
 }

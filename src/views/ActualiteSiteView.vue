@@ -107,14 +107,16 @@ const actualitesSecondaires = computed(() => {
 // 🔹 CONSTRUCTION DE L’URL DE LA PHOTO
 // ===============================
 function getPhotoUrl(photoPath) {
-  const baseUrl = 'http://localhost:5070';
+  // L'URL de base n'est plus nécessaire en production derrière Nginx/HTTPS.
 
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
-    return `${baseUrl}${photoPath}`;
+    // Si le chemin est déjà relatif (ex: /images/profiles/...), on le retourne directement.
+    return photoPath;
   }
-  return null;
-}
 
+  // Retourne le chemin original (soit null, soit une URL complète externe)
+  return photoPath;
+}
 
 function getBadgeClass(discipline) {
   switch (discipline) {
@@ -157,7 +159,7 @@ onMounted(fetchActualites);
       <div class="overlay">
         <h1 class="display-3 text-white text-center">ACTUALITÉS DU CLUB</h1>
         <p class="lead text-white text-center mb-4">
-          Restez informés des événements à venir et des nouvelles récentes de l'ASP Porcelette.
+          Restez informés des événements à venir et des nouvelles récentes de l'AS Porcelette Art Martiaux .
         </p>
       </div>
     </div>
@@ -284,7 +286,6 @@ onMounted(fetchActualites);
 /* --- BANNIÈRE --- */
 .imgBaniereJudo {
   background-image: url('@/assets/img/banniereActualite.png');
-  /* Utilisez votre image */
   background-size: cover;
   background-position: center 30%;
   width: 100%;

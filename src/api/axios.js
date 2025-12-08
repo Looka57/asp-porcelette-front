@@ -1,10 +1,8 @@
 import axios from 'axios';
 
-// Détection Docker vs local
-// const isDocker = window.location.hostname !== 'localhost';
-const baseURL = window.location.port === '8080'
-  ? 'http://localhost:5070/api/'  // Via Docker (frontend sur port 8080)
-  : 'http://localhost:5070/api/'; // En local direct
+// L'URL de base sera désormais relative au domaine actuel.
+// Toutes les requêtes commenceront par /api/, qui sera intercepté par Nginx.
+const baseURL = '/api/';
 
 const api = axios.create({
   baseURL,

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import logo from '@/assets/img/logo.png';
 
 // État pour gérer l'ouverture et la fermeture du menu mobile
 const isMenuOpen = ref(false);
@@ -18,7 +19,8 @@ const closeMenu = () => {
 <template>
   <div class="container-fluid p-0 bg-dark text-light bob">
     <header>
-      <a href="#" class="logoBarNav">Logo ASP Porcelette</a>
+     <img class="logoBarNav" :src="logo" alt="Logo ASP Porcelette">
+      <!-- <a href="#" class="logoBarNav">Logo ASP Porcelette</a> -->
 
       <!-- Bouton Hamburger visible uniquement sur mobile/tablette -->
       <div class="menu-icon" :class="{ open: isMenuOpen }" @click="toggleMenu">
@@ -70,13 +72,18 @@ header {
   z-index: 100;
 }
 
-.logoBarNav {
+/* .logoBarNav {
   font-size: 24px;
   font-weight: bold;
   text-decoration: none;
   color: white;
   cursor: default;
   z-index: 101;
+} */
+
+.logoBarNav{
+  height: 80px;
+  width: 80px;
 }
 
 /* NAVIGATION DESKTOP */

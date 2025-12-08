@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import api from '@/api/axios';
 
+
 const evenements = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
@@ -110,19 +111,22 @@ const evenementsSecondaires = computed(() => {
 // 🔹 CONSTRUCTION DE L’URL DE LA PHOTO
 // ===============================
 function getPhotoUrl(photoPath) {
-  const baseUrl = 'http://localhost:5070';
+  // L'URL de base n'est plus nécessaire en production derrière Nginx/HTTPS.
 
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
-    return `${baseUrl}${photoPath}`;
+    // Si le chemin est déjà relatif (ex: /images/profiles/...), on le retourne directement.
+    return photoPath;
   }
-  return null;
+
+  // Retourne le chemin original (soit null, soit une URL complète externe)
+  return photoPath;
 }
 
 const imageDiscipline = {
   1: new URL('@/assets/img/icones/judo.png', import.meta.url).href,
-  2: new URL('@/assets/img//icones/aikido.png', import.meta.url).href,
-  3: new URL('@/assets/img//icones/jujitsu.png', import.meta.url).href,
-  4: new URL('@/assets/img//icones/judo-detente.png', import.meta.url).href
+  2: new URL('@/assets/img/icones/aikido.png', import.meta.url).href,
+  3: new URL('@/assets/img/icones/jujitsu.png', import.meta.url).href,
+  4: new URL('@/assets/img/icones/judo-detente.png', import.meta.url).href
 }
 
 function getImageIconDiscipline(disciplineId) {
@@ -171,7 +175,7 @@ onMounted(fetchEvenements);
       <div class="overlay">
         <h1 class="display-3 text-white text-center">ÉVÉNEMENTS DU CLUB</h1>
         <p class="lead text-white text-center mb-4">
-          Restez informés des événements à venir et des nouvelles récentes de l'ASP Porcelette.
+          Restez informés des événements à venir et des nouvelles récentes de l'AS Porcelette Art Martiaux .
         </p>
       </div>
     </div>

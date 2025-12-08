@@ -43,7 +43,7 @@ const isInBackOffice = computed(() => {
 
 
       <footer class="bg-dark p-3 text-center text-light ">
-        ASP Porcelette © 2025. Tous droits réservés.
+        AS Porcelette Art Martiaux © 2025. Tous droits réservés.
       </footer>
     </template>
 

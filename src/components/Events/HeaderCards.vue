@@ -48,7 +48,7 @@ function selectFilter(filter) {
         </li>
       </ul>
     </div>
-  
+
 </template>
 
 <style scoped>
@@ -91,5 +91,12 @@ a.active::after {
 
 a.active {
   color: white;
+}
+
+@media (max-width: 767px)  {
+.headerLink{
+  display: flex;
+  flex-direction: column;
+}
 }
 </style>

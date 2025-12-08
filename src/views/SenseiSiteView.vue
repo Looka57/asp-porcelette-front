@@ -45,10 +45,14 @@ async function fetchDisciplines() {
 }
 // --- Construction de l’URL de la photo
 function getPhotoUrl(photoPath) {
-  const baseUrl = 'http://localhost:5070';
+  // En production derrière Nginx, nous retournons le chemin relatif.
+
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
-    return `${baseUrl}${photoPath}`;
+    // Si le chemin dans la BDD est relatif (/images/...), on le retourne directement.
+    return photoPath;
   }
+
+  // Si le chemin n'existe pas ou n'est pas relatif, on retourne l'image par défaut relative.
   return '/img/default-profile.png';
 }
 
@@ -83,7 +87,7 @@ onMounted(async () => {
           <h1 class="display-3 text-uppercase text-warning">Nos Senseis</h1>
           <p class="lead text-white fw-light mb-4">Expertise, passion et transmission.</p>
           <p class="text-white px-5 intro-text">
-            Découvrez l'équipe d'encadrement de l'AS Porcelette qui vous guidera tout au long de votre parcours.
+            Découvrez l'équipe d'encadrement de l'AS Porcelette Art Martiaux  qui vous guidera tout au long de votre parcours.
           </p>
         </div>
       </div>

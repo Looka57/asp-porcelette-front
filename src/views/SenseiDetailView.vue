@@ -166,8 +166,8 @@ onMounted(async () => {
           <div class="profile-card bg-dark text-light p-4 rounded shadow-lg"
             :style="{ border: '3px solid ' + getDisciplineColorId(sensei.disciplineId) }">
             <div class="text-center mb-4">
-              <img :src="'http://localhost:5070' + sensei.photoUrl" :alt="sensei.prenom + ' ' + sensei.nom"
-                class="profile-img rounded-circle" :style="{
+              <img :src="sensei.photoUrl" :alt="sensei.prenom + ' ' + sensei.nom" class="profile-img rounded-circle"
+                :style="{
                   'border': '5px solid ' + getDisciplineColorId(sensei.disciplineId)
                 }" />
             </div>
