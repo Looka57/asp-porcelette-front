@@ -5,6 +5,8 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
+RUN npm run build && ls -la /app/dist
+
 
 # Production stage - nginx
 FROM nginx:stable-alpine

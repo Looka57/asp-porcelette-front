@@ -4,10 +4,9 @@ import vue from '@vitejs/plugin-vue';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: './', // <-- Important pour Docker/Nginx et chemins relatifs
   plugins: [
-    // Le plugin Vue est essentiel
     vue(),
-    // L'ancien plugin vite-plugin-vue-devtools a été retiré ici
   ],
   resolve: {
     alias: {
