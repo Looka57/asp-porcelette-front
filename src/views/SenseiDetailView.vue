@@ -102,6 +102,14 @@ function getDisciplineColorId(id) {
   }
 }
 
+function getPhotoUrl(photoPath) {
+  if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
+    return photoPath;
+  }
+
+  return '/img/default-profile.png';
+}
+
 // ===============================
 // 🔹 LOGIQUE DISCIPLINE
 // ===============================
@@ -166,10 +174,13 @@ onMounted(async () => {
           <div class="profile-card bg-dark text-light p-4 rounded shadow-lg"
             :style="{ border: '3px solid ' + getDisciplineColorId(sensei.disciplineId) }">
             <div class="text-center mb-4">
-              <img :src="sensei.photoUrl" :alt="sensei.prenom + ' ' + sensei.nom" class="profile-img rounded-circle"
-                :style="{
-                  'border': '5px solid ' + getDisciplineColorId(sensei.disciplineId)
-                }" />
+              <img
+                  :src="getPhotoUrl(sensei.photoUrl)"
+                  :alt="sensei.prenom + ' ' + sensei.nom"
+                  class="profile-img rounded-circle"
+                  :style="{ border: '5px solid ' + getDisciplineColorId(sensei.disciplineId) }"
+                />
+
             </div>
             <div class="text-center">
               <h2 class="fw-bold display-5 mb-1">{{ sensei.prenom }} {{ sensei.nom }}</h2>
