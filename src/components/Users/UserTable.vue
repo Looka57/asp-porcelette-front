@@ -1,8 +1,13 @@
 
 <script setup>
+import { computed } from 'vue';
 
-const API_BASE_URL = 'http://localhost:8080';
-const DEFAULT_PHOTO_PATH = '/img/default-profile.png';
+// On détecte l'environnement : si on n'est pas sur localhost, on utilise l'origine du site (HTTPS)
+const API_BASE_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:8080'
+    : window.location.origin;
+
+    const DEFAULT_PHOTO_PATH = '/img/default-profile.png';
 
 const { userList, getDisciplineName } = defineProps({
   userList: {
@@ -31,14 +36,24 @@ const formatDate = (dateString) => {
 };
 
 const getPhotoPath = (user) => {
-    const photoPath = user.photoUrl;
+    let photoPath = user.photoUrl;
 
     if (!photoPath || photoPath.length < 5) {
-        // Retourne une image par défaut si le chemin est vide.
         return DEFAULT_PHOTO_PATH;
     }
 
-    // Le nouveau chemin complet sera : https://localhost:7183/images/profiles/...
+    // Nettoyage : si le chemin commence par // on enlève le slash en trop
+    if (photoPath.startsWith('//')) {
+        photoPath = photoPath.substring(1);
+    }
+
+    // Si le chemin en BDD n'a pas de slash du tout au début, on l'ajoute
+    if (!photoPath.startsWith('/')) {
+        photoPath = '/' + photoPath;
+    }
+
+    // Résultat : 'http://localhost:8080' + '/images/profiles/...'
+    // OU 'https://asporcelette...' + '/images/profiles/...'
     return `${API_BASE_URL}${photoPath}`;
 };
 
