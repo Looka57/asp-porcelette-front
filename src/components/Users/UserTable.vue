@@ -41,21 +41,24 @@ const getPhotoPath = (user) => {
         return DEFAULT_PHOTO_PATH;
     }
 
-    // 1. Nettoyage des slashs (BDD)
-    if (photoPath.startsWith('//')) photoPath = photoPath.substring(1);
-    if (!photoPath.startsWith('/')) photoPath = '/' + photoPath;
+    // 1. Nettoyage : On enlève les doubles slashs // s'ils existent
+    if (photoPath.startsWith('//')) {
+        photoPath = photoPath.substring(1);
+    }
 
-    // 2. Logique d'environnement
-    const isLocal = window.location.hostname === 'localhost';
+    // 2. On s'assure que le chemin commence par un seul /
+    if (!photoPath.startsWith('/')) {
+        photoPath = '/' + photoPath;
+    }
 
-    if (isLocal) {
-        // SUR TON PC : On garde le chemin tel quel (ex: http://localhost:8080/images/...)
-        return `${API_BASE_URL}${photoPath}`;
+    // 3. Logique d'environnement
+    if (window.location.hostname === 'localhost') {
+        // En local : on a besoin de l'URL complète avec le port 8080
+        return `http://localhost:8080${photoPath}`;
     } else {
-        // SUR LE VPS : On force le préfixe /api (ex: https://domaine.fr/api/images/...)
-        // On vérifie quand même si /api n'est pas déjà là pour ne pas le doubler
-        const finalPath = photoPath.startsWith('/api') ? photoPath : '/api' + photoPath;
-        return `${API_BASE_URL}${finalPath}`;
+        // En ligne : on retourne le chemin relatif direct (comme dans votre Dashboard)
+        // Cela donnera : /images/profiles/...
+        return photoPath;
     }
 };
 
