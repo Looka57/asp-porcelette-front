@@ -1,6 +1,5 @@
 
 <script setup>
-import { computed } from 'vue';
 
 // On détecte l'environnement : si on n'est pas sur localhost, on utilise l'origine du site (HTTPS)
 const API_BASE_URL = window.location.hostname === 'localhost'
@@ -42,19 +41,22 @@ const getPhotoPath = (user) => {
         return DEFAULT_PHOTO_PATH;
     }
 
-    // Nettoyage : si le chemin commence par // on enlève le slash en trop
-    if (photoPath.startsWith('//')) {
-        photoPath = photoPath.substring(1);
-    }
+    // 1. Nettoyage des slashs (BDD)
+    if (photoPath.startsWith('//')) photoPath = photoPath.substring(1);
+    if (!photoPath.startsWith('/')) photoPath = '/' + photoPath;
 
-    // Si le chemin en BDD n'a pas de slash du tout au début, on l'ajoute
-    if (!photoPath.startsWith('/')) {
-        photoPath = '/' + photoPath;
-    }
+    // 2. Logique d'environnement
+    const isLocal = window.location.hostname === 'localhost';
 
-    // Résultat : 'http://localhost:8080' + '/images/profiles/...'
-    // OU 'https://asporcelette...' + '/images/profiles/...'
-    return `${API_BASE_URL}${photoPath}`;
+    if (isLocal) {
+        // SUR TON PC : On garde le chemin tel quel (ex: http://localhost:8080/images/...)
+        return `${API_BASE_URL}${photoPath}`;
+    } else {
+        // SUR LE VPS : On force le préfixe /api (ex: https://domaine.fr/api/images/...)
+        // On vérifie quand même si /api n'est pas déjà là pour ne pas le doubler
+        const finalPath = photoPath.startsWith('/api') ? photoPath : '/api' + photoPath;
+        return `${API_BASE_URL}${finalPath}`;
+    }
 };
 
 const handleImageError = (event) => {
