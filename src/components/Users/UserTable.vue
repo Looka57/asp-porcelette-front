@@ -1,8 +1,7 @@
 
 <script setup>
 
-const API_BASE_URL = '/api'; // 🟢 UTILISEZ LE PORT HTTP
-// Définissez ce chemin après avoir déplacé l'image dans /public/img/
+const API_BASE_URL = 'http://localhost:8080';
 const DEFAULT_PHOTO_PATH = '/img/default-profile.png';
 
 const { userList, getDisciplineName } = defineProps({
