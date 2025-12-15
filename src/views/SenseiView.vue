@@ -282,7 +282,7 @@ onMounted(async () => {
 
     <div class="modal fade" id="createAdherent" tabindex="-1" aria-labelledby="createAdherentLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
-        <div class="modal-content modalDesign bg-light text-dark rounded-lg shadow-2xl">
+        <div class="modal-content modalDesign bg-dark text-light rounded-lg shadow-2xl">
           <div class="modal-header border-b-2 border-gray-200">
             <h1 class="modal-title fs-5" id="createrAdherentHeader">
               {{ editingUserId ? 'Modifier le Sensei' : 'Créer un nouveau Sensei' }}

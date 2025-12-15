@@ -100,8 +100,7 @@ onMounted(fetchCours);
                 <h4 class="display-6 text-warning mb-3">Horaires</h4>
                 <ul class="list-unstyled fs-5 horaire-list">
                   <li v-for="horaire in cours.horaires" :key="horaire.horaireId">
-                    <i class="pi pi-calendar-clock me-2 text-warning"></i>
-                    Le {{ horaire.jour }} : de {{ horaire.heureDebut }} à {{ horaire.heureFin }}
+                    <i class="pi pi-calendar-clock me-2 text-warning"></i>Le {{ horaire.jour }}:de{{ horaire.heureDebut }} à {{ horaire.heureFin }}
                   </li>
                 </ul>
               </div>

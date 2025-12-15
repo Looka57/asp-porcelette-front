@@ -185,7 +185,7 @@ async function handleSubmit() {
     dateFin: newEvent.value.dateFin ? `${newEvent.value.dateFin}T23:59:59` : null,
     disciplineId: newEvent.value.disciplineId ? Number(newEvent.value.disciplineId) : null,
     typeEvenementId: Number(newEvent.value.typeEvenementId),
-    imageUrl: 'placeholder',
+    imageUrl: null,
   };
 
   // --- Validation des champs requis ---

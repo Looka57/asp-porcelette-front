@@ -67,7 +67,7 @@ onMounted(fetchDisciplines);
     </div>
 
     <!-- 🔘 Boutons CRUD -->
-    <div class="boutonCrud m-5 d-flex justify-content-around">
+    <!-- <div class="boutonCrud m-5 d-flex justify-content-around">
       <div class="crud">
         <button class="btn btn-outline-warning">
           <i class="pi pi-plus-circle me-2"></i> Ajouter
@@ -83,7 +83,7 @@ onMounted(fetchDisciplines);
           <i class="pi pi-trash me-2"></i> Supprimer
         </button>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
