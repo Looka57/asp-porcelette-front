@@ -13,7 +13,7 @@ const $route = useRoute();
 const isInBackOffice = computed(() => {
   // Vérifie si l'utilisateur est connecté ET si le chemin est /admin/... ou /sensei/...
   return authStore.isLoggedIn && (
-    $route.path.startsWith('/admin') || $route.path.startsWith('/sensei')
+    $route.path.startsWith('/admin') || $route.path.startsWith('/')
   );
 });
 </script>
