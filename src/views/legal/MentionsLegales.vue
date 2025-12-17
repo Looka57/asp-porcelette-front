@@ -2,6 +2,11 @@
 
 <template>
   <div class="container mt-8 py-5 bg-dark text-light min-vh-100">
+    <div class="mb-4">
+  <router-link to="/" class="btn btn-outline-warning btn-sm d-inline-flex align-items-center gap-2">
+    <i class="bi bi-arrow-left"></i> 🏠 Retour à l'accueil
+  </router-link>
+</div>
     <h1 class="text-center mb-5 text-warning">🧾 Mentions Légales</h1>
 
     <div class="row justify-content-center">
