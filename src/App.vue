@@ -1,20 +1,16 @@
 <script setup>
-
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import AppHeader from '@/components/AppHeader.vue'; // La barre du haut (pour l'instant, c'est votre déconnexion)
-import AppSidebar from '@/components/AppSidebar.vue'; // Le nouveau composant
+import AppHeader from '@/components/AppHeader.vue';
+import AppSidebar from '@/components/AppSidebar.vue';
 
 const authStore = useAuthStore();
 const $route = useRoute();
 
-// Déterminez si l'utilisateur est dans la zone protégée (Back-Office)
+// ✅ CORRECTION : Ne vérifier QUE les routes /admin
 const isInBackOffice = computed(() => {
-  // Vérifie si l'utilisateur est connecté ET si le chemin est /admin/... ou /sensei/...
-  return authStore.isLoggedIn && (
-    $route.path.startsWith('/admin') || $route.path.startsWith('/')
-  );
+  return authStore.isLoggedIn && $route.path.startsWith('/admin');
 });
 </script>
 
@@ -26,7 +22,6 @@ const isInBackOffice = computed(() => {
         <AppSidebar />
 
         <!-- Main content -->
-
         <div class="flex-grow-1 d-flex flex-column bg-dark overflow-hidden">
           <AppHeader />
 
@@ -35,14 +30,10 @@ const isInBackOffice = computed(() => {
               <RouterView />
             </main>
           </div>
-
         </div>
       </div>
 
-
-
-
-      <footer class="bg-dark p-3 text-center text-light ">
+      <footer class="bg-dark p-3 text-center text-light">
         AS Porcelette Art Martiaux © 2025. Tous droits réservés.
       </footer>
     </template>
@@ -54,19 +45,15 @@ const isInBackOffice = computed(() => {
 </template>
 
 <style>
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-
 html, body {
   overflow-x: hidden !important;
 }
-
-
 
 .custom-shadow {
   box-shadow: -5px -2px 40px rgba(238, 238, 238, 0.266);
