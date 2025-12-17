@@ -19,7 +19,8 @@ const closeMenu = () => {
 <template>
   <div class="container-fluid p-0 bg-dark text-light bob">
     <header>
-     <img class="logoBarNav" :src="logo" alt="Logo ASP Porcelette">
+     <img class="logoBarNav" :src="logo" alt="Logo ASP Porcelette" width="992"
+  height="1056" loading="lazy" title="Logo AS Porcelette Arts Martiaux" />
       <!-- <a href="#" class="logoBarNav">Logo ASP Porcelette</a> -->
 
       <!-- Bouton Hamburger visible uniquement sur mobile/tablette -->
@@ -63,7 +64,7 @@ header {
   left: 0;
   background: rgba(28, 28, 28, 0.394);
   color: white;
-  padding: 20px 100px;
+  padding: 0px 100px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -185,7 +186,7 @@ header {
 
   /* Ajustement du padding du header sur mobile */
   header {
-    padding: 15px 20px;
+    padding: 0px 20px;
   }
 
   /* Masquer la navigation par défaut sur mobile/tablette */

@@ -83,7 +83,8 @@ onMounted(fetchSensei)
     <div class="row justify-content-center">
       <div v-for="sensei in senseis" :key="sensei.userId" class="col-lg-3 col-md-6 col-sm-6 teacher-card">
         <div class="sensei-photo-container" :class="getBorderClass(sensei.disciplineId)">
-          <img :src="getPhotoUrl(sensei.photoUrl)" alt="Photo du Sensei" class="sensei-photo" />
+          <img :src="getPhotoUrl(sensei.photoUrl)" :alt="'Photo de ' + sensei.prenom + ' ' + sensei.nom"
+            :title="sensei.prenom + ' ' + sensei.nom" class="sensei-photo" width="626" height="626" loading="lazy" />
 
         </div>
         <h3 class="mt-3 mb-0 text-light">{{ sensei.nom }} {{ sensei.prenom }}</h3>

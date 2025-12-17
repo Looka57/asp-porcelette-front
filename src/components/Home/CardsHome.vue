@@ -107,10 +107,11 @@ onMounted(fetchDisciplines)
       <div class="row p-2">
         <div v-for="discipline in disciplines" :key="discipline.disciplineId"
           class="col-lg-4 col-md-12 col-sm-12 p-0 hero" :class="getCardClass(discipline.disciplineId)">
-          <img :src="getimageDiscipline(discipline.disciplineId)" alt="image de la discipline" class="image">
+          <img :src="getimageDiscipline(discipline.disciplineId)" :alt="'Image ' + discipline.nom"
+            :title="discipline.nom" class="image" loading="lazy">
           <div class="text"></div>
           <div class="logo">
-            <img :src="getIconUrl(discipline.disciplineId)" alt="icone de la discipline">
+            <img :src="getIconUrl(discipline.disciplineId)" alt="icone de la discipline" :title="discipline.nom" loading="lazy">
           </div>
           <div class="main-text">
             <p>{{ getTextDiscipline(discipline.disciplineId) }}</p>

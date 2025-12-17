@@ -1,9 +1,14 @@
 <script setup>
+// ===============================
+// 🔹 IMPORTS
+// ===============================
 import BarnavHome from './components/Barnav/BarnavHome.vue';
 import { RouterView } from 'vue-router';
 
 </script>
-
+<!-- ===============================
+🔹 BODY
+=============================== -->
 <template>
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
     <BarnavHome />
@@ -13,23 +18,48 @@ import { RouterView } from 'vue-router';
 
     </main>
   </div>
-
-  <!-- FOOTER -->
+  <!-- ===============================
+🔹 FOOTER
+ =============================== -->
   <footer class="bg-dark text-center text-light d-flex flex-column align-items-center">
-    AS Porcelette Art Martiaux © 2025. Tous droits réservés.
+
+
+<!-- // **********************
+// 🔹 Reseau
+// ********************** -->
     <div class="reseau">
-      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/facebook-new.png" alt="facebook-new"/></a>
-      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/instagram-new--v2.png" alt="instagram-new--v2"/></a>
+      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/facebook-new.png"
+          alt="facebook-new" loading="lazy" title="Logo de facebook" /></a>
+      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/instagram-new--v2.png"
+          alt="instagram-new--v2" loading="lazy" title="Logo d'instagram" /></a>
     </div>
-    <router-link to="/login"
-      class=" inline-block bg-green-500 text-dark py-2 px-4 rounded hover:bg-green-600 transition" target="_blank">
+    <!-- // **********************
+// 🔹 Mentions legales
+// ********************** -->
+    <div class="legal d-flex gap-4 mb-3">
+      <router-link to="/mentions-legales" class="link-light link-underline-opacity-0 link-underline-opacity-100-hover">
+        Mentions légales
+      </router-link>
+      <router-link to="/politique-confidentialite"
+        class="link-light link-underline-opacity-0 link-underline-opacity-100-hover">
+        Politique de confidentialité
+      </router-link>
+      <router-link to="/politique-cookies" class="link-light link-underline-opacity-0 link-underline-opacity-100-hover">
+        Politique de cookies
+      </router-link>
+    </div>
+
+     <p class="fs-6 text-white-50">© Tous droits réservés.<br>AS Porcelette Art Martiaux 2025. </p>
+    <!-- // **********************
+// 🔹 Login dash
+// ********************** -->
+    <router-link to="/login" class=" inline-block text-dark py-2 px-4 rounded  transition" target="_blank">
       Accéder à l'Espace Membre
     </router-link>
+
   </footer>
 
 
 
 </template>
-<style>
-
-</style>
+<style></style>

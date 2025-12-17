@@ -100,7 +100,7 @@ async function fetchEvenement() {
     );
 
     if (evenementsFiltres.length === 0) {
-      errorMessage.value = "Aucun événement de Jujitsu à venir trouvé.";
+      errorMessage.value = "Aucun événement de §Judo déetente à venir trouvé.";
       evenements.value = [];
       return;
     }
@@ -127,7 +127,7 @@ onMounted(() => {
 
 
 <template>
-  <div class="container-fluid mt-5 bg-dark text-light min-vh-100 p-4">
+  <div class="container-fluid mt-5 bg-dark text-light p-4">
     <div class="row">
       <!-- Colonne Actualités -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 news-section">
@@ -178,7 +178,7 @@ onMounted(() => {
 
       <!-- Colonne Événements -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 events-section border-start border-secondary">
-        <h2 class="text-center text-warning mb-5 display-5">Évènements de Jujitsu à Venir</h2>
+        <h2 class="text-center text-warning mb-5 display-5">Évènements de Judo détente à Venir</h2>
         <div v-if="isLoading" class="text-center text-light p-4">
           Chargement des événements... 🔄
         </div>

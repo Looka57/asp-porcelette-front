@@ -127,7 +127,7 @@ onMounted(() => {
 
 
 <template>
-  <div class="container-fluid mt-5 bg-dark text-light min-vh-100 p-4">
+  <div class="container-fluid mt-5 bg-dark text-light p-4">
     <div class="row">
       <!-- Colonne Actualités -->
       <div class="col-lg-6 col-md-6 col-sm-12 p-3 news-section">

@@ -6,7 +6,7 @@ import FrontLayout from '@/FrontLayout.vue';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior() {
-    return { top: 0 };
+    return { top: 0 }
   },
 
   routes: [
@@ -20,68 +20,80 @@ const router = createRouter({
         {
           path: '',
           name: 'home',
-          component: () => import('@/views/HomeView.vue')
+          component: () => import('@/views/HomeView.vue'),
         },
         {
           path: 'judo',
           name: 'judo',
-          component: () => import('@/views/JudoView.vue')
+          component: () => import('@/views/JudoView.vue'),
         },
         {
           path: 'aikido',
           name: 'aikido',
-          component: () => import('@/views/AikidoView.vue')
+          component: () => import('@/views/AikidoView.vue'),
         },
         {
           path: 'jujitsu',
           name: 'jujitsu',
-          component: () => import('@/views/JujitsuView.vue')
+          component: () => import('@/views/JujitsuView.vue'),
         },
         {
           path: 'judo-detente',
           name: 'judo-detente',
-          component: () => import('@/views/JudoDetenteView.vue')
+          component: () => import('@/views/JudoDetenteView.vue'),
         },
         {
           path: 'equipe',
           name: 'sensei',
-          component: () => import('@/views/SenseiSiteView.vue')
+          component: () => import('@/views/SenseiSiteView.vue'),
         },
         {
           path: '/equipeDetailView/:id',
           name: 'senseiDetailView',
           component: () => import('@/views/SenseiDetailView.vue'),
-          props: true
+          props: true,
         },
         {
           path: 'actualites',
           name: 'actualites',
-          component: () => import('@/views/ActualiteSiteView.vue')
+          component: () => import('@/views/ActualiteSiteView.vue'),
         },
         {
           path: '/actualite/:id',
           name: 'ActualiteDetail',
           component: () => import('@/views/ActualiteDetail.vue'),
-          props: true
+          props: true,
         },
         {
           path: 'evenements',
           name: 'evenements',
-          component: () => import('@/views/EvenementsView.vue')
+          component: () => import('@/views/EvenementsView.vue'),
         },
         {
           path: '/evenement/:id',
           name: 'EvenementDetail',
           component: () => import('@/views/EvenementDetail.vue'),
-          props: true
+          props: true,
         },
         {
           path: 'tarifs',
           name: 'tarifs',
           component: () => import('@/views/TarifSiteView.vue'),
-          props: true
-        }
-      ]
+          props: true,
+        },
+        {
+          path: '/mentions-legales',
+          component: () => import('@/views/legal/MentionsLegales.vue'),
+        },
+        {
+          path: '/politique-confidentialite',
+          component: () => import('@/views/legal/PolitiqueConfidentialite.vue'),
+        },
+        {
+          path: '/politique-cookies',
+          component: () => import('@/views/legal/PolitiqueCookies.vue'),
+        },
+      ],
     },
 
     // ===============================================
@@ -90,7 +102,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/LoginView.vue')
+      component: () => import('@/views/LoginView.vue'),
     },
 
     // ===============================================
@@ -99,7 +111,7 @@ const router = createRouter({
     {
       path: '/403',
       name: 'forbidden',
-      component: () => import('@/views/ForbiddenView.vue')
+      component: () => import('@/views/ForbiddenView.vue'),
     },
 
     // ===============================================
@@ -111,8 +123,8 @@ const router = createRouter({
       component: () => import('@/views/AdminDashboard.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/sensei',
@@ -120,8 +132,8 @@ const router = createRouter({
       component: () => import('@/views/SenseiView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/licencies',
@@ -129,8 +141,8 @@ const router = createRouter({
       component: () => import('@/views/LicenciesView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/cours',
@@ -138,8 +150,8 @@ const router = createRouter({
       component: () => import('@/views/CoursView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/events',
@@ -147,8 +159,8 @@ const router = createRouter({
       component: () => import('@/views/EventsView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/actualite',
@@ -156,8 +168,8 @@ const router = createRouter({
       component: () => import('@/views/ActualiteView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/discipline',
@@ -165,8 +177,8 @@ const router = createRouter({
       component: () => import('@/views/DisciplineView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/tarifs',
@@ -174,8 +186,8 @@ const router = createRouter({
       component: () => import('@/views/TarifsView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/compta',
@@ -183,8 +195,8 @@ const router = createRouter({
       component: () => import('@/views/ComptabiliteView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/compta/transactions/:compteId',
@@ -192,8 +204,8 @@ const router = createRouter({
       component: () => import('@/views/GestionTransactionsPage.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/profile',
@@ -201,8 +213,8 @@ const router = createRouter({
       component: () => import('@/views/ProfilePageView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
     {
       path: '/admin/comptes/:id',
@@ -211,8 +223,8 @@ const router = createRouter({
       props: true,
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei']
-      }
+        roles: ['Admin', 'Sensei'],
+      },
     },
 
     // ===============================================
@@ -220,10 +232,10 @@ const router = createRouter({
     // ===============================================
     {
       path: '/admin/:pathMatch(.*)*',
-      redirect: '/403'
-    }
-  ]
-});
+      redirect: '/403',
+    },
+  ],
+})
 
 // ===============================================
 // 🛡️ GARDE DE NAVIGATION RENFORCÉE
