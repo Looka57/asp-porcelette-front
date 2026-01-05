@@ -113,7 +113,6 @@ watch(
             <div class="modal-body bg-light text-dark p-3 mb-3">
               <p class="lead fs-4"><strong>Date de début :</strong> {{ formatDate(event.dateDebut) }}</p>
               <p class="lead fs-4"><strong>Date de fin :</strong> {{ formatDate(event.dateFin) }}</p>
-              <!-- 🎯 CORRECTION 2: Utiliser la propriété calculée disciplineName -->
               <p><strong>Discipline :</strong> {{ disciplineName }}</p>
               <p><strong>Lieu :</strong> {{ event.lieu || 'Complexe Porcelette' }}</p>
               <p><strong>Événement :</strong> {{ eventTypeName }}</p>

@@ -5,6 +5,8 @@
 import BarnavHome from './components/Barnav/BarnavHome.vue';
 import { RouterView } from 'vue-router';
 
+const dateYear = new Date().getFullYear();
+
 </script>
 <!-- ===============================
 🔹 BODY
@@ -49,7 +51,7 @@ import { RouterView } from 'vue-router';
       </router-link>
     </div>
 
-     <p class="fs-6 text-white-50">© Tous droits réservés.<br>AS Porcelette Art Martiaux 2025. </p>
+     <p class="fs-6 text-white-50">© Tous droits réservés.<br>AS Porcelette Art Martiaux {{dateYear}}. </p>
     <!-- // **********************
 // 🔹 Login dash
 // ********************** -->

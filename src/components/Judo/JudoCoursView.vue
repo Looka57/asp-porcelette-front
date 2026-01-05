@@ -8,7 +8,6 @@ import api from '@/api/axios'
 // ===============================
 // 🔹 ÉTATS
 // ===============================
-
 const coursJudo = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
@@ -29,7 +28,7 @@ async function fetchCours() {
     const coursAllJudo = reponse.data;
     const foundCoursJudo = coursAllJudo.filter(c => (c.discipline.disciplineId === 1))
     if (foundCoursJudo && foundCoursJudo.length > 0) {
-      // 🎯 Stocker le tableau de résultats filtrés
+      // Stocker le tableau de résultats filtrés
       coursJudo.value = foundCoursJudo;
     } else {
       errorMessage.value = "Aucun cours de Judo trouvé.";
@@ -42,7 +41,6 @@ async function fetchCours() {
     isLoading.value = false;
   }
 }
-
 
 const imgCours = {
   17: new URL('@/assets/img/coursbaby.png', import.meta.url).href,
@@ -64,13 +62,17 @@ function getDescriptionCours(coursId) {
   return descriptionCours[coursId];
 }
 
+function formatHeure(heure) {
+  if (!heure) return '';
+  return heure.slice(0, 5);
+}
+
 onMounted(fetchCours);
 </script>
 
 <template>
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
     <h2 class="mb-5 text-center text-warning display-3">NOS COURS</h2>
-
     <div v-if="isLoading" class="text-center p-4">Chargement des cours...</div>
     <div v-else-if="errorMessage" class="text-danger text-center p-4">{{ errorMessage }}</div>
 
@@ -78,7 +80,7 @@ onMounted(fetchCours);
 
       <div v-for="(cours, index) in coursJudo" :key="cours.coursId" class="row align-items-center course-row">
 
-        <div class="col-lg-4 col-md-6" :class="{ 'order-lg-2': index % 2 === 1 }">
+        <div class="col-lg-4 col-md-6 mb-4" :class="{ 'order-lg-2': index % 2 === 1 }">
           <div class="designer-card h-100">
             <div class="image-wrapper">
               <img :src="getImgCours(cours.coursId)" :alt="'Image du cours ' + cours.libelle"
@@ -100,14 +102,16 @@ onMounted(fetchCours);
                 <h4 class="display-6 text-warning mb-3">Horaires</h4>
                 <ul class="list-unstyled fs-5 horaire-list">
                   <li v-for="horaire in cours.horaires" :key="horaire.horaireId">
-                    <i class="pi pi-calendar-clock me-2 text-warning"></i>Le {{ horaire.jour }}:de{{ horaire.heureDebut }} à {{ horaire.heureFin }}
+                    <i class="pi pi-calendar-clock me-2 text-warning"></i>
+                    Le {{ horaire.jour }}: de {{ formatHeure(horaire.heureDebut) }} à {{ formatHeure(horaire.heureFin)
+                    }}
                   </li>
                 </ul>
               </div>
               <div class="senseiCours ">
                 <h4 class="display-6 text-warning mb-3">Sensei</h4>
                 <p class="fs-5" v-if="cours.sensei">
-                      <i class="pi pi-user me-2 text-warning"></i>
+                  <i class="pi pi-user me-2 text-warning"></i>
                   {{ cours.sensei.prenom }} {{ cours.sensei.nom }}
                 </p>
                 <p v-else class="text-secondary">

@@ -60,6 +60,11 @@ function getDescriptionCours(coursId) {
   return descriptionCours[coursId];
 }
 
+function formatHeure(heure) {
+  if (!heure) return '';
+  return heure.slice(0, 5); // "18:30:00" → "18:30"
+}
+
 onMounted(fetchCours);
 </script>
 
@@ -74,7 +79,7 @@ onMounted(fetchCours);
 
       <div v-for="(cours, index) in coursJujitsu" :key="cours.coursId" class="row align-items-center course-row">
 
-        <div class="col-lg-4 col-md-6" :class="{ 'order-lg-2': index % 2 === 1 }">
+        <div class="col-lg-4 col-md-6 mb-4" :class="{ 'order-lg-2': index % 2 === 1 }">
           <div class="designer-card h-100">
             <div class="image-wrapper">
               <img :src="getImgCours(cours.coursId)" :alt="'Image du cours ' + cours.libelle"
@@ -97,7 +102,7 @@ onMounted(fetchCours);
                 <ul class="list-unstyled fs-5 horaire-list">
                   <li v-for="horaire in cours.horaires" :key="horaire.horaireId">
                     <i class="pi pi-calendar-clock me-2 text-warning"></i>
-                    Le {{ horaire.jour }} : de {{ horaire.heureDebut }} à {{ horaire.heureFin }}
+                     Le {{ horaire.jour }}: de {{ formatHeure(horaire.heureDebut) }} à {{ formatHeure(horaire.heureFin) }}
                   </li>
                 </ul>
               </div>

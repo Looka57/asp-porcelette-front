@@ -7,6 +7,7 @@ import AppSidebar from '@/components/AppSidebar.vue';
 
 const authStore = useAuthStore();
 const $route = useRoute();
+const dateYear = new Date().getFullYear();
 
 // ✅ CORRECTION : Ne vérifier QUE les routes /admin
 const isInBackOffice = computed(() => {
@@ -34,7 +35,8 @@ const isInBackOffice = computed(() => {
       </div>
 
       <footer class="bg-dark p-3 text-center text-light">
-        AS Porcelette Art Martiaux © 2025. Tous droits réservés.
+        AS Porcelette Art Martiaux © {{dateYear}} Tous droits réservés.
+
       </footer>
     </template>
 

@@ -19,9 +19,9 @@ const closeMenu = () => {
 <template>
   <div class="container-fluid p-0 bg-dark text-light bob">
     <header>
-     <img class="logoBarNav" :src="logo" alt="Logo ASP Porcelette" width="992"
-  height="1056" loading="lazy" title="Logo AS Porcelette Arts Martiaux" />
-      <!-- <a href="#" class="logoBarNav">Logo ASP Porcelette</a> -->
+      <router-link to="/">
+      <img class="logoBarNav" :src="logo" alt="Logo ASP Porcelette" width="992" height="1056" loading="lazy"
+        title="Logo AS Porcelette Arts Martiaux" /></router-link>
 
       <!-- Bouton Hamburger visible uniquement sur mobile/tablette -->
       <div class="menu-icon" :class="{ open: isMenuOpen }" @click="toggleMenu">
@@ -82,7 +82,7 @@ header {
   z-index: 101;
 } */
 
-.logoBarNav{
+.logoBarNav {
   height: 80px;
   width: 80px;
 }
@@ -193,16 +193,23 @@ header {
   .navbar {
     position: fixed;
     top: 101%;
-    right: -100%; /* Caché hors de l'écran */
-    width: 70%; /* Prend 70% de la largeur du viewport */
-    max-width: 300px; /* Limiter la taille max pour les très grands écrans */
+    right: -100%;
+    /* Caché hors de l'écran */
+    width: 70%;
+    /* Prend 70% de la largeur du viewport */
+    max-width: 300px;
+    /* Limiter la taille max pour les très grands écrans */
     height: 100vh;
     background: rgba(28, 28, 28, 0.95);
     backdrop-filter: blur(20px);
-    flex-direction: column; /* Les liens s'empilent verticalement */
-    justify-content: flex-start; /* Aligner les éléments en haut */
-    align-items: flex-start; /* Aligner le texte à gauche */
-    padding-top: 80px; /* Espace pour le logo/header */
+    flex-direction: column;
+    /* Les liens s'empilent verticalement */
+    justify-content: flex-start;
+    /* Aligner les éléments en haut */
+    align-items: flex-start;
+    /* Aligner le texte à gauche */
+    padding-top: 80px;
+    /* Espace pour le logo/header */
     transition: right 0.4s ease-in-out;
   }
 
@@ -212,10 +219,12 @@ header {
   }
 
   /* Ajustement des liens pour le menu mobile */
-  .navbar a, .dropbtn {
+  .navbar a,
+  .dropbtn {
     margin-left: 0;
     padding: 15px 20px;
-    width: 100%; /* Prend toute la largeur du menu mobile */
+    width: 100%;
+    /* Prend toute la largeur du menu mobile */
     text-align: left;
     border-radius: 0;
   }
@@ -228,7 +237,8 @@ header {
     width: 30px;
     height: 25px;
     cursor: pointer;
-    z-index: 101; /* Doit être au-dessus de la navbar */
+    z-index: 101;
+    /* Doit être au-dessus de la navbar */
   }
 
   .menu-icon span {
@@ -259,20 +269,24 @@ header {
   }
 
   .dropdown-content {
-    position: static; /* Position statique dans le flux pour s'ouvrir verticalement */
+    position: static;
+    /* Position statique dans le flux pour s'ouvrir verticalement */
     width: 100%;
     left: auto;
-    background: rgba(50, 50, 50, 0.95); /* Arrière-plan légèrement plus foncé */
+    background: rgba(50, 50, 50, 0.95);
+    /* Arrière-plan légèrement plus foncé */
     padding: 0;
     border: none;
-    opacity: 1; /* Toujours visible si le dropdown est ouvert */
+    opacity: 1;
+    /* Toujours visible si le dropdown est ouvert */
     transform: none;
     transition: none;
   }
 
   /* Ajuster les liens à l'intérieur du dropdown mobile */
   .dropdown-content a {
-    padding-left: 40px; /* Décaler les sous-liens */
+    padding-left: 40px;
+    /* Décaler les sous-liens */
     font-size: 16px;
   }
 
@@ -281,5 +295,4 @@ header {
     display: block;
   }
 }
-
 </style>

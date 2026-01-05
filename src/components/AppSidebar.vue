@@ -72,7 +72,6 @@ const toggleNavbar = () => {
     <nav class="custom-navbar bg-dark text-light p-4" :class="{
           'open': isOpen,
           'mobile-mode': isMobile,
-          // Appliquez 'collapsed' uniquement si ce n'est PAS en mode mobile et que c'est fermé
           'collapsed': !isOpen && !isMobile
       }">
       <div class="d-flex justify-content-center align-items-center mb-4">

@@ -53,4 +53,12 @@ function getIconsForDiscipline(disciplineId) {
   object-fit: contain;
   flex-wrap: wrap;
 }
+
+
+@media (max-width: 440px) {
+  .discipline-icon {
+    width: 100px;
+  height: 100px;
+  }
+}
 </style>

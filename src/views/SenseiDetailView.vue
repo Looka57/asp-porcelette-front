@@ -189,7 +189,7 @@ onMounted(async () => {
               </p>
               <hr class="text-warning">
               <div class="row text-start details-row">
-                <div class="col-sm-6 mb-3 bob">
+                <div class="col-sm-6 mb-3 textDiscipline">
                   <h6 class="text-muted">Discipline principale</h6>
                   <p class="fw-bold ">{{ getDisciplineName(sensei.disciplineId) }}</p>
                   <SenseiBulleView class="iconDiscipline" :discipline-id="sensei.disciplineId" />
@@ -295,6 +295,12 @@ onMounted(async () => {
   text-transform: uppercase;
 }
 
+.details-row {
+ display: flex;
+flex-direction: row;
+}
+
+
 .details-row h6 {
   text-transform: uppercase;
   font-size: 0.8rem;
@@ -326,7 +332,7 @@ onMounted(async () => {
   border-color: #e0b320;
 }
 
-.bob {
+.textDiscipline {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -348,5 +354,12 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+@media (max-width: 440px) {
+  .iconDiscipline {
+    flex-wrap: wrap;
+    width: 100%;
+  }
 }
 </style>

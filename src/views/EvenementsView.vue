@@ -269,7 +269,7 @@ onMounted(fetchEvenements);
                   class="img-fluid rounded-start object-fit-cover w-100 h-100 actu-secondaire-img" :alt="event.titre" />
               </div>
               <div class="col-7">
-                <div class="card-body p-3">
+                <div class="card-body p-3 text-center">
                   <span :class="['badge mb-1', getBadgeClass(event.discipline)]">
                     {{ event.discipline }}
                   </span>
