@@ -110,7 +110,7 @@ onMounted(fetchEvenement);
       </figure>
 
       <article class="evenement-contenu mb-5">
-        <p class="lead text-secondary text-justify">{{ evenement.description }}</p>
+        <p class="lead text-light text-justify">{{ evenement.description }}</p>
       </article>
 
       <footer class="text-end">

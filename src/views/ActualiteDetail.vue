@@ -88,7 +88,7 @@ onMounted(fetchActualite);
       </figure>
 
       <article class="actualite-contenu mb-5">
-        <p class="lead text-secondary text-justify">{{ actualite.contenu }}</p>
+        <p class="lead text-light text-justify">{{ actualite.contenu }}</p>
       </article>
 
       <footer class="text-end">
