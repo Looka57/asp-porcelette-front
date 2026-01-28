@@ -26,14 +26,21 @@ const dateYear = new Date().getFullYear();
   <footer class="bg-dark text-center text-light d-flex flex-column align-items-center">
 
 
-<!-- // **********************
+    <!-- // **********************
 // 🔹 Reseau
 // ********************** -->
     <div class="reseau">
-      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/facebook-new.png"
-          alt="facebook-new" loading="lazy" title="Logo de facebook" /></a>
-      <a href=""><img width="80" height="80" src="https://img.icons8.com/bubbles/100/instagram-new--v2.png"
-          alt="instagram-new--v2" loading="lazy" title="Logo d'instagram" /></a>
+      <a href="https://www.facebook.com/groups/387110822915291/?ref=share" target="_blank" rel="noopener noreferrer"
+        aria-label="Rejoignez notre groupe Facebook">
+        <img width="80" height="80" src="https://img.icons8.com/bubbles/100/facebook-new.png" alt="Logo Facebook"
+          loading="lazy" />
+      </a>
+
+      <a href="https://www.instagram.com/TON_COMPTE" target="_blank" rel="noopener noreferrer"
+        aria-label="Suivez-nous sur Instagram">
+        <img width="80" height="80" src="https://img.icons8.com/bubbles/100/instagram-new--v2.png" alt="Logo Instagram"
+          loading="lazy" />
+      </a>
     </div>
     <!-- // **********************
 // 🔹 Mentions legales
@@ -51,7 +58,7 @@ const dateYear = new Date().getFullYear();
       </router-link>
     </div>
 
-     <p class="fs-6 text-white-50">© Tous droits réservés.<br>AS Porcelette Art Martiaux {{dateYear}}. </p>
+    <p class="fs-6 text-white-50">© Tous droits réservés.<br>AS Porcelette Art Martiaux {{ dateYear }}. </p>
     <!-- // **********************
 // 🔹 Login dash
 // ********************** -->

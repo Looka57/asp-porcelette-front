@@ -78,9 +78,9 @@ function getCardClass(disciplineId) {
     case 2:
       return 'second'; // Aïkido
     case 3:
-      return 'third'; // Jujitsu
+      return 'quatre'; // Jujitsu
     case 4:
-      return 'quatre'; // Judo détente
+      return 'third'; // Judo détente
     default:
       return '';
   }
