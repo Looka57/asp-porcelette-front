@@ -95,9 +95,9 @@ onMounted(fetchEvenement);
               <img class="w-25" :src="getIconUrl(evenement.disciplineId)" alt="logo">
               <p class="card-text mb-1  fw-bold">{{ formatDate(evenement.dateDebut) }}</p>
               <h5 class="card-title text-warning ellipsis-3">{{ evenement.titre || 'Evénement' }}</h5>
-              <p class="card-text ellipsis-3 ">{{ evenement.description || 'Pas de description disponible.' }}</p>
+              <h6 class="card-text ellipsis-3 ">{{ evenement.lieu || 'Pas de lieu disponible.' }}</h6>
               <router-link :to="`/evenement/${evenement.evenementId}`" class="btn btn-outline-warning btn-sm">
-                Voir l'archive
+                Voir le détail
               </router-link>
             </div>
           </div>

@@ -96,7 +96,7 @@ onMounted(fetchEvenement);
 
       <header class="mb-5">
         <h1 class="text-warning display-4">{{ evenement.titre }}</h1>
-
+        <h2 class="text-light">{{ evenement.lieu }}</h2>
         <p class="text-light fs-2">Prévu du :
           <time :datetime="evenement.dateDebut">{{ formatDate(evenement.dateDebut) }}</time>
           au
