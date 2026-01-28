@@ -230,6 +230,7 @@ onMounted(fetchEvenements);
                 <h3 class="card-title text-warning mb-2 display-6">
                   {{ evenementPrincipal.titre }}
                 </h3>
+                <h4 class="text-light">{{ evenementPrincipal.lieu }}</h4>
                 <p class="text-light small mb-3 fw-bold">
                   Prévu le : {{ formatDate(evenementPrincipal.dateDePublication) }}
                 </p>
@@ -274,6 +275,7 @@ onMounted(fetchEvenements);
                     {{ event.discipline }}
                   </span>
                   <h5 class="card-title text-light actu-secondaire-title">{{ event.titre }}</h5>
+                  <h6 class=" text-light">{{ event.lieu }}</h6>
                   <p class="card-text text-light small mb-2">{{ formatDate(event.dateDePublication) }}</p>
                   <router-link :to="`/evenement/${event.evenementId}`"
                     :class="['btn btn-outline', 'btn-sm', getButtonClass(event.discipline)]">

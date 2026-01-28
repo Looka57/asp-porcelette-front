@@ -32,15 +32,10 @@ async function fetchActualite() {
 }
 
 function getPhotoUrl(photoPath) {
-  // L'URL de base n'est plus nécessaire en production derrière Nginx.
-
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
-    // Si le chemin est déjà relatif (ex: /images/profiles/...), on le retourne directement.
     return photoPath;
   }
-
-  // Si l'URL n'était pas relative, elle est peut-être déjà complète (ou null, si pas d'image)
-  return photoPath; // Retourne l'original (qui peut être null ou une URL complète externe)
+  return photoPath;
 }
 
 function formatDate(dateString) {
@@ -109,6 +104,8 @@ onMounted(fetchActualite);
 
 
 <style scoped>
+
+
 .container {
   max-width: 900px;
 }
@@ -117,6 +114,7 @@ onMounted(fetchActualite);
   line-height: 1.8;
   color: #ccc;
   font-size: 1.1rem;
+  white-space: pre-line
 }
 
 .shadow-lg {
