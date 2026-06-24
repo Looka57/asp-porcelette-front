@@ -70,7 +70,6 @@ function getimageDiscipline(disciplineId) {
   return imageDiscipline[disciplineId] || "Image non disponible.";
 }
 
-
 function getCardClass(disciplineId) {
   switch (disciplineId) {
     case 1:
