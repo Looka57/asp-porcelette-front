@@ -1,22 +1,57 @@
+Oui, là je vois ce qui s'est passé 👍
+
+Tu as **mélangé ton ancien README Vite avec ton README professionnel**. Ce n'est pas grave, mais il faut nettoyer.
+
+Ce que je garderais :
+✅ ta présentation du projet
+✅ fonctionnalités
+✅ technologies
+✅ architecture
+✅ compétences
+✅ installation npm
+✅ état du projet
+✅ démonstration
+
+Ce que je supprimerais :
+❌ "Recommended IDE Setup" (c'est le README automatique de Vite)
+❌ "Recommended Browser Setup"
+❌ liens vers Vue Devtools
+❌ "Customize configuration"
+❌ répétition de `npm install`
+❌ la partie anglaise Vite en bas
+
+Ces infos sont utiles au début d'un projet Vue vierge, mais pour un dépôt professionnel elles donnent l'impression que tu n'as pas personnalisé ton README.
+
+Je ferais plutôt cette version finale :
+
+```md
 # 🥋 ASP Porcelette – Front-End
 
-Application Front-End développée avec **Vue.js** et **PrimeVue** pour le site de l'APS Judo de Porcelette.
+Application Front-End développée avec **Vue.js 3** et **PrimeVue** pour le site de l'**AS Porcelette Arts Martiaux**.
 
-Cette interface consomme l'API ASP.NET Core afin d'offrir un site moderne, responsive et simple d'utilisation aussi bien pour les visiteurs que pour les administrateurs.
+Cette interface consomme une API **ASP.NET Core** afin d'offrir un site moderne, responsive et simple d'utilisation pour les visiteurs ainsi qu'une interface connectée aux données administrées.
+
+---
+
+## 🌐 Démonstration
+
+Le projet est accessible en ligne :
+
+[![Website](https://img.shields.io/badge/Site%20en%20ligne-Visiter-success?style=for-the-badge)](https://asporcelette-art-martiaux.fr/)
 
 ---
 
 ## 🚀 Fonctionnalités
 
 * 🏠 Accueil dynamique
-* 📰 Actualités
-* 📅 Événements
-* 🥋 Présentation du club
-* 📷 Galerie
-* 📞 Contact
-* 🔑 Connexion administrateur
+* 📰 Gestion et affichage des actualités
+* 📅 Gestion et affichage des événements
+* 🥋 Présentation du club et des disciplines
+* 📷 Galerie photos
+* 📞 Informations de contact
+* 🔑 Authentification administrateur
 * 📱 Interface responsive
-* ⚡ Communication avec l'API REST
+* ⚡ Communication avec l'API REST ASP.NET Core
 
 ---
 
@@ -32,41 +67,45 @@ Cette interface consomme l'API ASP.NET Core afin d'offrir un site moderne, respo
 
 ---
 
-## 🎨 Objectifs
-
-* Développer une interface moderne et intuitive.
-* Offrir une navigation fluide sur tous les appareils.
-* Consommer une API REST développée en ASP.NET Core.
-* Garantir une expérience utilisateur agréable.
-
----
-
 ## 📂 Architecture
 
 ```
+
 Utilisateur
-      │
-      ▼
-Vue.js + PrimeVue
-      │
-      ▼
+│
+▼
+Vue.js 3 + PrimeVue
+│
+▼
 ASP.NET Core API
-      │
-      ▼
+│
+▼
 SQL Server
-```
+
+````
+
+---
+
+## 🎨 Objectifs
+
+* Développer une interface moderne et intuitive.
+* Proposer une navigation fluide sur tous les supports.
+* Consommer une API REST développée en ASP.NET Core.
+* Garantir une expérience utilisateur agréable.
+* Mettre en place une architecture Front-End maintenable.
 
 ---
 
 ## 💡 Compétences mises en œuvre
 
-* Vue.js
+* Vue.js 3
 * PrimeVue
-* Consommation d'API REST
-* Responsive Design
-* UI / UX
-* Gestion des composants
+* Composants Vue réutilisables
 * Routing
+* Consommation d'API REST
+* Gestion des données dynamiques
+* Responsive Design
+* UI / UX Design
 * Clean Code
 
 ---
@@ -78,98 +117,48 @@ SQL Server
 - Node.js
 - npm
 
-### Installation
+### Installation des dépendances
 
 ```bash
 npm install
+````
 
+### Lancer le projet en développement
 
+```bash
+npm run dev
+```
 
+### Compiler pour la production
 
+```bash
+npm run build
+```
 
+### Vérifier la qualité du code
 
+```bash
+npm run lint
+```
 
-
-
-
-
+---
 
 ## 🚀 État du projet
 
 🟢 Site en ligne et opérationnel.
 
-Des évolutions et améliorations seront apportées au fil des besoins afin de faire évoluer l'application.
+Le site est actuellement utilisé par l'association **AS Porcelette Arts Martiaux**.
 
+Des évolutions et améliorations continueront d'être apportées selon les besoins de l'association.
 
 ---
 
-## 🌐 Démonstration
+## 👩‍💻 Auteur
 
-Le projet est accessible en ligne :
+**Amandine**
 
-[![Website](https://img.shields.io/badge/Site%20en%20ligne-Visiter-success?style=for-the-badge)](https://asporcelette-art-martiaux.fr/)
+Développeuse Full Stack
 
+GitHub : [https://github.com/Looka57](https://github.com/Looka57)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Recommended IDE Setup
-
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
 ```
