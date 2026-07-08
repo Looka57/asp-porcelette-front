@@ -34,6 +34,7 @@ Le site est accessible en ligne :
 
 ## 🏗️ Architecture
 
+```
 Utilisateur
 │
 ▼
@@ -44,8 +45,11 @@ ASP.NET Core Web API
 │
 ▼
 Base de données
+```
 
 ---
+
+
 
 ## ⚙️ Installation locale
 
