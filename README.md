@@ -64,20 +64,20 @@ npm run dev
 ```
 
 ## 🎯 Objectifs du projet
-*Concevoir une interface utilisateur moderne et intuitive.
-*Assurer une expérience utilisateur (UX) fluide sur tous les supports (Responsive Design).
-*Intégrer une architecture basée sur les composants pour une meilleure maintenabilité.
-*Consommer et afficher les données provenant de l'API REST sécurisée.
+* Concevoir une interface utilisateur moderne et intuitive.
+* Assurer une expérience utilisateur (UX) fluide sur tous les supports (Responsive Design).
+* Intégrer une architecture basée sur les composants pour une meilleure maintenabilité.
+* Consommer et afficher les données provenant de l'API REST sécurisée.
 
 ---
 
 ## 💡 Compétences mises en œuvre
-*Développement Web : Vue.js 3, Vite, JavaScript (ES6+).
-*UI/UX : Intégration de composants avec PrimeVue et Bootstrap.
-*Architecture : Gestion du routage, état global, composants réutilisables.
-*Communication : Consommation d'API REST (Axios/Fetch), gestion des tokens JWT.
-*Responsive Design : Adaptabilité mobile, tablette et desktop.
-*Méthodologie : Clean Code, Git, déploiement continu.
+* Développement Web : Vue.js 3, Vite, JavaScript (ES6+).
+* UI/UX : Intégration de composants avec PrimeVue et Bootstrap.
+* Architecture : Gestion du routage, état global, composants réutilisables.
+* Communication : Consommation d'API REST (Axios/Fetch), gestion des tokens JWT.
+* Responsive Design : Adaptabilité mobile, tablette et desktop.
+* Méthodologie : Clean Code, Git, déploiement continu.
 
 ---
 
