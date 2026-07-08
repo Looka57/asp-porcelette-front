@@ -1,29 +1,3 @@
-Oui, là je vois ce qui s'est passé 👍
-
-Tu as **mélangé ton ancien README Vite avec ton README professionnel**. Ce n'est pas grave, mais il faut nettoyer.
-
-Ce que je garderais :
-✅ ta présentation du projet
-✅ fonctionnalités
-✅ technologies
-✅ architecture
-✅ compétences
-✅ installation npm
-✅ état du projet
-✅ démonstration
-
-Ce que je supprimerais :
-❌ "Recommended IDE Setup" (c'est le README automatique de Vite)
-❌ "Recommended Browser Setup"
-❌ liens vers Vue Devtools
-❌ "Customize configuration"
-❌ répétition de `npm install`
-❌ la partie anglaise Vite en bas
-
-Ces infos sont utiles au début d'un projet Vue vierge, mais pour un dépôt professionnel elles donnent l'impression que tu n'as pas personnalisé ton README.
-
-Je ferais plutôt cette version finale :
-
 ```md
 # 🥋 ASP Porcelette – Front-End
 
