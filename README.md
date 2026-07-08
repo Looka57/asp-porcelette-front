@@ -67,10 +67,7 @@ Extension Vue (Official)
 Vue.js DevTools
 
 🚀 État du projet
+
 🟢 Projet déployé en production.
 
 Le site est actuellement utilisé par l'association AS Porcelette Arts Martiaux. Des évolutions et améliorations continueront d'être apportées selon les besoins.
-
-Le site est actuellement utilisé par l'association AS Porcelette Arts Martiaux.
-
-Des évolutions et améliorations continueront d'être apportées selon les besoins.
