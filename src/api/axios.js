@@ -1,7 +1,4 @@
 import axios from 'axios';
-
-// L'URL de base sera désormais relative au domaine actuel.
-// Toutes les requêtes commenceront par /api/, qui sera intercepté par Nginx.
 const baseURL = '/api/';
 
 const api = axios.create({

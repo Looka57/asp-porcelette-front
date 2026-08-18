@@ -9,7 +9,6 @@ const authStore = useAuthStore();
 const $route = useRoute();
 const dateYear = new Date().getFullYear();
 
-// ✅ CORRECTION : Ne vérifier QUE les routes /admin
 const isInBackOffice = computed(() => {
   return authStore.isLoggedIn && $route.path.startsWith('/admin');
 });
