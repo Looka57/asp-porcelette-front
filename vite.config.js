@@ -12,5 +12,15 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    proxy: {
+      // Redirige toutes les requêtes /api vers le backend Docker (port 5070)
+      '/api': {
+        target: 'http://localhost:5070',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   }
 });
