@@ -9,20 +9,26 @@ const router = useRouter();
 const email = ref('');
 const password = ref('');
 const loginError = ref(false);
+const errorMessage = ref('');
 
 async function handleLogin() {
   loginError.value = false;
-  const success = await authStore.login(email.value, password.value);
+  errorMessage.value = '';
 
-  if (success) {
-    // Rediriger l'utilisateur après la connexion
-    if (authStore.user?.roles.includes('Admin') || authStore.user?.roles.includes('Sensei')) {
+  // On récupère l'objet { success, message } retourné par le store
+  const result = await authStore.login(email.value, password.value);
+
+  if (result.success && authStore.user) {
+    // Redirection uniquement en cas de VRAI succès
+    if (authStore.user.roles?.includes('Admin') || authStore.user.roles?.includes('Sensei')) {
       router.push('/admin/dashboard');
     } else {
       router.push('/profile');
     }
   } else {
+    // Affichage du message d'erreur retourné par le backend
     loginError.value = true;
+    errorMessage.value = result.message || 'Email ou mot de passe incorrect.';
   }
 }
 </script>
@@ -58,7 +64,7 @@ async function handleLogin() {
           </button>
 
           <p v-if="loginError" class="error-message text-red-500 text-center">
-            ⚠️ Identifiants incorrects.
+            ⚠️ {{ errorMessage }}
           </p>
         </form>
       </div>

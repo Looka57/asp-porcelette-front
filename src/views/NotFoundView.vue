@@ -1,38 +1,164 @@
 <template>
   <div class="not-found">
-    <h1>404</h1>
-    <h2>Oups ! Cette page n'existe pas.</h2>
-    <p>Il semble que vous vous soyez égaré sur le tatami.</p>
-    <router-link to="/" class="btn-home">Retour à l'accueil</router-link>
+    <div class="not-found-content">
+
+      <div class="dojo-mark">
+        <span>AS</span>
+      </div>
+
+      <p class="error-label">ERREUR 404</p>
+
+      <h1>404</h1>
+
+      <h2>Vous avez quitté le tatami.</h2>
+
+      <p class="description">
+        La page que vous recherchez n'existe pas ou n'est plus disponible.
+        Pas d'inquiétude, le chemin vers le dojo est juste ici.
+      </p>
+
+      <RouterLink to="/" class="btn-home">
+        <i class="pi pi-home"></i>
+        Retour à l'accueil
+      </RouterLink>
+
+    </div>
   </div>
 </template>
 
 <style scoped>
 .not-found {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background:
+    radial-gradient(circle at center, rgba(212, 175, 55, 0.08), transparent 45%),
+    #111111;
+  color: white;
   text-align: center;
-  padding: 100px 20px;
-  color: #333;
 }
+
+.not-found-content {
+  width: 100%;
+  max-width: 650px;
+}
+
+/* Logo / symbole */
+.dojo-mark {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid #d4af37;
+  border-radius: 50%;
+
+  color: #d4af37;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 2px;
+
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+}
+
+.error-label {
+  margin: 0 0 10px;
+
+  color: #d4af37;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+/* 404 */
 h1 {
-  font-size: 6rem;
   margin: 0;
-  color: #d4af37; /* Couleur Or */
+
+  font-size: clamp(7rem, 20vw, 12rem);
+  line-height: 0.9;
+  font-weight: 900;
+
+  color: transparent;
+  -webkit-text-stroke: 2px #d4af37;
+  text-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
 }
+
+/* Titre */
 h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
+  margin: 30px 0 15px;
+
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 700;
 }
+
+/* Texte */
+.description {
+  max-width: 520px;
+  margin: 0 auto;
+
+  color: #a3a3a3;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* Bouton */
 .btn-home {
-  display: inline-block;
-  margin-top: 30px;
-  padding: 12px 25px;
-  background-color: #000;
-  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 35px;
+  padding: 13px 25px;
+
+  background: #d4af37;
+  color: #111;
+
+  border: 2px solid #d4af37;
+  border-radius: 6px;
+
+  font-weight: 700;
   text-decoration: none;
-  border-radius: 5px;
-  transition: 0.3s;
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
+
 .btn-home:hover {
-  background-color: #d4af37;
+  background: transparent;
+  color: #d4af37;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .not-found {
+    padding: 30px 20px;
+  }
+
+  .dojo-mark {
+    width: 65px;
+    height: 65px;
+    margin-bottom: 25px;
+    font-size: 20px;
+  }
+
+  h2 {
+    margin-top: 25px;
+  }
+
+  .description {
+    font-size: 0.95rem;
+  }
 }
 </style>

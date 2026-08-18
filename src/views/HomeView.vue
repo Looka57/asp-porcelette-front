@@ -66,7 +66,7 @@ const closeModal = () => {
     <div class="container-fluid p-0 bg-dark text-light min-vh-100">
         <div class="imgBaniereHome">
             <div class="titlePrincipal">
-                <h1 class="fs-1 text-uppercase display-3 text-white text-center">L'art du mouvement!!!!!!!!! <br> L'esprit des
+                <h1 class="fs-1 text-uppercase display-3 text-white text-center">L'art du mouvement <br> L'esprit des
                     disciplines.</h1>
                 <p class="fs-3">Judo - Aikido - Jujitsu</p>
             </div>

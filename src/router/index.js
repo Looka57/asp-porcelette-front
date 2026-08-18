@@ -1,7 +1,7 @@
 // src/router/index.js
-import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import FrontLayout from '@/FrontLayout.vue';
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import FrontLayout from '@/FrontLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -112,6 +112,17 @@ const router = createRouter({
       path: '/403',
       name: 'forbidden',
       component: () => import('@/views/ForbiddenView.vue'),
+    },
+    {
+      path: '/404',
+      name: 'not-found',
+      component: () => import('@/views/NotFoundView.vue'),
+    },
+
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found-catchall',
+      component: () => import('@/views/NotFoundView.vue'),
     },
 
     // ===============================================
@@ -241,20 +252,20 @@ const router = createRouter({
 // 🛡️ GARDE DE NAVIGATION RENFORCÉE
 // ===============================================
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore();
+  const authStore = useAuthStore()
 
   // 🔍 Si on a un token mais pas de profil utilisateur chargé
   if (authStore.token && !authStore.user) {
     try {
-      await authStore.fetchProfile();
+      await authStore.fetchProfile()
     } catch (error) {
       // ❌ Si la récupération du profil échoue (token invalide/expiré)
-      console.error('Token invalide ou expiré:', error);
-      authStore.logout();
+      console.error('Token invalide ou expiré:', error)
+      authStore.logout()
 
       // Si on essayait d'accéder à une route protégée, on redirige vers login
       if (to.meta.requiresAuth) {
-        return next('/login');
+        return next('/login')
       }
     }
   }
@@ -263,21 +274,21 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth) {
     // Pas connecté du tout
     if (!authStore.isLoggedIn) {
-      return next('/login');
+      return next('/login')
     }
 
     // Vérification des rôles
-    const requiredRoles = to.meta.roles || [];
-    const userRoles = authStore.userRoles;
-    const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
+    const requiredRoles = to.meta.roles || []
+    const userRoles = authStore.userRoles
+    const hasRequiredRole = requiredRoles.some((role) => userRoles.includes(role))
 
     if (!hasRequiredRole) {
-      return next('/403');
+      return next('/403')
     }
   }
 
   // ✅ Tout est OK, on laisse passer
-  next();
-});
+  next()
+})
 
-export default router;
+export default router
