@@ -53,22 +53,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
-  border: 2px solid #d4af37;
+  border: 2px solid #6C63FF ;
   border-radius: 50%;
-
-  color: #d4af37;
+  color: #6C63FF ;
   font-size: 24px;
   font-weight: 800;
   letter-spacing: 2px;
-
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
 }
 
 .error-label {
   margin: 0 0 10px;
-
-  color: #d4af37;
+  color: #3754d4;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 4px;
@@ -84,8 +80,8 @@ h1 {
   font-weight: 900;
 
   color: transparent;
-  -webkit-text-stroke: 2px #d4af37;
-  text-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
+  -webkit-text-stroke: 2px #6C63FF ;
+  text-shadow: 0 0 40px rgba(55, 118, 212, 0.15);
 }
 
 /* Titre */
@@ -111,14 +107,11 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-
   margin-top: 35px;
   padding: 13px 25px;
-
-  background: #d4af37;
+  background: #6C63FF ;
   color: #111;
-
-  border: 2px solid #d4af37;
+  border: 2px solid #6C63FF ;
   border-radius: 6px;
 
   font-weight: 700;
@@ -133,11 +126,11 @@ h2 {
 
 .btn-home:hover {
   background: transparent;
-  color: #d4af37;
+  color: #6C63FF ;
 
   transform: translateY(-2px);
 
-  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 8px 25px rgba(55, 118, 212, 0.2);
 }
 
 /* Mobile */
