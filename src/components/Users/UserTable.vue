@@ -1,12 +1,11 @@
-
 <script setup>
 
 // On détecte l'environnement : si on n'est pas sur localhost, on utilise l'origine du site (HTTPS)
-const API_BASE_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:8080'
-    : window.location.origin;
+// const API_BASE_URL = window.location.hostname === 'localhost'
+//   ? 'http://localhost:8080'
+//   : window.location.origin;
 
-    const DEFAULT_PHOTO_PATH = '/img/default-profile.png';
+const DEFAULT_PHOTO_PATH = '/img/default-profile.png';
 
 const { userList, getDisciplineName } = defineProps({
   userList: {
@@ -35,31 +34,31 @@ const formatDate = (dateString) => {
 };
 
 const getPhotoPath = (user) => {
-    let photoPath = user.photoUrl;
+  let photoPath = user.photoUrl;
 
-    if (!photoPath || photoPath.length < 5) {
-        return DEFAULT_PHOTO_PATH;
-    }
+  if (!photoPath || photoPath.length < 5) {
+    return DEFAULT_PHOTO_PATH;
+  }
 
-    // 1. Nettoyage : On enlève les doubles slashs // s'ils existent
-    if (photoPath.startsWith('//')) {
-        photoPath = photoPath.substring(1);
-    }
+  // 1. Nettoyage : On enlève les doubles slashs // s'ils existent
+  if (photoPath.startsWith('//')) {
+    photoPath = photoPath.substring(1);
+  }
 
-    // 2. On s'assure que le chemin commence par un seul /
-    if (!photoPath.startsWith('/')) {
-        photoPath = '/' + photoPath;
-    }
+  // 2. On s'assure que le chemin commence par un seul /
+  if (!photoPath.startsWith('/')) {
+    photoPath = '/' + photoPath;
+  }
 
-    // 3. Logique d'environnement
-    if (window.location.hostname === 'localhost') {
-        // En local : on a besoin de l'URL complète avec le port 8080
-        return `http://localhost:8080${photoPath}`;
-    } else {
-        // En ligne : on retourne le chemin relatif direct (comme dans votre Dashboard)
-        // Cela donnera : /images/profiles/...
-        return photoPath;
-    }
+  // 3. Logique d'environnement
+  if (window.location.hostname === 'localhost') {
+    // En local : on a besoin de l'URL complète avec le port 8080
+    return `http://localhost:8080${photoPath}`;
+  } else {
+    // En ligne : on retourne le chemin relatif direct (comme dans votre Dashboard)
+    // Cela donnera : /images/profiles/...
+    return photoPath;
+  }
 };
 
 const handleImageError = (event) => {
@@ -82,8 +81,8 @@ const handleImageError = (event) => {
 
           <th scope="col" class="d-none d-md-table-cell">Email</th>
           <th scope="col" class="d-none d-md-table-cell">Téléphone</th>
-          <th scope="col" class="d-none d-md-table-cell">Adresse</th>
           <th scope="col" class="d-none d-md-table-cell">Ville</th>
+          <th scope="col" class="d-none d-md-table-cell">Adresse</th>
           <th scope="col" class="d-none d-md-table-cell">Statut</th>
           <th scope="col" class="d-none d-md-table-cell">Date Inscriptions</th>
           <th scope="col" class="d-none d-md-table-cell">Discipline</th>
@@ -96,13 +95,8 @@ const handleImageError = (event) => {
 
           <th scope="row" class="d-none d-md-table-cell">{{ index + 1 }}</th>
           <td class="d-none d-md-table-cell">
-            <img
-              v-if="getPhotoPath(user)"
-              :src="getPhotoPath(user)"
-              alt="Photo utilisateur"
-              class="rounded-circle object-fit-cover"
-              style="width: 60px; height: 60px;"
-              @error="handleImageError" />
+            <img v-if="getPhotoPath(user)" :src="getPhotoPath(user)" alt="Photo utilisateur"
+              class="rounded-circle object-fit-cover" style="width: 60px; height: 60px;" @error="handleImageError" />
             <span v-else class="text-secondary">Aucune photo</span>
           </td>
 
@@ -119,12 +113,13 @@ const handleImageError = (event) => {
 
           <td>
             <div class="d-flex justify-content-center">
-                <button class="btn btn-outline-info btn-sm me-2" @click="$emit('edit', user)" title="Éditer">
-                  <i class="pi pi-pencil"></i>
-                </button>
-                <button class="btn btn-outline-danger btn-sm" @click="$emit('delete', user.userId || user.id)" title="Supprimer">
-                  <i class="pi pi-trash"></i>
-                </button>
+              <button class="btn btn-outline-info btn-sm me-2" @click="$emit('edit', user)" title="Éditer">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button class="btn btn-outline-danger btn-sm" @click="$emit('delete', user.userId || user.id)"
+                title="Supprimer">
+                <i class="pi pi-trash"></i>
+              </button>
             </div>
           </td>
         </tr>

@@ -265,10 +265,10 @@ onMounted(() => {
                         <th class="d-none d-md-table-cell">Prénom</th>
                         <th class="d-none d-md-table-cell">Email</th>
                         <th class="d-none d-md-table-cell">Téléphone</th>
-                        <th class="d-none d-md-table-cell">Adresse</th>
                         <th class="d-none d-md-table-cell">Ville</th>
                         <th class="d-none d-md-table-cell">Date inscription</th>
                         <th class="d-none d-md-table-cell">Date de renouvellement</th>
+                        <th class="d-none d-md-table-cell">Certificat médical</th>
 
                         <th style="width: 200px;">Action</th>
                       </tr>
@@ -281,10 +281,10 @@ onMounted(() => {
                         <td class="d-none d-md-table-cell">{{ user.prenom }}</td>
                         <td class="d-none d-md-table-cell">{{ user.email || 'N/A' }}</td>
                         <td class="d-none d-md-table-cell">{{ user.telephone || 'N/A' }}</td>
-                        <td class="d-none d-md-table-cell">{{ user.rueEtNumero || 'N/A' }}</td>
                         <td class="d-none d-md-table-cell">{{ user.ville || 'N/A' }}</td>
                         <td class="d-none d-md-table-cell">{{ formatDate(user.dateAdhesion) }}</td>
                         <td class="d-none d-md-table-cell">{{ formatDate(user.dateRenouvellement) }}</td>
+                        <td class="d-none d-md-table-cell">{{ formatDate(user.dateCertificatMedical) || 'N/A' }}</td>
 
                         <td>
                           <div class="d-flex justify-content-center">

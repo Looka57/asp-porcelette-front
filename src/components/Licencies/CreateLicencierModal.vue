@@ -41,7 +41,7 @@ const form = ref({
   // =============================
   // 🔹 CERTIFICAT MÉDICAL
   // =============================
-   certificatMedicalFourni: false,
+  certificatMedicalFourni: false,
   dateCertificatMedical: '',
   dateExpirationCertificatMedical: '',
 
@@ -288,33 +288,33 @@ const submitAdherent = async () => {
     }
 
     // =============================
-// 🔹 CERTIFICAT MÉDICAL
-// =============================
-formData.append(
-  'CertificatMedicalFourni',
-  form.value.certificatMedicalFourni
-    ? 'true'
-    : 'false'
-);
-
-if (form.value.certificatMedicalFourni) {
-
-  // Date du certificat
-  if (form.value.dateCertificatMedical) {
+    // 🔹 CERTIFICAT MÉDICAL
+    // =============================
     formData.append(
-      'DateCertificatMedical',
-      form.value.dateCertificatMedical
+      'CertificatMedicalFourni',
+      form.value.certificatMedicalFourni
+        ? 'true'
+        : 'false'
     );
-  }
 
-  // Date d'expiration calculée par Vue
-  if (dateExpirationCertificatMedical.value) {
-    formData.append(
-      'DateExpirationCertificatMedical',
-      dateExpirationCertificatMedical.value
-    );
-  }
-}
+    if (form.value.certificatMedicalFourni) {
+
+      // Date du certificat
+      if (form.value.dateCertificatMedical) {
+        formData.append(
+          'DateCertificatMedical',
+          form.value.dateCertificatMedical
+        );
+      }
+
+      // Date d'expiration calculée par Vue
+      if (dateExpirationCertificatMedical.value) {
+        formData.append(
+          'DateExpirationCertificatMedical',
+          dateExpirationCertificatMedical.value
+        );
+      }
+    }
 
     // =============================
     // AUTRES CHAMPS
@@ -440,8 +440,8 @@ if (form.value.certificatMedicalFourni) {
       DateCertificatMedical:
         form.value.dateCertificatMedical || null,
 
-    DateExpirationCertificatMedical:
-  dateExpirationCertificatMedical.value || null
+      DateExpirationCertificatMedical:
+        dateExpirationCertificatMedical.value || null
     };
 
     await api.post(
@@ -480,12 +480,7 @@ if (form.value.certificatMedicalFourni) {
 </script>
 
 <template>
-  <div
-    v-if="show"
-    class="modal fade show d-block"
-    tabindex="-1"
-    style="background-color: rgba(0,0,0,0.5);"
-  >
+  <div v-if="show" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
     <div class="modal-dialog modal-lg">
       <div class="modal-content bg-dark text-light">
 
@@ -498,11 +493,7 @@ if (form.value.certificatMedicalFourni) {
             {{ props.user ? 'Modifier Adhérent' : 'Nouvel Adhérent' }}
           </h5>
 
-          <button
-            type="button"
-            class="btn-close btn-close-white"
-            @click="emit('close')"
-          ></button>
+          <button type="button" class="btn-close btn-close-white" @click="emit('close')"></button>
         </div>
 
         <!-- ============================= -->
@@ -511,10 +502,7 @@ if (form.value.certificatMedicalFourni) {
 
         <div class="modal-body">
 
-          <div
-            v-if="error"
-            class="alert alert-danger"
-          >
+          <div v-if="error" class="alert alert-danger">
             {{ error }}
           </div>
 
@@ -529,12 +517,7 @@ if (form.value.certificatMedicalFourni) {
                   Nom
                 </label>
 
-                <input
-                  v-model="form.nom"
-                  type="text"
-                  class="form-control"
-                  required
-                />
+                <input v-model="form.nom" type="text" class="form-control" required />
               </div>
 
               <!-- PRÉNOM -->
@@ -544,12 +527,7 @@ if (form.value.certificatMedicalFourni) {
                   Prénom
                 </label>
 
-                <input
-                  v-model="form.prenom"
-                  type="text"
-                  class="form-control"
-                  required
-                />
+                <input v-model="form.prenom" type="text" class="form-control" required />
               </div>
 
               <!-- EMAIL -->
@@ -559,12 +537,7 @@ if (form.value.certificatMedicalFourni) {
                   Email
                 </label>
 
-                <input
-                  v-model="form.email"
-                  type="email"
-                  class="form-control"
-                  required
-                />
+                <input v-model="form.email" type="email" class="form-control" required />
               </div>
 
               <!-- TÉLÉPHONE -->
@@ -574,11 +547,7 @@ if (form.value.certificatMedicalFourni) {
                   Téléphone
                 </label>
 
-                <input
-                  v-model="form.telephone"
-                  type="text"
-                  class="form-control"
-                />
+                <input v-model="form.telephone" type="text" class="form-control" />
               </div>
 
               <!-- DATE DE NAISSANCE -->
@@ -588,11 +557,7 @@ if (form.value.certificatMedicalFourni) {
                   Date de naissance
                 </label>
 
-                <input
-                  v-model="form.dateDeNaissance"
-                  type="date"
-                  class="form-control"
-                />
+                <input v-model="form.dateDeNaissance" type="date" class="form-control" />
               </div>
 
               <!-- ADRESSE -->
@@ -602,11 +567,7 @@ if (form.value.certificatMedicalFourni) {
                   Adresse
                 </label>
 
-                <input
-                  v-model="form.adresse"
-                  type="text"
-                  class="form-control"
-                />
+                <input v-model="form.adresse" type="text" class="form-control" />
               </div>
 
               <!-- VILLE -->
@@ -616,11 +577,7 @@ if (form.value.certificatMedicalFourni) {
                   Ville
                 </label>
 
-                <input
-                  v-model="form.ville"
-                  type="text"
-                  class="form-control"
-                />
+                <input v-model="form.ville" type="text" class="form-control" />
               </div>
 
               <!-- CODE POSTAL -->
@@ -630,11 +587,7 @@ if (form.value.certificatMedicalFourni) {
                   Code Postal
                 </label>
 
-                <input
-                  v-model="form.codePostal"
-                  type="text"
-                  class="form-control"
-                />
+                <input v-model="form.codePostal" type="text" class="form-control" />
               </div>
 
               <!-- DISCIPLINE -->
@@ -645,20 +598,12 @@ if (form.value.certificatMedicalFourni) {
                   <span class="text-danger">*</span>
                 </label>
 
-                <select
-                  v-model="form.disciplineId"
-                  class="form-control"
-                  required
-                >
+                <select v-model="form.disciplineId" class="form-control" required>
                   <option value="">
                     -- Choisir une discipline --
                   </option>
 
-                  <option
-                    v-for="d in disciplineList"
-                    :key="d.disciplineId"
-                    :value="d.disciplineId"
-                  >
+                  <option v-for="d in disciplineList" :key="d.disciplineId" :value="d.disciplineId">
                     {{ d.nom }}
                   </option>
                 </select>
@@ -670,9 +615,7 @@ if (form.value.certificatMedicalFourni) {
 
               <div class="col-12 mt-4">
 
-                <div
-                  class="border-top border-secondary pt-3"
-                >
+                <div class="border-top border-secondary pt-3">
 
                   <h6 class="text-warning mb-3">
                     Certificat médical
@@ -682,17 +625,10 @@ if (form.value.certificatMedicalFourni) {
 
                   <div class="form-check mb-3">
 
-                    <input
-                      id="certificatMedicalFourni"
-                      v-model="form.certificatMedicalFourni"
-                      type="checkbox"
-                      class="form-check-input"
-                    />
+                    <input id="certificatMedicalFourni" v-model="form.certificatMedicalFourni" type="checkbox"
+                      class="form-check-input" />
 
-                    <label
-                      for="certificatMedicalFourni"
-                      class="form-check-label"
-                    >
+                    <label for="certificatMedicalFourni" class="form-check-label">
                       Certificat médical fourni
                     </label>
 
@@ -700,10 +636,7 @@ if (form.value.certificatMedicalFourni) {
 
                   <!-- DATE DU CERTIFICAT -->
 
-                  <div
-                    v-if="form.certificatMedicalFourni"
-                    class="row g-3"
-                  >
+                  <div v-if="form.certificatMedicalFourni" class="row g-3">
 
                     <div class="col-md-6">
 
@@ -711,11 +644,7 @@ if (form.value.certificatMedicalFourni) {
                         Date du certificat
                       </label>
 
-                      <input
-                        v-model="form.dateCertificatMedical"
-                        type="date"
-                        class="form-control"
-                      />
+                      <input v-model="form.dateCertificatMedical" type="date" class="form-control" />
 
                     </div>
 
@@ -725,13 +654,10 @@ if (form.value.certificatMedicalFourni) {
                   <!-- DATE EXPIRATION + STATUT -->
                   <!-- ================================= -->
 
-                  <div
-                    v-if="
-                      form.certificatMedicalFourni &&
-                      dateExpirationCertificatMedical
-                    "
-                    class="mt-3"
-                  >
+                  <div v-if="
+                    form.certificatMedicalFourni &&
+                    dateExpirationCertificatMedical
+                  " class="mt-3">
 
                     <!-- DATE D'EXPIRATION -->
 
@@ -741,9 +667,7 @@ if (form.value.certificatMedicalFourni) {
                         Date d'expiration
                       </label>
 
-                      <div
-                        class="form-control bg-secondary text-light"
-                      >
+                      <div class="form-control bg-secondary text-light">
                         {{
                           dateExpirationCertificatMedical
                         }}
@@ -753,22 +677,16 @@ if (form.value.certificatMedicalFourni) {
 
                     <!-- CERTIFICAT VALIDE -->
 
-                    <div
-                      v-if="
-                        dateExpirationCertificatMedical >=
-                        new Date().toISOString().split('T')[0]
-                      "
-                      class="alert alert-success mb-0"
-                    >
+                    <div v-if="
+                      dateExpirationCertificatMedical >=
+                      new Date().toISOString().split('T')[0]
+                    " class="alert alert-success mb-0">
                       Certificat médical valide.
                     </div>
 
                     <!-- CERTIFICAT EXPIRÉ -->
 
-                    <div
-                      v-else
-                      class="alert alert-danger mb-0"
-                    >
+                    <div v-else class="alert alert-danger mb-0">
                       Certificat médical expiré.
                     </div>
 
@@ -786,19 +704,11 @@ if (form.value.certificatMedicalFourni) {
 
             <div class="mt-4 text-end">
 
-              <button
-                type="button"
-                class="btn btn-outline-light me-2"
-                @click="emit('close')"
-              >
+              <button type="button" class="btn btn-outline-light me-2" @click="emit('close')">
                 Annuler
               </button>
 
-              <button
-                type="submit"
-                class="btn btn-warning"
-                :disabled="loading"
-              >
+              <button type="submit" class="btn btn-warning" :disabled="loading">
 
                 <span v-if="!loading">
                   {{ props.user ? 'Modifier' : 'Ajouter' }}
