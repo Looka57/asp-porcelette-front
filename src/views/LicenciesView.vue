@@ -17,7 +17,6 @@ const showModal = ref(false);
 const selectedUser = ref(null);
 const searchTerm = ref('');
 
-// ✅ Nouvelle variable pour garder l'accordéon ouvert
 const activeAccordion = ref(null);
 
 // ===============================
@@ -42,16 +41,14 @@ const userListWithDiscipline = computed(() => {
 });
 
 // ===============================
-// 🔹 UTILISATEURS GROUPÉS PAR DISCIPLINE (MIS À JOUR)
+// 🔹 UTILISATEURS GROUPÉS PAR DISCIPLINE
 // ===============================
 const groupedUsersByDiscipline = computed(() => {
-    const groups = {};
-    disciplineList.value.forEach(d => {
-        // 🎯 IMPORTANT : On filtre DÉSORMAIS la liste complète filtrée (`filteredUserList.value`)
-        // et non l'ancienne liste (`userListWithDiscipline.value`)
-        groups[d.nom] = filteredUserList.value.filter(u => u.disciplineName === d.nom);
-    });
-    return groups;
+  const groups = {};
+  disciplineList.value.forEach(d => {
+    groups[d.nom] = filteredUserList.value.filter(u => u.disciplineName === d.nom);
+  });
+  return groups;
 });
 
 
@@ -59,23 +56,24 @@ const groupedUsersByDiscipline = computed(() => {
 // 🔹 FILTRE GLOBAL DES UTILISATEURS
 // ===============================
 const filteredUserList = computed(() => {
-    // Si la recherche est vide, on retourne la liste complète des utilisateurs fusionnés.
-    if (!searchTerm.value) {
-        return userListWithDiscipline.value;
-    }
+  // Si la recherche est vide, on retourne la liste complète des utilisateurs fusionnés.
+  if (!searchTerm.value) {
+    return userListWithDiscipline.value;
+  }
 
-    const searchLower = searchTerm.value.toLowerCase();
+  const searchLower = searchTerm.value.toLowerCase();
 
-    return userListWithDiscipline.value.filter(user => {
-        // Recherche dans le Nom, Prénom, Email, Téléphone, et Discipline.
-        return (
-            (user.nom && user.nom.toLowerCase().includes(searchLower)) ||
-            (user.prenom && user.prenom.toLowerCase().includes(searchLower)) ||
-            (user.email && user.email.toLowerCase().includes(searchLower)) ||
-            (user.telephone && user.telephone.includes(searchLower))
-        );
-    });
+  return userListWithDiscipline.value.filter(user => {
+    // Recherche dans le Nom, Prénom, Email, Téléphone, et Discipline.
+    return (
+      (user.nom && user.nom.toLowerCase().includes(searchLower)) ||
+      (user.prenom && user.prenom.toLowerCase().includes(searchLower)) ||
+      (user.ville && user.ville.toLowerCase().includes(searchLower)) ||
+      (user.telephone && user.telephone.includes(searchLower))
+    );
+  });
 });
+
 
 
 
@@ -104,26 +102,26 @@ const fetchLicencie = async () => {
 const API_RENEW = '/User/admin/renouvellement'; // Nouvelle constante API
 
 const renewAdhesion = async (userId, nom, prenom) => {
-    if (!confirm(`Êtes-vous sûr de vouloir renouveler l'adhésion de ${prenom} ${nom} à la date d'aujourd'hui ?`)) {
-        return;
-    }
+  if (!confirm(`Êtes-vous sûr de vouloir renouveler l'adhésion de ${prenom} ${nom} à la date d'aujourd'hui ?`)) {
+    return;
+  }
 
-    try {
-        // L'API est une POST qui prend l'ID dans l'URL
-        const response = await api.post(`${API_RENEW}/${userId}`);
+  try {
+    // L'API est une POST qui prend l'ID dans l'URL
+    const response = await api.post(`${API_RENEW}/${userId}`);
 
-      const message = response.data?.Message || 'Renouvellement réussi';
-        const nouvelleDate = response.data?.NouvelleDateRenouvellement || 'Date inconnue';
+    const message = response.data?.Message || 'Renouvellement réussi';
+    const nouvelleDate = response.data?.NouvelleDateRenouvellement || 'Date inconnue';
 
-        // Affichage du succès et rafraîchissement
-        alert(message + ` Nouvelle date : ${nouvelleDate}`);
+    // Affichage du succès et rafraîchissement
+    alert(message + ` Nouvelle date : ${nouvelleDate}`);
 
-        // Rafraîchir la liste des utilisateurs si nécessaire
-        await fetchLicencie();
-    } catch (error) {
-        console.error('Erreur lors du renouvellement :', error);
-        alert('Échec du renouvellement : Vérifiez la console et que vous avez les permissions nécessaires (Admin/Sensei).');
-    }
+    // Rafraîchir la liste des utilisateurs si nécessaire
+    await fetchLicencie();
+  } catch (error) {
+    console.error('Erreur lors du renouvellement :', error);
+    alert('Échec du renouvellement : Vérifiez la console et que vous avez les permissions nécessaires (Admin/Sensei).');
+  }
 };
 
 // ===============================
@@ -143,9 +141,9 @@ const fetchDiscipline = async () => {
 // ===============================
 const openModal = (user = null) => {
   if (user && user.id) {
-selectedUser.value = { ...user, userId: user.id }; // Cloner l'objet pour éviter les mutations directes
+    selectedUser.value = { ...user, userId: user.id }; // Cloner l'objet pour éviter les mutations directes
   }
-  else{
+  else {
     selectedUser.value = null;
   }
   showModal.value = true;
@@ -194,6 +192,22 @@ const formatDate = (dateString) => {
   }
 };
 
+
+// ===============================
+// 🔹 VÉRIFICATION EXPIRATION CERTIFICAT
+// ===============================
+const isCertificatExpire = (dateExpiration) => {
+  if (!dateExpiration) return false;
+
+  const aujourdHui = new Date();
+  aujourdHui.setHours(0, 0, 0, 0);
+
+  const expiration = new Date(dateExpiration);
+  expiration.setHours(0, 0, 0, 0);
+
+  return expiration < aujourdHui;
+};
+
 // ===============================
 // 🔹 MONTAGE DU COMPOSANT
 // ===============================
@@ -210,7 +224,7 @@ onMounted(() => {
     <div class="mb-5 d-flex justify-content-end ">
       <div class="input-group w-50 ">
         <input type="text" v-model="searchTerm" class="form-control bg-light text-dark border-warning"
-          placeholder="Rechercher par Nom, Prénom ou Email..." aria-label="Recherche licencié" />
+          placeholder="Rechercher par Nom, Prénom ou ville..." aria-label="Recherche licencié" />
 
         <button class="btn btn-secondary" type="button" id="button-addon2">
           <i class="pi pi-search"></i>
@@ -239,7 +253,7 @@ onMounted(() => {
             <div class="accordion-item bg-dark text-white border-warning rounded">
               <h2 class="accordion-header" :id="'heading-' + discipline.disciplineId">
                 <button class="accordion-button fs-5"
-                  :class="{'collapsed': activeAccordion !== discipline.disciplineId}" type="button"
+                  :class="{ 'collapsed': activeAccordion !== discipline.disciplineId }" type="button"
                   @click="activeAccordion = (activeAccordion === discipline.disciplineId ? null : discipline.disciplineId)">
 
                   {{ discipline.nom }}
@@ -251,13 +265,13 @@ onMounted(() => {
               </h2>
 
               <div class="accordion-collapse"
-                :class="{'collapse show': activeAccordion === discipline.disciplineId, 'collapse': activeAccordion !== discipline.disciplineId}">
+                :class="{ 'collapse show': activeAccordion === discipline.disciplineId, 'collapse': activeAccordion !== discipline.disciplineId }">
                 <div class="accordion-body p-3">
                   <div v-if="groupedUsersByDiscipline[discipline.nom]?.length === 0" class="text-center text-secondary">
                     Aucun adhérent dans cette discipline.
                   </div>
 
-                 <table class="table table-dark table-striped table-hover mb-0 text-center">
+                  <table class="table table-dark table-striped table-hover mb-0 text-center">
                     <thead>
                       <tr>
                         <th class="d-none d-md-table-cell">#</th>
@@ -284,7 +298,18 @@ onMounted(() => {
                         <td class="d-none d-md-table-cell">{{ user.ville || 'N/A' }}</td>
                         <td class="d-none d-md-table-cell">{{ formatDate(user.dateAdhesion) }}</td>
                         <td class="d-none d-md-table-cell">{{ formatDate(user.dateRenouvellement) }}</td>
-                        <td class="d-none d-md-table-cell">{{ formatDate(user.dateCertificatMedical) || 'N/A' }}</td>
+                        <td class="d-none d-md-table-cell">
+                          <span v-if="user.dateExpirationCertificatMedical" :class="{
+                            'text-danger fw-bold': isCertificatExpire(user.dateExpirationCertificatMedical),
+                            'text-light ': !isCertificatExpire(user.dateExpirationCertificatMedical)
+                          }">
+                            {{ formatDate(user.dateExpirationCertificatMedical) }}
+                          </span>
+
+                          <span v-else class="text-secondary">
+                            Aucun certificat
+                          </span>
+                        </td>
 
                         <td>
                           <div class="d-flex justify-content-center">
@@ -321,25 +346,29 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.table td, .table th {
+.table td,
+.table th {
   padding: 0.75rem 1rem;
   vertical-align: middle;
 }
+
 .accordion-body {
   padding: 1rem;
 }
+
 .btn.me-1 {
   margin-right: 0.25rem;
 }
 
 /* 🔹 Flèche de l'accordéon en blanc */
 .accordion-button::after {
-  filter: invert(1); /* Inverse les couleurs → blanc */
+  filter: invert(1);
+  /* Inverse les couleurs → blanc */
 }
 
 
-.accordion-button{
-    background-color: #2c3035;
-    color: white;
+.accordion-button {
+  background-color: #2c3035;
+  color: white;
 }
 </style>

@@ -84,7 +84,7 @@ const toggleNavbar = () => {
 
       <div class="nav-links">
         <router-link v-for="item in filteredNavItems" :key="item.label" :to="item.to"
-          class="d-flex align-items-center p-3 mb-2 text-secondary text-decoration-none rounded"
+          class="d-flex align-items-center p-3 mb-2 text-light text-decoration-none rounded"
           :class="{ 'bg-secondary text-light': $route.path === item.to }" @click="isMobile && toggleNavbar()">
           <i :class="item.icon" class="me-3"></i>
           <span>{{ item.label }}</span>
