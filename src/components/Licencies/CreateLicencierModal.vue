@@ -1,13 +1,15 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import api from '@/api/axios';
 
 const props = defineProps({
   show: Boolean,
+
   disciplineList: {
     type: Array,
     default: () => []
   },
+
   user: {
     type: Object,
     default: null
@@ -29,7 +31,9 @@ const form = ref({
   codePostal: '',
   disciplineId: null,
   dateDeNaissance: '',
+
   dateAdhesion: new Date().toISOString().split('T')[0],
+
   dateRenouvellement: new Date(
     new Date().setFullYear(new Date().getFullYear() + 1)
   ).toISOString().split('T')[0],
@@ -37,16 +41,16 @@ const form = ref({
   // =============================
   // 🔹 CERTIFICAT MÉDICAL
   // =============================
-  certificatMedicalFourni: false,
+   certificatMedicalFourni: false,
   dateCertificatMedical: '',
   dateExpirationCertificatMedical: '',
 
-  statut: "Actif"
+  statut: 'Actif'
 });
 
-/* -------------------------------------------------------------------------- */
-/* 🔒 FONCTIONS UTILES */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+ 🔒 FONCTIONS UTILES
+-------------------------------------------------------------------------- */
 
 // Formater une date pour un input type="date"
 const formatDateForInput = (date) => {
@@ -61,6 +65,46 @@ const formatDateForInput = (date) => {
   return '';
 };
 
+// Calcul de la date d'expiration du certificat
+// Le frontend l'utilise uniquement pour l'affichage.
+// Le backend reste responsable de l'enregistrer.
+const dateExpirationCertificatMedical = computed(() => {
+  if (!form.value.dateCertificatMedical) {
+    return '';
+  }
+
+  const [year, month, day] = form.value.dateCertificatMedical
+    .split('-')
+    .map(Number);
+
+  let expirationYear = year + 3;
+  let expirationDay = day;
+
+  // Cas particulier du 29 février
+  // Exemple : 29/02/2024 → 28/02/2027
+  if (
+    month === 2 &&
+    day === 29 &&
+    !(
+      expirationYear % 4 === 0 &&
+      (expirationYear % 100 !== 0 || expirationYear % 400 === 0)
+    )
+  ) {
+    expirationDay = 28;
+  }
+
+  return `${expirationYear}-${String(month).padStart(2, '0')}-${String(
+    expirationDay
+  ).padStart(2, '0')}`;
+});
+
+watch(
+  dateExpirationCertificatMedical,
+  (newDate) => {
+    form.value.dateExpirationCertificatMedical = newDate;
+  }
+);
+
 // Réinitialiser le formulaire
 const clearForm = () => {
   form.value = {
@@ -73,7 +117,9 @@ const clearForm = () => {
     codePostal: '',
     disciplineId: null,
     dateDeNaissance: '',
+
     dateAdhesion: new Date().toISOString().split('T')[0],
+
     dateRenouvellement: new Date(
       new Date().setFullYear(new Date().getFullYear() + 1)
     ).toISOString().split('T')[0],
@@ -83,20 +129,20 @@ const clearForm = () => {
     // =============================
     certificatMedicalFourni: false,
     dateCertificatMedical: '',
-    dateExpirationCertificatMedical: '',
 
-    statut: "Actif"
+    statut: 'Actif'
   };
 
   error.value = null;
 };
 
-/* -------------------------------------------------------------------------- */
-/* 🔹 PRÉREMPLISSAGE DU FORMULAIRE */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+ 🔹 PRÉREMPLISSAGE DU FORMULAIRE
+-------------------------------------------------------------------------- */
 
 watch(
   () => props.user,
+
   (newUser) => {
     if (newUser) {
       form.value = {
@@ -104,12 +150,15 @@ watch(
         prenom: newUser.prenom || '',
         email: newUser.email || '',
         telephone: newUser.telephone || '',
+
         adresse: newUser.rueEtNumero || '',
         ville: newUser.ville || '',
         codePostal: newUser.codePostal || '',
+
         disciplineId: newUser.disciplineId || null,
 
-        dateDeNaissance: formatDateForInput(newUser.dateNaissance),
+        dateDeNaissance:
+          formatDateForInput(newUser.dateNaissance),
 
         dateAdhesion:
           formatDateForInput(newUser.dateAdhesion) ||
@@ -130,21 +179,22 @@ watch(
         dateCertificatMedical:
           formatDateForInput(newUser.dateCertificatMedical),
 
-        dateExpirationCertificatMedical:
-          formatDateForInput(newUser.dateExpirationCertificatMedical),
-
-        statut: newUser.statut === 1 ? "Actif" : "Inactif"
+        statut:
+          newUser.statut === 1
+            ? 'Actif'
+            : 'Inactif'
       };
     } else {
       clearForm();
     }
   },
+
   { immediate: true }
 );
 
-/* -------------------------------------------------------------------------- */
-/* 🔹 CRÉATION / MODIFICATION */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+ 🔹 CRÉATION / MODIFICATION
+-------------------------------------------------------------------------- */
 
 const submitAdherent = async () => {
   loading.value = true;
@@ -161,15 +211,41 @@ const submitAdherent = async () => {
     // INFORMATIONS PERSONNELLES
     // =============================
 
-    formData.append('Nom', form.value.nom || '');
-    formData.append('Prenom', form.value.prenom || '');
-    formData.append('Email', form.value.email || '');
-    formData.append('Telephone', form.value.telephone || '');
+    formData.append(
+      'Nom',
+      form.value.nom || ''
+    );
+
+    formData.append(
+      'Prenom',
+      form.value.prenom || ''
+    );
+
+    formData.append(
+      'Email',
+      form.value.email || ''
+    );
+
+    formData.append(
+      'Telephone',
+      form.value.telephone || ''
+    );
 
     // Adresse
-    formData.append('RueEtNumero', form.value.adresse || '');
-    formData.append('Ville', form.value.ville || '');
-    formData.append('CodePostal', form.value.codePostal || '');
+    formData.append(
+      'RueEtNumero',
+      form.value.adresse || ''
+    );
+
+    formData.append(
+      'Ville',
+      form.value.ville || ''
+    );
+
+    formData.append(
+      'CodePostal',
+      form.value.codePostal || ''
+    );
 
     // =============================
     // DATE DE NAISSANCE
@@ -212,28 +288,33 @@ const submitAdherent = async () => {
     }
 
     // =============================
-    // 🔹 CERTIFICAT MÉDICAL
-    // =============================
+// 🔹 CERTIFICAT MÉDICAL
+// =============================
+formData.append(
+  'CertificatMedicalFourni',
+  form.value.certificatMedicalFourni
+    ? 'true'
+    : 'false'
+);
 
+if (form.value.certificatMedicalFourni) {
+
+  // Date du certificat
+  if (form.value.dateCertificatMedical) {
     formData.append(
-      'CertificatMedicalFourni',
-      form.value.certificatMedicalFourni ? 'true' : 'false'
+      'DateCertificatMedical',
+      form.value.dateCertificatMedical
     );
+  }
 
-    if (form.value.dateCertificatMedical) {
-      formData.append(
-        'DateCertificatMedical',
-        form.value.dateCertificatMedical
-      );
-    }
-
-    if (form.value.dateExpirationCertificatMedical) {
-      formData.append(
-        'DateExpirationCertificatMedical',
-        form.value.dateExpirationCertificatMedical
-      );
-    }
-
+  // Date d'expiration calculée par Vue
+  if (dateExpirationCertificatMedical.value) {
+    formData.append(
+      'DateExpirationCertificatMedical',
+      dateExpirationCertificatMedical.value
+    );
+  }
+}
 
     // =============================
     // AUTRES CHAMPS
@@ -241,7 +322,9 @@ const submitAdherent = async () => {
 
     formData.append(
       'Username',
-      props.user.userName || props.user.email || ''
+      props.user.userName ||
+      props.user.email ||
+      ''
     );
 
     formData.append(
@@ -267,6 +350,16 @@ const submitAdherent = async () => {
     // =============================
 
     try {
+      console.log(
+        '🔵 DATE CERTIFICAT :',
+        form.value.dateCertificatMedical
+      );
+
+      console.log(
+        '🔵 DATE EXPIRATION CALCULÉE FRONT :',
+        dateExpirationCertificatMedical.value
+      );
+
       const response = await api.put(
         `/User/admin/${props.user.userId}`,
         formData,
@@ -282,7 +375,9 @@ const submitAdherent = async () => {
         response.data
       );
 
-      alert('✅ Adhérent modifié avec succès !');
+      alert(
+        '✅ Adhérent modifié avec succès !'
+      );
 
       emit('refresh');
       emit('close');
@@ -329,8 +424,11 @@ const submitAdherent = async () => {
 
       DisciplineId: form.value.disciplineId,
 
-      DateDeNaissance: form.value.dateDeNaissance,
-      DateAdhesion: form.value.dateAdhesion,
+      DateDeNaissance:
+        form.value.dateDeNaissance,
+
+      DateAdhesion:
+        form.value.dateAdhesion,
 
       // =============================
       // 🔹 CERTIFICAT MÉDICAL
@@ -342,13 +440,8 @@ const submitAdherent = async () => {
       DateCertificatMedical:
         form.value.dateCertificatMedical || null,
 
-      DateExpirationCertificatMedical:
-        form.value.dateExpirationCertificatMedical || null,
-
-      CertificatMedicalValide:
-        form.value.certificatMedicalFourni &&
-        form.value.dateExpirationCertificatMedical &&
-        new Date(form.value.dateExpirationCertificatMedical) >= new Date()
+    DateExpirationCertificatMedical:
+  dateExpirationCertificatMedical.value || null
     };
 
     await api.post(
@@ -356,7 +449,9 @@ const submitAdherent = async () => {
       createPayload
     );
 
-    alert('✅ Adhérent créé avec succès !');
+    alert(
+      '✅ Adhérent créé avec succès !'
+    );
 
     clearForm();
 
@@ -428,6 +523,7 @@ const submitAdherent = async () => {
             <div class="row g-3">
 
               <!-- NOM -->
+
               <div class="col-md-6">
                 <label class="form-label">
                   Nom
@@ -442,6 +538,7 @@ const submitAdherent = async () => {
               </div>
 
               <!-- PRÉNOM -->
+
               <div class="col-md-6">
                 <label class="form-label">
                   Prénom
@@ -456,6 +553,7 @@ const submitAdherent = async () => {
               </div>
 
               <!-- EMAIL -->
+
               <div class="col-md-6">
                 <label class="form-label">
                   Email
@@ -470,6 +568,7 @@ const submitAdherent = async () => {
               </div>
 
               <!-- TÉLÉPHONE -->
+
               <div class="col-md-6">
                 <label class="form-label">
                   Téléphone
@@ -483,6 +582,7 @@ const submitAdherent = async () => {
               </div>
 
               <!-- DATE DE NAISSANCE -->
+
               <div class="col-md-6">
                 <label class="form-label">
                   Date de naissance
@@ -496,6 +596,7 @@ const submitAdherent = async () => {
               </div>
 
               <!-- ADRESSE -->
+
               <div class="col-md-6">
                 <label class="form-label">
                   Adresse
@@ -509,6 +610,7 @@ const submitAdherent = async () => {
               </div>
 
               <!-- VILLE -->
+
               <div class="col-md-6">
                 <label class="form-label">
                   Ville
@@ -522,6 +624,7 @@ const submitAdherent = async () => {
               </div>
 
               <!-- CODE POSTAL -->
+
               <div class="col-md-6">
                 <label class="form-label">
                   Code Postal
@@ -535,6 +638,7 @@ const submitAdherent = async () => {
               </div>
 
               <!-- DISCIPLINE -->
+
               <div class="col-md-12">
                 <label class="form-label">
                   Discipline
@@ -565,13 +669,17 @@ const submitAdherent = async () => {
               <!-- ================================= -->
 
               <div class="col-12 mt-4">
-                <div class="border-top border-secondary pt-3">
+
+                <div
+                  class="border-top border-secondary pt-3"
+                >
 
                   <h6 class="text-warning mb-3">
                     Certificat médical
                   </h6>
 
                   <!-- CERTIFICAT FOURNI -->
+
                   <div class="form-check mb-3">
 
                     <input
@@ -590,13 +698,13 @@ const submitAdherent = async () => {
 
                   </div>
 
-                  <!-- DATES DU CERTIFICAT -->
+                  <!-- DATE DU CERTIFICAT -->
+
                   <div
                     v-if="form.certificatMedicalFourni"
                     class="row g-3"
                   >
 
-                    <!-- DATE CERTIFICAT -->
                     <div class="col-md-6">
 
                       <label class="form-label">
@@ -611,35 +719,51 @@ const submitAdherent = async () => {
 
                     </div>
 
-                    <!-- DATE EXPIRATION -->
-                    <div class="col-md-6">
+                  </div>
+
+                  <!-- ================================= -->
+                  <!-- DATE EXPIRATION + STATUT -->
+                  <!-- ================================= -->
+
+                  <div
+                    v-if="
+                      form.certificatMedicalFourni &&
+                      dateExpirationCertificatMedical
+                    "
+                    class="mt-3"
+                  >
+
+                    <!-- DATE D'EXPIRATION -->
+
+                    <div class="mb-3">
 
                       <label class="form-label">
                         Date d'expiration
                       </label>
 
-                      <input
-                        v-model="form.dateExpirationCertificatMedical"
-                        type="date"
-                        class="form-control"
-                      />
+                      <div
+                        class="form-control bg-secondary text-light"
+                      >
+                        {{
+                          dateExpirationCertificatMedical
+                        }}
+                      </div>
 
                     </div>
 
-                  </div>
-
-                  <!-- INFORMATION -->
-                  <div
-                    v-if="form.certificatMedicalFourni && form.dateExpirationCertificatMedical"
-                    class="mt-3"
-                  >
+                    <!-- CERTIFICAT VALIDE -->
 
                     <div
-                      v-if="new Date(form.dateExpirationCertificatMedical) >= new Date()"
+                      v-if="
+                        dateExpirationCertificatMedical >=
+                        new Date().toISOString().split('T')[0]
+                      "
                       class="alert alert-success mb-0"
                     >
                       Certificat médical valide.
                     </div>
+
+                    <!-- CERTIFICAT EXPIRÉ -->
 
                     <div
                       v-else
@@ -651,6 +775,7 @@ const submitAdherent = async () => {
                   </div>
 
                 </div>
+
               </div>
 
             </div>
@@ -690,6 +815,7 @@ const submitAdherent = async () => {
           </form>
 
         </div>
+
       </div>
     </div>
   </div>
