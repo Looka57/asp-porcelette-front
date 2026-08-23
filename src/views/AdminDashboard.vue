@@ -10,6 +10,8 @@ import CountUp from 'vue-countup-v3';
 
 // 💡 Import du composable (logique de graphique externalisée)
 import { useEvolutionInscriptionsChart } from '@/composables/useChartData';
+import SaisonStatisticsChart from '@/composables/SaisonStatisticsChart.vue';
+
 
 /* ════════════════════════════════════════════════════════════════════════ */
 /* ⚙️ CONFIGURATION DE CHART.JS */
@@ -20,7 +22,6 @@ Chart.register(...registerables);
 /* 🎯 UTILISATION DU COMPOSABLE */
 /* ════════════════════════════════════════════════════════════════════════ */
 const rawInscriptionsData = ref({});
-// ✅ CORRECTION : Passer la ref au composable pour qu'il puisse réagir aux changements
 const { inscriptionsData, chartOptions, totalInscriptions } = useEvolutionInscriptionsChart(rawInscriptionsData);
 const totalLicencies = ref(0);
 const totalEvenements = ref(0);
@@ -219,6 +220,16 @@ onMounted(async () => {
             <LineChart :chart-data="inscriptionsData" :options="chartOptions" />
           </div>
         </div>
+        <!-- 📊 STATISTIQUES PAR SAISON -->
+
+        <div class="row justify-content-center mt-5">
+          <div class="col-md-12">
+            <SaisonStatisticsChart />
+          </div>
+        </div>
+
+
+
       </div>
     </div>
   </div>
