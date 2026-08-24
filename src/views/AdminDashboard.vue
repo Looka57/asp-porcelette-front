@@ -337,19 +337,108 @@ const fetchStats = async () => {
     const licenciesResponse =
       await api.get('/User/admin/list');
 
-    const allUsers =
-      licenciesResponse.data || [];
+const allUsers = licenciesResponse.data || [];
 
 
     processInscriptionsData(allUsers);
 
+const today = new Date('2026-10-15');
 
-    totalLicencies.value =
-      allUsers.filter(user =>
-        user.roles &&
-        user.roles.includes('Adherent')
-      ).length;
+const currentYear = today.getFullYear();
+const currentMonth = today.getMonth();
 
+// Saison sportive : septembre → juin
+const seasonStartYear =
+  currentMonth >= 8
+    ? currentYear
+    : currentYear - 1;
+
+const seasonStart = new Date(
+  seasonStartYear,
+  8, // septembre
+  1,
+  0,
+  0,
+  0,
+  0
+);
+
+const seasonEnd = new Date(
+  seasonStartYear + 1,
+  5, // juin
+  30,
+  23,
+  59,
+  59,
+  999
+);
+console.table(
+  allUsers
+    .filter(user => user.roles?.includes('Adherent'))
+    .map(user => ({
+      nom: user.nom,
+      prenom: user.prenom,
+      statut: user.statut,
+      dateRenouvellement: user.dateRenouvellement,
+      dateConvertie: user.dateRenouvellement
+        ? new Date(user.dateRenouvellement).toString()
+        : null
+    }))
+);
+totalLicencies.value = allUsers.filter(user => {
+
+  // 1. Doit être adhérent
+  const isAdherent =
+    user.roles?.includes('Adherent');
+
+  // 2. Doit avoir le statut actif
+  const isActif =
+    Number(user.statut) === 1;
+
+  // 3. Doit avoir une date de renouvellement
+  if (!user.dateRenouvellement) {
+    return false;
+  }
+
+  const dateRenouvellement =
+    new Date(user.dateRenouvellement);
+
+  // Date invalide
+  if (isNaN(dateRenouvellement.getTime())) {
+    return false;
+  }
+
+  // 4. Le renouvellement doit être dans la saison
+  const isDansLaSaison =
+    dateRenouvellement >= seasonStart &&
+    dateRenouvellement <= seasonEnd;
+
+  return (
+    isAdherent &&
+    isActif &&
+    isDansLaSaison
+  );
+}).length;
+
+console.log(
+  '>>> SAISON =',
+  `${seasonStartYear}-${seasonStartYear + 1}`
+);
+
+console.log(
+  '>>> DÉBUT =',
+  seasonStart
+);
+
+console.log(
+  '>>> FIN =',
+  seasonEnd
+);
+
+console.log(
+  '>>> LICENCIÉS ACTIFS RENOUVELABLES =',
+  totalLicencies.value
+);
 
     /* ──────────────────────────────────────────────────────────────────── */
     /* 2️⃣ ÉVÉNEMENTS */
