@@ -1,14 +1,16 @@
+```vue
 <script setup>
+
 /* ════════════════════════════════════════════════════════════════════════ */
 /* 📦 IMPORTS */
 /* ════════════════════════════════════════════════════════════════════════ */
+
 import { ref, onMounted } from 'vue';
 import { LineChart } from 'vue-chart-3';
 import { Chart, registerables } from 'chart.js';
 import api from '@/api/axios';
 import CountUp from 'vue-countup-v3';
 
-// 💡 Import du composable (logique de graphique externalisée)
 import { useEvolutionInscriptionsChart } from '@/composables/useChartData';
 import SaisonStatisticsChart from '@/composables/SaisonStatisticsChart.vue';
 
@@ -16,142 +18,415 @@ import SaisonStatisticsChart from '@/composables/SaisonStatisticsChart.vue';
 /* ════════════════════════════════════════════════════════════════════════ */
 /* ⚙️ CONFIGURATION DE CHART.JS */
 /* ════════════════════════════════════════════════════════════════════════ */
+
 Chart.register(...registerables);
+
 
 /* ════════════════════════════════════════════════════════════════════════ */
 /* 🎯 UTILISATION DU COMPOSABLE */
 /* ════════════════════════════════════════════════════════════════════════ */
+
 const rawInscriptionsData = ref({});
-const { inscriptionsData, chartOptions, totalInscriptions } = useEvolutionInscriptionsChart(rawInscriptionsData);
+
+const {
+  inscriptionsData,
+  chartOptions,
+  totalInscriptions
+} = useEvolutionInscriptionsChart(rawInscriptionsData);
+
 const totalLicencies = ref(0);
 const totalEvenements = ref(0);
 const totalCompta = ref(0);
 
+
 /* ════════════════════════════════════════════════════════════════════════ */
-/* 🧠 LOGIQUE DU COMPOSANT (fetchStats) */
+/* 🧠 LOGIQUE DU COMPOSANT */
 /* ════════════════════════════════════════════════════════════════════════ */
 
-// Définition des disciplines utilisées pour le graphique
-// 🎯 CORRECTION : Mapping ID -> Nom
+/* 🎯 Mapping ID -> Nom */
+
 const DISCIPLINES_MAP = {
-  // ASSUREZ-VOUS QUE CES IDS CORRESPONDENT À VOTRE BASE DE DONNÉES
   1: 'Judo',
   2: 'Aïkido',
   3: 'Jujitsu',
   4: 'Judo Détente',
 };
+
 const DISCIPLINES_NAMES = Object.values(DISCIPLINES_MAP);
 
-// Cartographie des mois de l'année scolaire (Sept à Juin, 10 mois)
-const MONTHS = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
 
+/* 📅 Mois de la saison sportive : Septembre → Juin */
+
+const MONTHS = [
+  'Sept',
+  'Oct',
+  'Nov',
+  'Déc',
+  'Jan',
+  'Fév',
+  'Mar',
+  'Avr',
+  'Mai',
+  'Juin'
+];
+
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* 📊 TRAITEMENT DES INSCRIPTIONS */
+/* ════════════════════════════════════════════════════════════════════════ */
 
 const processInscriptionsData = (allUsers) => {
-  // 📢 DÉBOGAGE CRITIQUE : Affiche le premier utilisateur pour vérifier les noms de propriétés
-  if (allUsers.length > 0) {
-    console.log("--- INSPECTION UTILISATEUR ---");
-    console.log("-----------------------------");
-  }
 
-  // Initialisation d'une structure pour stocker les inscriptions mensuelles brutes
+  /* ────────────────────────────────────────────────────────────────────── */
+  /* 📅 DÉTERMINATION DE LA SAISON ACTUELLE */
+  /* ────────────────────────────────────────────────────────────────────── */
+
+  const today = new Date('2026-10-15');
+
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+
+  /*
+   * Saison sportive :
+   *
+   * Septembre 2026 → Juin 2027 = saison 2026-2027
+   *
+   * Si on est entre septembre et décembre :
+   *     saison = année actuelle
+   *
+   * Si on est entre janvier et juin :
+   *     saison = année précédente
+   */
+
+  const seasonStartYear = currentMonth >= 8
+    ? currentYear
+    : currentYear - 1;
+
+
+  /* ────────────────────────────────────────────────────────────────────── */
+  /* 📍 MOIS ACTUEL DANS LA SAISON */
+  /* ────────────────────────────────────────────────────────────────────── */
+
+  /*
+   * Septembre = 0
+   * Octobre   = 1
+   * Novembre  = 2
+   * Décembre  = 3
+   * Janvier   = 4
+   * ...
+   * Juin      = 9
+   */
+
+  const currentMonthIndex = currentMonth >= 8
+    ? currentMonth - 8
+    : currentMonth + 4;
+
+
+  /* ────────────────────────────────────────────────────────────────────── */
+  /* 📦 INITIALISATION DES DONNÉES */
+  /* ────────────────────────────────────────────────────────────────────── */
+
   const monthlyData = DISCIPLINES_NAMES.reduce((acc, disc) => {
+
     acc[disc] = new Array(MONTHS.length).fill(0);
+
     return acc;
+
   }, {});
+
 
   let usersComptes = 0;
 
+
+  /* ══════════════════════════════════════════════════════════════════════ */
+  /* 👥 PARCOURS DES ADHÉRENTS */
+  /* ══════════════════════════════════════════════════════════════════════ */
+
   allUsers.forEach(user => {
-    // 1. Vérification des rôles et des données essentielles
-    const isAdherent = user.roles && user.roles.includes('Adherent');
 
-    // 🎯 CORRECTION : Utiliser disciplineId pour obtenir le nom
-    const userDiscipline = DISCIPLINES_MAP[user.disciplineId];
-    const dateAdhesion = user.dateAdhesion;
+    /* ──────────────────────────────────────────────────────────────────── */
+    /* 1️⃣ Vérification de l'adhérent */
+    /* ──────────────────────────────────────────────────────────────────── */
 
-    // VÉRIFICATION : Si le rôle est 'Adherent', si la discipline est mappée et si la date existe
-    if (!isAdherent || !userDiscipline || !dateAdhesion) {
+    const isAdherent =
+      user.roles &&
+      user.roles.includes('Adherent');
+
+    const userDiscipline =
+      DISCIPLINES_MAP[user.disciplineId];
+
+    const dateAdhesion =
+      user.dateAdhesion;
+
+
+    /*
+     * On ignore :
+     * - les utilisateurs qui ne sont pas adhérents
+     * - les disciplines inconnues
+     * - les adhérents sans date d'adhésion
+     */
+
+    if (
+      !isAdherent ||
+      !userDiscipline ||
+      !dateAdhesion
+    ) {
       return;
     }
 
-    const inscriptionDate = new Date(dateAdhesion);
 
-    // Sécurité de date (juste au cas où)
+    /* ──────────────────────────────────────────────────────────────────── */
+    /* 2️⃣ Conversion de la date */
+    /* ──────────────────────────────────────────────────────────────────── */
+
+    const inscriptionDate =
+      new Date(dateAdhesion);
+
+
     if (isNaN(inscriptionDate.getTime())) {
       return;
     }
 
-    // 2. Déterminer l'indice du mois (Sept=0, Oct=1, ..., Juin=9)
-    const month = inscriptionDate.getMonth(); // 0 (Jan) à 11 (Déc)
 
-    let monthIndex; // Indice dans notre tableau de 10 mois
+    /* ══════════════════════════════════════════════════════════════════════ */
+    /* 🚫 IGNORER LES ANCIENNES SAISONS */
+    /* ══════════════════════════════════════════════════════════════════════ */
 
-    if (month >= 8) { // Sept (8) à Déc (11)
-      monthIndex = month - 8;
-    } else if (month <= 5) { // Jan (0) à Juin (5)
-      monthIndex = month + 4;
-    } else {
-      return; // Mois ignoré (Juillet/Août)
+    /*
+     * Exemple :
+     *
+     * Saison actuelle = 2026-2027
+     *
+     * Une inscription de 2025
+     * → ignorée
+     *
+     * Une inscription de septembre 2026
+     * → conservée
+     */
+
+    if (
+      inscriptionDate.getFullYear() < seasonStartYear
+    ) {
+      return;
     }
 
-    // 3. Incrémenter le compteur si la discipline est répertoriée
-    if (monthIndex >= 0 && monthIndex < MONTHS.length) {
+
+    /* ══════════════════════════════════════════════════════════════════════ */
+    /* 📅 CALCUL DU MOIS DANS LA SAISON */
+    /* ══════════════════════════════════════════════════════════════════════ */
+
+    const month =
+      inscriptionDate.getMonth();
+
+    let monthIndex;
+
+
+    /* Septembre → Décembre */
+
+    if (month >= 8) {
+
+      monthIndex =
+        month - 8;
+
+    }
+
+    /* Janvier → Juin */
+
+    else if (month <= 5) {
+
+      monthIndex =
+        month + 4;
+
+    }
+
+    /* Juillet / Août */
+
+    else {
+
+      return;
+
+    }
+
+
+    /* ══════════════════════════════════════════════════════════════════════ */
+    /* 🚫 NE PAS AFFICHER LES MOIS FUTURS */
+    /* ══════════════════════════════════════════════════════════════════════ */
+
+    /*
+     * Exemple en octobre :
+     *
+     * Septembre → affiché
+     * Octobre   → affiché
+     * Novembre  → 0
+     * Décembre  → 0
+     * etc.
+     */
+
+    if (
+      monthIndex > currentMonthIndex
+    ) {
+      return;
+    }
+
+
+    /* ──────────────────────────────────────────────────────────────────── */
+    /* 3️⃣ Ajout de l'inscription */
+    /* ──────────────────────────────────────────────────────────────────── */
+
+    if (
+      monthIndex >= 0 &&
+      monthIndex < MONTHS.length
+    ) {
+
       monthlyData[userDiscipline][monthIndex]++;
+
       usersComptes++;
+
     }
+
   });
 
-  console.log(`Nombre total de licenciés comptés dans le graphique : ${usersComptes}`);
 
-  // Stocker les données brutes dans la ref lue par le composable
-  rawInscriptionsData.value = monthlyData;
-  console.log("Données brutes générées pour le graphique (devraient contenir les totaux):", monthlyData);
+  /* ══════════════════════════════════════════════════════════════════════ */
+  /* 📊 DEBUG */
+  /* ══════════════════════════════════════════════════════════════════════ */
+
+  console.log(
+    '>>> SAISON ACTUELLE =',
+    `${seasonStartYear}-${seasonStartYear + 1}`
+  );
+
+  console.log(
+    '>>> MOIS ACTUEL =',
+    MONTHS[currentMonthIndex]
+  );
+
+  console.log(
+    '>>> NOMBRE DE LICENCIÉS COMPTÉS =',
+    usersComptes
+  );
+
+  console.log(
+    '>>> DONNÉES BRUTES DU GRAPHIQUE =',
+    monthlyData
+  );
+
+
+  /* ══════════════════════════════════════════════════════════════════════ */
+  /* 💾 ENVOI AU COMPOSABLE */
+  /* ══════════════════════════════════════════════════════════════════════ */
+
+  rawInscriptionsData.value =
+    monthlyData;
+
 };
 
 
-const fetchStats = async () => {
-  try {
-    // 1. Licenciés : Récupération de la liste complète
-    const licenciesResponse = await api.get('/User/admin/list');
-    const allUsers = licenciesResponse.data || [];
+/* ════════════════════════════════════════════════════════════════════════ */
+/* 📡 RÉCUPÉRATION DES STATISTIQUES */
+/* ════════════════════════════════════════════════════════════════════════ */
 
-    // ✅ 1.1 Traitement des données pour le graphique
+const fetchStats = async () => {
+
+  try {
+
+    /* ──────────────────────────────────────────────────────────────────── */
+    /* 1️⃣ LICENCIÉS */
+    /* ──────────────────────────────────────────────────────────────────── */
+
+    const licenciesResponse =
+      await api.get('/User/admin/list');
+
+    const allUsers =
+      licenciesResponse.data || [];
+
+
     processInscriptionsData(allUsers);
 
-    // 1.2 Calcul du total des licenciés (simple, inchangé)
-    totalLicencies.value = allUsers.filter(user =>
-      user.roles.includes('Adherent')).length;
 
-    // 2. Événements (inchangé)
-    const eventsResponse = await api.get('/Evenement');
-    totalEvenements.value = eventsResponse.data.length || 0;
+    totalLicencies.value =
+      allUsers.filter(user =>
+        user.roles &&
+        user.roles.includes('Adherent')
+      ).length;
 
-    // 3. Comptabilité (inchangé)
-    const comptaReponse = await api.get('/Compte');
-    const comptes = comptaReponse.data || [];
 
-    const soldeTotal = comptes.reduce((sum, compte) => {
-      const soldeDuCompte = compte.solde || 0;
-      return sum + soldeDuCompte;
-    }, 0);
-    totalCompta.value = soldeTotal;
+    /* ──────────────────────────────────────────────────────────────────── */
+    /* 2️⃣ ÉVÉNEMENTS */
+    /* ──────────────────────────────────────────────────────────────────── */
+
+    const eventsResponse =
+      await api.get('/Evenement');
+
+    totalEvenements.value =
+      eventsResponse.data.length || 0;
+
+
+    /* ──────────────────────────────────────────────────────────────────── */
+    /* 3️⃣ COMPTABILITÉ */
+    /* ──────────────────────────────────────────────────────────────────── */
+
+    const comptaReponse =
+      await api.get('/Compte');
+
+    const comptes =
+      comptaReponse.data || [];
+
+
+    const soldeTotal =
+      comptes.reduce(
+        (sum, compte) => {
+
+          const soldeDuCompte =
+            compte.solde || 0;
+
+          return sum + soldeDuCompte;
+
+        },
+        0
+      );
+
+
+    totalCompta.value =
+      soldeTotal;
+
 
   } catch (err) {
-    console.error("Erreur lors du chargement des statistiques du tableau de bord :", err);
-    rawInscriptionsData.value = { /* données par défaut vides */ };
+
+    console.error(
+      'Erreur lors du chargement des statistiques du tableau de bord :',
+      err
+    );
+
+    rawInscriptionsData.value = {};
+
   }
-}
+
+};
+
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* ⏳ CHARGEMENT */
+/* ════════════════════════════════════════════════════════════════════════ */
 
 const loading = ref(true);
 
+
 onMounted(async () => {
+
   await fetchStats();
 
   setTimeout(() => {
+
     loading.value = false;
+
   }, 500);
+
 });
+
 </script>
+```
+
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <!-- 🎨 TEMPLATE -->

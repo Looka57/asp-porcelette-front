@@ -2,32 +2,38 @@ import { ref, computed } from 'vue'
 
 // 🎨 Définition des couleurs (inchangée)
 const DISCIPLINE_COLORS = {
-  'Judo': '#FF6384',
-  'Aïkido': '#3B82F6',
-  'Jujitsu': '#efd844ff',
-  'Judo Détente': '#10B981'
-};
+  Judo: '#FF6384',
+  Aïkido: '#3B82F6',
+  Jujitsu: '#efd844ff',
+  'Judo Détente': '#10B981',
+}
 
 // 💡 Fonction Utilitaire pour le Calcul Cumulatif
 const cumulativeSum = (data) => {
-  let sum = 0;
-  return data.map(value => sum += value);
-};
+  let sum = 0
+  return data.map((value) => (sum += value))
+}
 
 // 🎯 Modification : Accepte la *Ref* contenant les données brutes en paramètre
 export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
-  const labels = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
+  const labels = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin']
 
   // 💡 Utilisez un computed pour calculer les datasets DYNAMIQUEMENT
   const inscriptionsData = computed(() => {
     // L'accès à la ref est sécurisé ici :
-    const rawData = (rawInscriptionsDataRef && rawInscriptionsDataRef.value) ? rawInscriptionsDataRef.value : {};
+    const rawData =
+      rawInscriptionsDataRef && rawInscriptionsDataRef.value ? rawInscriptionsDataRef.value : {}
 
+    console.log('>>> RAW INSCRIPTIONS =', rawData)
+    console.log('>>> JUDO =', rawData.Judo)
+    console.log('>>> AIKIDO =', rawData.Aïkido)
+    console.log('>>> JUJITSU =', rawData.Jujitsu)
+    console.log('>>> JUDO DETENTE =', rawData['Judo Détente'])
     // Calculs sécurisés :
-    const dataJudo = rawData.Judo ? cumulativeSum(rawData.Judo) : [];
-    const dataAikido = rawData.Aïkido ? cumulativeSum(rawData.Aïkido) : [];
-    const dataJujitsu = rawData.Jujitsu ? cumulativeSum(rawData.Jujitsu) : [];
-    const dataJudoDetente = rawData['Judo Détente'] ? cumulativeSum(rawData['Judo Détente']) : [];
+    const dataJudo = rawData.Judo ? cumulativeSum(rawData.Judo) : []
+    const dataAikido = rawData.Aïkido ? cumulativeSum(rawData.Aïkido) : []
+    const dataJujitsu = rawData.Jujitsu ? cumulativeSum(rawData.Jujitsu) : []
+    const dataJudoDetente = rawData['Judo Détente'] ? cumulativeSum(rawData['Judo Détente']) : []
 
     return {
       labels: labels,
@@ -68,18 +74,18 @@ export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
           pointBackgroundColor: DISCIPLINE_COLORS['Judo Détente'],
           data: dataJudoDetente,
         },
-      ]
+      ],
     }
-  });
+  })
 
   // Le calcul du totalInscriptions doit aussi utiliser l'objet computed
   const totalInscriptions = computed(() => {
     // La dernière valeur de chaque série cumulée donne le total final
     return inscriptionsData.value.datasets.reduce((total, dataset) => {
-      const lastValue = dataset.data.length > 0 ? dataset.data[dataset.data.length - 1] : 0;
-      return total + lastValue;
-    }, 0);
-  });
+      const lastValue = dataset.data.length > 0 ? dataset.data[dataset.data.length - 1] : 0
+      return total + lastValue
+    }, 0)
+  })
 
   // 🎯 OPTIONS pour les INSCRIPTIONS (nombres entiers)
   const chartOptions = ref({
@@ -90,42 +96,42 @@ export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
       tooltip: {
         callbacks: {
           label: (context) => {
-            let label = context.dataset.label || '';
+            let label = context.dataset.label || ''
             if (label) {
-              label += ': ';
+              label += ': '
             }
             if (context.parsed.y !== null) {
-              label += context.parsed.y.toFixed(0); // Affiche sans décimales
+              label += context.parsed.y.toFixed(0) // Affiche sans décimales
             }
-            return label;
-          }
-        }
-      }
+            return label
+          },
+        },
+      },
     },
     scales: {
       y: {
         beginAtZero: true,
         title: {
           display: true,
-          text: "Nombre d'Inscriptions Cumulées"
+          text: "Nombre d'Inscriptions Cumulées",
         },
         ticks: {
           stepSize: 1, // Force les pas à être des entiers
           callback: (value) => {
             if (Number.isInteger(value)) {
-              return value;
+              return value
             }
-          }
-        }
+          },
+        },
       },
       x: {
         title: {
           display: true,
-          text: "Mois de l'Année en cours"
-        }
-      }
-    }
-  });
+          text: "Mois de l'Année en cours",
+        },
+      },
+    },
+  })
 
   return { inscriptionsData, chartOptions, totalInscriptions }
 }
