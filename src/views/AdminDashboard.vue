@@ -1,4 +1,3 @@
-```vue
 <script setup>
 
 /* ════════════════════════════════════════════════════════════════════════ */
@@ -73,57 +72,27 @@ const MONTHS = [
 
 const processInscriptionsData = (allUsers) => {
 
-  /* ────────────────────────────────────────────────────────────────────── */
-  /* 📅 DÉTERMINATION DE LA SAISON ACTUELLE */
-  /* ────────────────────────────────────────────────────────────────────── */
-
   const today = new Date();
 
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
 
-  /*
-   * Saison sportive : Septembre 2026 → Juin 2027 = saison 2026-2027
-   * Si on est entre septembre et décembre :
-   *     saison = année actuelle
-   * Si on est entre janvier et juin :
-   *     saison = année précédente
-   */
-
   const seasonStartYear = currentMonth >= 8
     ? currentYear
     : currentYear - 1;
-
-  /* ────────────────────────────────────────────────────────────────────── */
-  /* 📍 MOIS ACTUEL DANS LA SAISON */
-  /* ────────────────────────────────────────────────────────────────────── */
 
   const currentMonthIndex = currentMonth >= 8
     ? currentMonth - 8
     : currentMonth + 4;
 
-  /* ────────────────────────────────────────────────────────────────────── */
-  /* 📦 INITIALISATION DES DONNÉES */
-  /* ────────────────────────────────────────────────────────────────────── */
-
   const monthlyData = DISCIPLINES_NAMES.reduce((acc, disc) => {
     acc[disc] = new Array(MONTHS.length).fill(0);
     return acc;
-
-  },
-    {});
+  }, {});
 
   let usersComptes = 0;
 
-  /* ══════════════════════════════════════════════════════════════════════ */
-  /* 👥 PARCOURS DES ADHÉRENTS */
-  /* ══════════════════════════════════════════════════════════════════════ */
-
   allUsers.forEach(user => {
-
-    /* ──────────────────────────────────────────────────────────────────── */
-    /* 1️⃣ Vérification de l'adhérent */
-    /* ──────────────────────────────────────────────────────────────────── */
 
     const isAdherent = user.roles && user.roles.includes('Adherent');
     const userDiscipline = DISCIPLINES_MAP[user.disciplineId];
@@ -133,96 +102,42 @@ const processInscriptionsData = (allUsers) => {
       return;
     }
 
-
-    /* ──────────────────────────────────────────────────────────────────── */
-    /* 2️⃣ Conversion de la date */
-    /* ──────────────────────────────────────────────────────────────────── */
-
     const inscriptionDate = new Date(dateAdhesion);
 
     if (isNaN(inscriptionDate.getTime())) {
       return;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════ */
-    /* 🚫 IGNORER LES ANCIENNES SAISONS */
-    /* ══════════════════════════════════════════════════════════════════════ */
-
     if (inscriptionDate.getFullYear() < seasonStartYear) {
       return;
     }
-    /* ══════════════════════════════════════════════════════════════════════ */
-    /* 📅 CALCUL DU MOIS DANS LA SAISON */
-    /* ══════════════════════════════════════════════════════════════════════ */
 
     const month = inscriptionDate.getMonth();
     let monthIndex;
-    /* Septembre → Décembre */
 
     if (month >= 8) {
       monthIndex = month - 8;
-    }
-
-    /* Janvier → Juin */
-
-    else if (month <= 5) {
+    } else if (month <= 5) {
       monthIndex = month + 4;
-    }
-    /* Juillet / Août */
-    else {
+    } else {
       return;
-
     }
-
-
-    /* ══════════════════════════════════════════════════════════════════════ */
-    /* 🚫 NE PAS AFFICHER LES MOIS FUTURS */
-    /* ══════════════════════════════════════════════════════════════════════ */
 
     if (monthIndex > currentMonthIndex) {
       return;
     }
 
-
-    /* ──────────────────────────────────────────────────────────────────── */
-    /* 3️⃣ Ajout de l'inscription */
-    /* ──────────────────────────────────────────────────────────────────── */
-
     if (monthIndex >= 0 && monthIndex < MONTHS.length) {
-
       monthlyData[userDiscipline][monthIndex]++;
       usersComptes++;
     }
   });
 
+  console.log('>>> SAISON ACTUELLE =', `${seasonStartYear}-${seasonStartYear + 1}`);
+  console.log('>>> MOIS ACTUEL =', MONTHS[currentMonthIndex]);
+  console.log('>>> NOMBRE DE LICENCIÉS COMPTÉS =', usersComptes);
+  console.log('>>> DONNÉES BRUTES DU GRAPHIQUE =', monthlyData);
 
-  /* ══════════════════════════════════════════════════════════════════════ */
-  /* 📊 DEBUG */
-  /* ══════════════════════════════════════════════════════════════════════ */
-
-  console.log(
-    '>>> SAISON ACTUELLE =',
-    `${seasonStartYear}-${seasonStartYear + 1}`
-  );
-
-  console.log(
-    '>>> MOIS ACTUEL =',
-    MONTHS[currentMonthIndex]
-  );
-
-  console.log(
-    '>>> NOMBRE DE LICENCIÉS COMPTÉS =',
-    usersComptes
-  );
-
-  console.log(
-    '>>> DONNÉES BRUTES DU GRAPHIQUE =',
-    monthlyData
-  );
-
-  /* ══════════════════════════════════════════════════════════════════════ */
-  /* 💾 ENVOI AU COMPOSABLE */
-  /* ══════════════════════════════════════════════════════════════════════ */
   rawInscriptionsData.value = monthlyData;
 };
 
@@ -233,156 +148,48 @@ const processInscriptionsData = (allUsers) => {
 const fetchStats = async () => {
 
   try {
-
-    /* ──────────────────────────────────────────────────────────────────── */
-    /* 1️⃣ LICENCIÉS */
-    /* ──────────────────────────────────────────────────────────────────── */
-
-    const licenciesResponse =
-      await api.get('/User/admin/list');
-
+    const licenciesResponse = await api.get('/User/admin/list');
     const allUsers = licenciesResponse.data || [];
     processInscriptionsData(allUsers);
 
     const today = new Date();
-
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
 
-    // Saison sportive : septembre → juin
-    const seasonStartYear =
-      currentMonth >= 8
-        ? currentYear
-        : currentYear - 1;
+    const seasonStartYear = currentMonth >= 8
+      ? currentYear
+      : currentYear - 1;
 
-    const seasonStart = new Date(
-      seasonStartYear,
-      8, // septembre
-      1,
-      0,
-      0,
-      0,
-      0
-    );
-
-    const seasonEnd = new Date(
-      seasonStartYear + 1,
-      5, // juin
-      30,
-      23,
-      59,
-      59,
-      999
-    );
-    console.table(
-      allUsers
-        .filter(user => {
-          const isAdherent = user.roles?.includes('Adherent');
-          const isActif = Number(user.statut) === 1;
-
-          if (!user.dateRenouvellement) return false;
-
-          const dateRenouvellement = new Date(user.dateRenouvellement);
-
-          if (isNaN(dateRenouvellement.getTime())) return false;
-
-          const isDansLaSaison =
-            dateRenouvellement >= seasonStart &&
-            dateRenouvellement <= seasonEnd;
-
-          return isAdherent && isActif && isDansLaSaison;
-        })
-        .map(user => ({
-          nom: user.nom,
-          prenom: user.prenom,
-          roles: user.roles,
-          statut: user.statut,
-          dateRenouvellement: user.dateRenouvellement
-        }))
-    );
-
+    const seasonStart = new Date(seasonStartYear, 8, 1, 0, 0, 0, 0);
+    const seasonEnd = new Date(seasonStartYear + 1, 5, 30, 23, 59, 59, 999);
 
     totalLicencies.value = allUsers.filter(user => {
-
-      // 1. Doit être adhérent
       const isAdherent = user.roles?.includes('Adherent');
 
-      // 2. Doit avoir une date de renouvellement
-      if (!user.dateRenouvellement) {
-        return false;
-      }
+      if (!user.dateRenouvellement) return false;
 
       const dateRenouvellement = new Date(user.dateRenouvellement);
+      if (isNaN(dateRenouvellement.getTime())) return false;
 
-      // Date invalide
-      if (isNaN(dateRenouvellement.getTime())) {
-        return false;
-      }
-
-      // 3. Le renouvellement doit être dans la saison actuelle
       const isDansLaSaison = dateRenouvellement >= seasonStart && dateRenouvellement <= seasonEnd;
 
-      return (
-        isAdherent && isDansLaSaison
-      );
+      return isAdherent && isDansLaSaison;
     }).length;
 
-    console.log(
-      '>>> SAISON =',
-      `${seasonStartYear}-${seasonStartYear + 1}`
-    );
-
-    console.log(
-      '>>> DÉBUT =',
-      seasonStart
-    );
-
-    console.log(
-      '>>> FIN =',
-      seasonEnd
-    );
-
-    console.log(
-      '>>> LICENCIÉS ACTIFS RENOUVELABLES =',
-      totalLicencies.value
-    );
-
-    /* ──────────────────────────────────────────────────────────────────── */
-    /* 2️⃣ ÉVÉNEMENTS */
-    /* ──────────────────────────────────────────────────────────────────── */
-
     const eventsResponse = await api.get('/Evenement');
-
     totalEvenements.value = eventsResponse.data.length || 0;
-
-
-    /* ──────────────────────────────────────────────────────────────────── */
-    /* 3️⃣ COMPTABILITÉ */
-    /* ──────────────────────────────────────────────────────────────────── */
 
     const comptaReponse = await api.get('/Compte');
     const comptes = comptaReponse.data || [];
 
-    const soldeTotal = comptes.reduce((sum, compte) => {
-      const soldeDuCompte = compte.solde || 0;
-      return sum + soldeDuCompte;
-    },
-      0
-    );
-
+    const soldeTotal = comptes.reduce((sum, compte) => sum + (compte.solde || 0), 0);
     totalCompta.value = soldeTotal;
 
   } catch (err) {
-
-    console.error(
-      'Erreur lors du chargement des statistiques du tableau de bord :',
-      err
-    );
-
+    console.error('Erreur lors du chargement des statistiques du tableau de bord :', err);
     rawInscriptionsData.value = {};
   }
 };
-
 
 /* ════════════════════════════════════════════════════════════════════════ */
 /* ⏳ CHARGEMENT */
@@ -394,18 +201,13 @@ onMounted(async () => {
   setTimeout(() => {
     loading.value = false;
   }, 500);
-
 });
 
 </script>
 
-
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!-- 🎨 TEMPLATE -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
 <template>
-  <div class="container-fluid text-center bg-dark text-white min-h-screen p-4">
-    <!-- Header Admin Premium -->
+  <div class="py-5 px-3 md:px-6 surface-ground min-vh-100 text-white">
+
     <!-- Header Admin Premium -->
     <div class="header-banner position-relative overflow-hidden p-4 p-md-5 mb-5 rounded-4 text-start shadow-lg">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
@@ -429,91 +231,96 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- ════════════ 🧾 CARTES DU HAUT ════════════ -->
-    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+    <!-- ════════════ 🧾 CARTES DU HAUT Modernisées PrimeFlex ════════════ -->
+    <div class="grid grid-nogutter gap-4 mb-6">
+
       <!-- 🧍 Licenciés -->
-      <div class="col">
-        <router-link :to="{ name: 'admin-licencies' }">
-          <div
-            class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
-            <img width="100" height="100" src="https://img.icons8.com/bubbles/100/user-group-man-woman.png"
-              alt="user-group-man-woman" />
-            <h4>Licenciés</h4>
-            <CountUp :end-val="totalLicencies" :duration="2" class="h4 mb-0 fs-1" />
+      <div class="col-12 md:col flex">
+        <router-link :to="{ name: 'admin-licencies' }" class="w-full no-underline">
+          <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
+            <div class="kpi-icon-wrapper mb-3 p-3 border-round-circle flex align-items-center justify-content-center">
+              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/user-group-man-woman.png" alt="Licenciés" class="kpi-img" />
+            </div>
+            <span class="text-light font-semibold text-lg uppercase tracking-wider mb-2">Licenciés</span>
+            <CountUp :end-val="totalLicencies" :duration="2" class="text-4xl font-bold text-white m-0" />
           </div>
         </router-link>
       </div>
 
       <!-- 📅 Événements -->
-      <div class="col">
-        <router-link :to="{ name: 'admin-events' }">
-          <div
-            class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
-            <img width="100" height="100" src="https://img.icons8.com/bubbles/100/today.png" alt="today" />
-            <h4>Événements</h4>
-            <CountUp :end-val="totalEvenements" :duration="2" class="h4 mb-0 fs-1" />
+      <div class="col-12 md:col flex">
+        <router-link :to="{ name: 'admin-events' }" class="w-full no-underline">
+          <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
+            <div class="kpi-icon-wrapper mb-3 p-3 border-round-circle flex align-items-center justify-content-center">
+              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/today.png" alt="Événements" class="kpi-img" />
+            </div>
+            <span class="text-light font-semibold text-lg uppercase tracking-wider mb-2">Événements</span>
+            <CountUp :end-val="totalEvenements" :duration="2" class="text-4xl font-bold text-white m-0" />
           </div>
         </router-link>
       </div>
 
-      <!-- 📦 Archives -->
-      <div class="col">
-        <router-link :to="{ name: 'admin-compta' }">
-          <div
-            class="card bg-secondary text-white p-3 rounded h-100 d-flex flex-column align-items-center justify-content-center hover-card">
-            <!-- <img width="100" height="100" src="https://img.icons8.com/bubbles/100/megaphone.png" alt="megaphone" /> -->
-            <img width="100" height="100" src="https://img.icons8.com/bubbles/100/bank.png" alt="bank" />
-            <h4>Comptabilité</h4>
-            <CountUp :end-val="totalCompta" :duration="2" :options="{ decimalPlaces: 2, suffix: ' €' }"
-              class="h4 mb-0 fs-1" />
+      <!-- 📦 Comptabilité -->
+      <div class="col-12 md:col flex">
+        <router-link :to="{ name: 'admin-compta' }" class="w-full no-underline">
+          <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
+            <div class="kpi-icon-wrapper mb-3 p-3 border-round-circle flex align-items-center justify-content-center">
+              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/bank.png" alt="Comptabilité" class="kpi-img" />
+            </div>
+            <span class="text-light font-semibold text-lg uppercase tracking-wider mb-2">Comptabilité</span>
+            <CountUp :end-val="totalCompta" :duration="2" :options="{ decimalPlaces: 2, suffix: ' €' }" class="text-4xl font-bold text-warning m-0" />
           </div>
         </router-link>
       </div>
+
     </div>
 
     <!-- ════════════ 📊 SECTION GRAPHIQUE ════════════ -->
-    <div v-if="loading" class="text-info mt-5">Chargement du graphique...</div>
 
-    <!-- 🔹 TOTAL INSCRIPTIONS -->
-    <div class="mb-4">
-      <h3 class="display-6 text-warning">Total des inscrits toutes disciplines : {{ totalInscriptions }}</h3>
+    <!-- Indicateur de Chargement Global -->
+    <div v-if="loading" class="flex flex-column align-items-center justify-content-center py-8">
+      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+      <span class="text-500 mt-3 font-medium">Chargement des données analytiques...</span>
     </div>
 
-    <!-- 🔹 Graphique -->
-    <div v-if="loading" class="text-info mt-5">Chargement du graphique...</div>
-    <div v-else class="row justify-content-center">
-      <div class="col-md-12">
-        <div class="card bg-secondary text-white shadow-lg border-0 rounded-3 p-4">
-          <h4 class="card-title text-start mb-3">Évolution des Inscriptions</h4>
-          <div style="height: 400px; width: 100%;">
-            <LineChart :chart-data="inscriptionsData" :options="chartOptions" />
+    <div v-else class="max-w-7xl mx-auto flex flex-column gap-5">
+
+      <!-- 🔹 Synthèse Saison -->
+      <div class="chart-box p-4 border-round-xl border-1">
+        <div class="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom-1 border-white-alpha-10">
+          <div>
+            <h3 class="text-2xl font-bold text-white m-0 mb-1 flex align-items-center gap-2">
+              <i class="pi pi-chart-line text-warning"></i> Évolution des Inscriptions
+            </h3>
+            <p class="text-400 text-sm m-0">Inscriptions enregistrées au cours de la saison sportive actuelle</p>
           </div>
+          <Tag severity="warning" class="px-3 py-2 text-base font-bold">
+            Total : {{ totalInscriptions }} inscrits
+          </Tag>
         </div>
-        <!-- 📊 STATISTIQUES PAR SAISON -->
-        <div class="mb-4">
-          <h3 class="display-6 text-warning mt-5">Total des inscrits toutes disciplines pour les années précédentes
-          </h3>
-        </div>
-        <div class="row justify-content-center mt-5">
-          <div class="col-md-12">
-            <SaisonStatisticsChart />
-          </div>
+
+        <div class="w-full" style="height: 420px;">
+          <LineChart :chart-data="inscriptionsData" :options="chartOptions" />
         </div>
       </div>
+
+      <!-- 📊 STATISTIQUES PAR SAISON (Années précédentes) -->
+      <div class="chart-box p-4 border-round-xl border-1">
+        <div class="mb-4 pb-3 border-bottom-1 border-white-alpha-10">
+          <h3 class="text-2xl font-bold text-white m-0 mb-1 flex align-items-center gap-2">
+            <i class="pi pi-history text-warning"></i> Historique des Inscriptions
+          </h3>
+          <p class="text-400 text-sm m-0">Comparatif des effectifs totaux par disciplines sur les saisons précédentes</p>
+        </div>
+        <SaisonStatisticsChart />
+      </div>
+
     </div>
+
   </div>
 </template>
 
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!-- 💅 STYLE -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
 <style scoped>
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-
 /* Bannière d'en-tête */
 .header-banner {
   background: linear-gradient(135deg, #1e2530 0%, #2b3035 100%);
@@ -524,34 +331,33 @@ a {
   letter-spacing: 0.08em;
 }
 
-.container-fluid.bg-dark {
-  background-color: #121417 !important;
+/* Cartes KPI */
+.kpi-card {
+  background: #2a2e35;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-.card {
-  background-color: #343a40 !important;
-  border-radius: 1rem;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+.kpi-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 193, 7, 0.4);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  background: #323740;
 }
 
-.hover-card {
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  background-color: #343a40 !important;
-}
 
-.hover-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
-  background-color: #495057 !important;
-}
-
-.hover-card img {
+.kpi-img {
   transition: transform 0.3s ease;
 }
 
-.hover-card:hover img {
+.kpi-card:hover .kpi-img {
   transform: scale(1.1);
+}
+
+/* Boîtes de graphiques */
+.chart-box {
+  background: #2a2e35;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 </style>

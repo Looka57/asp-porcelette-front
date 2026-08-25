@@ -18,6 +18,20 @@ const errorMessage = ref(null)
 const API_PATH_DISCIPLINE = '/Discipline'
 
 // ===============================
+// 🔹 COULEURS DES DISCIPLINES
+// ===============================
+const disciplineColors = {
+  Judo: '#FF6384',
+  Aïkido: '#3B82F6',
+  Jujitsu: '#efd844ff',
+  'Judo Détente': '#10B981',
+}
+
+function getDisciplineColor(nom) {
+  return disciplineColors[nom] || '#FFC107' // Jaune par défaut
+}
+
+// ===============================
 // 🔹 FONCTIONS
 // ===============================
 async function fetchDisciplines() {
@@ -37,10 +51,10 @@ async function fetchDisciplines() {
 // 🔹 ICONES PAR DÉFAUT
 // ===============================
 const disciplineIcons = {
-  1: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png', // Judo
-  2: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Aïkido
-  3: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-jiu-jitsu-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Jujitsu
-  4: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-judo-martial-arts-flaticons-lineal-color-flat-icons-3.png', // Judo détente
+  1: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png',
+  2: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png',
+  3: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-jiu-jitsu-martial-arts-flaticons-lineal-color-flat-icons-3.png',
+  4: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-judo-martial-arts-flaticons-lineal-color-flat-icons-3.png',
 }
 
 function getIconUrl(disciplineId) {
@@ -55,83 +69,98 @@ onMounted(fetchDisciplines)
 </script>
 
 <template>
-  <div class="container-fluid py-4">
+  <div class="py-5 px-3 md:px-6 surface-ground min-vh-100 text-white">
+
+    <!-- En-tête -->
+    <div class="text-center mb-6">
+      <h1 class="text-4xl font-bold text-warning mb-2 flex align-items-center justify-content-center gap-3">
+        <i class="pi pi-shield text-3xl"></i> Nos Disciplines
+      </h1>
+      <p class="text-400 text-lg m-0">Découvrez l'ensemble des arts martiaux enseignés au club.</p>
+    </div>
 
     <!-- 🔄 Chargement -->
-    <div v-if="isLoading" class="text-center text-light p-4">
-      <p>Chargement des disciplines...</p>
+    <div v-if="isLoading" class="flex flex-column align-items-center justify-content-center py-8">
+      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+      <span class="text-500 mt-3 font-medium">Chargement des disciplines...</span>
     </div>
 
     <!-- ❌ Erreur -->
-    <div v-else-if="errorMessage" class="text-center text-danger p-4">
-      <p>{{ errorMessage }}</p>
-    </div>
+    <Message v-else-if="errorMessage" severity="error" :closable="false" class="max-w-md mx-auto mb-5">
+      {{ errorMessage }}
+    </Message>
 
     <!-- ✅ Liste des disciplines -->
-    <div v-else class="discipline-grid ">
+    <div v-else class="max-w-7xl mx-auto grid grid-nogutter gap-4 justify-content-center">
       <div
         v-for="discipline in disciplines"
         :key="discipline.disciplineId"
-        class="discipline-card text-white p-4 rounded d-flex flex-column align-items-center justify-content-center"
+        class="col-12 sm:col-6 lg:col-4 xl:col-3 flex"
       >
-        <h3>{{ discipline.nom }}</h3>
-        <img
-          width="64"
-          height="64"
-          :src="getIconUrl(discipline.disciplineId)"
-          :alt="`Icône ${discipline.nom}`"
-        />
-        <p class="mt-2 text-justify ">
-          {{ discipline.description || 'Aucune description disponible.' }}
-        </p>
+        <div
+          class="discipline-card w-full p-4 border-round-xl border-1 flex flex-column justify-content-between text-center"
+          :style="{ '--card-theme-color': getDisciplineColor(discipline.nom) }"
+        >
+
+          <div class="flex flex-column align-items-center">
+            <!-- Icone avec fond à la couleur de la discipline -->
+            <div
+              class="icon-wrapper p-3 border-round-circle mb-3 flex align-items-center justify-content-center"
+
+            >
+              <img
+                width="64"
+                height="64"
+                :src="getIconUrl(discipline.disciplineId)"
+                :alt="`Icône ${discipline.nom}`"
+                class="discipline-icon"
+              />
+            </div>
+
+            <!-- Titre coloré dynamiquement -->
+            <h3
+              class="text-2xl font-bold m-0 mb-2"
+              :style="{ color: getDisciplineColor(discipline.nom) }"
+            >
+              {{ discipline.nom }}
+            </h3>
+
+            <!-- Description -->
+            <p class="text-300 text-sm line-height-3 m-0">
+              {{ discipline.description || 'Aucune description disponible.' }}
+            </p>
+          </div>
+
+          <!-- Actions d'administration -->
+          <!-- <div class="flex justify-content-center gap-2 mt-4 pt-3 border-top-1 border-white-alpha-10">
+            <Button icon="pi pi-pencil" class="p-button-text p-button-warning p-button-sm" v-tooltip.top="'Modifier'" />
+            <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" v-tooltip.top="'Supprimer'" />
+          </div> -->
+
+        </div>
       </div>
     </div>
-
-    <!-- 🔘 Boutons CRUD -->
-    <!-- <div class="boutonCrud m-5 d-flex justify-content-around">
-      <div class="crud">
-        <button class="btn btn-outline-warning">
-          <i class="pi pi-plus-circle me-2"></i> Ajouter
-        </button>
-      </div>
-      <div class="crud">
-        <button class="btn btn-outline-info">
-          <i class="pi pi-file-edit me-2"></i> Modifier
-        </button>
-      </div>
-      <div class="crud">
-        <button class="btn btn-outline-danger">
-          <i class="pi pi-trash me-2"></i> Supprimer
-        </button>
-      </div>
-    </div> -->
 
   </div>
 </template>
 
 <style scoped>
-/* ======================================================
-🎨 STYLE DE LA SECTION DES DISCIPLINES
-===================================================== */
-
-.discipline-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  justify-items: center;
-  align-items: stretch;
-}
-
 .discipline-card {
-  background-color: #343a40;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  width: 100%;
-  text-align: center;
+  background: #2a2e35;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .discipline-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-5px);
+  border-color: var(--card-theme-color);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+
+
+.discipline-icon {
+  object-fit: contain;
 }
 </style>

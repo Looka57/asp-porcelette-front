@@ -189,7 +189,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="card bg-secondary text-white shadow-lg border-0 rounded-3 p-4">
+  <div class="card bg-dark text-white shadow-lg border-0 rounded-3 p-4">
 
     <!-- ========================================================= -->
     <!-- TITRE -->

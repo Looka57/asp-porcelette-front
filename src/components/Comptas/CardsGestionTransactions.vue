@@ -1,24 +1,20 @@
 <script setup>
-
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/axios';
-import { LineChart, BarChart } from 'vue-chart-3'
-import { Chart, registerables } from 'chart.js'
-// Import dynamique des dépenses générales (mensuelles)
-import { useDepensesGeneralesChart } from '@/composables/graphDepensesGenerales'
-// 💥 MISE À JOUR : Import dynamique des dépenses par discipline
-import { useDepensesDisciplinesChart } from '@/composables/useDepensesDisciplines'
+import { LineChart, BarChart } from 'vue-chart-3';
+import { Chart, registerables } from 'chart.js';
 
-Chart.register(...registerables)
+import { useDepensesGeneralesChart } from '@/composables/graphDepensesGenerales';
+import { useDepensesDisciplinesChart } from '@/composables/useDepensesDisciplines';
+
+Chart.register(...registerables);
 
 // ===============================
 // 🔹 ROUTE & ID DU COMPTE
 // ===============================
 const route = useRoute();
-// Récupère l'ID de l'URL et le convertit en nombre
 const currentCompteId = computed(() => parseInt(route.params.compteId));
-
 
 // ===============================
 // 🔹 ÉTATS
@@ -27,241 +23,405 @@ const comptes = ref([]);
 const transactions = ref([]);
 const isLoading = ref(false);
 const errorMessage = ref(null);
-const loadingChart = ref(true); // Utilisé pour masquer les graphiques pendant le chargement initial
+const loadingChart = ref(true);
 
 const API_PATCH = '/Compte';
 const API_TRANSACTIONS = '/Transaction';
 
 async function fetchCompte() {
-    try {
-        isLoading.value = true;
-        const response = await api.get(API_PATCH)
-        comptes.value = response.data;
-    } catch (error) {
-        console.error('❌ Erreur lors du chargement des comptes :', error);
-        errorMessage.value = "Erreur lors du chargement des comptes.";
-    } finally {
-        isLoading.value = false;
-    }
+  try {
+    isLoading.value = true;
+    const response = await api.get(API_PATCH);
+    comptes.value = response.data;
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement des comptes :', error);
+    errorMessage.value = "Erreur lors du chargement des comptes.";
+  } finally {
+    isLoading.value = false;
+  }
 }
+
 async function fetchTransactions() {
-    try {
-        isLoading.value = true;
-        // Récupère toutes les transactions pour l'instant
-        const response = await api.get(API_TRANSACTIONS);
-        transactions.value = response.data;
-    } catch (error) {
-        console.error(error);
-    } finally {
-        isLoading.value = false;
-    }
+  try {
+    isLoading.value = true;
+    const response = await api.get(API_TRANSACTIONS);
+    transactions.value = response.data;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isLoading.value = false;
+  }
 }
 
 // ===============================
 // 🔹 DONNÉES FILTRÉES & CALCULÉES
 // ===============================
-// Le Compte actuellement affiché (Compte Courant ou Épargne)
 const currentCompte = computed(() => {
-    return comptes.value.find(c => c.compteId === currentCompteId.value);
+  return comptes.value.find(c => c.compteId === currentCompteId.value);
 });
 
-// Les Transactions appartenant au Compte sélectionné
 const filteredTransactions = computed(() => {
-    return transactions.value.filter(t => t.compte?.compteId === currentCompteId.value);
+  return transactions.value.filter(t => t.compte?.compteId === currentCompteId.value);
 });
 
-
-// 🔹 Année en cours (année de la transaction la plus récente du compte sélectionné)
 const currentYear = computed(() => {
-    const currentAccountTransactions = transactions.value.filter(t => t.compte?.compteId === currentCompteId.value);
-
-    if (currentAccountTransactions.length === 0) {
-        return new Date().getFullYear(); // Si pas de transactions, prend l'année actuelle
-    }
-
-    // Trouver la date la plus récente
-    const latestDate = currentAccountTransactions.reduce((latest, t) => {
-        const transactionDate = new Date(t.dateTransaction);
-        return transactionDate > latest ? transactionDate : latest;
-    }, new Date(0));
-
-    // Retourner l'année
-    return latestDate.getFullYear();
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  return month >= 8 ? year : year - 1;
 });
 
-
-// ✅ Calcul du total des dépenses pour l'année en cours
 const totalDepensesAnnuelle = computed(() => {
-    const annualTransactions = filteredTransactions.value.filter(t =>
-        new Date(t.dateTransaction).getFullYear() === currentYear.value
-    );
+  const annualTransactions = filteredTransactions.value.filter(t =>
+    new Date(t.dateTransaction).getFullYear() === currentYear.value
+  );
 
-    return annualTransactions
-        .filter(t => t.montant < 0) // seulement les dépenses
-        .reduce((total, t) => total + Math.abs(t.montant), 0)
-        .toLocaleString('fr-FR', { minimumFractionDigits: 2 });
+  return annualTransactions
+    .filter(t => t.montant < 0)
+    .reduce((total, t) => total + Math.abs(t.montant), 0)
+    .toLocaleString('fr-FR', { minimumFractionDigits: 2 });
 });
-
-
-// ===========================================
-// 💥 MISE À JOUR : Utilisation des Composables
-// ===========================================
-
-// 1. Dépenses Mensuelles
-const { depensesData, chartOptions: chartOptionsGenerales } =
-    useDepensesGeneralesChart(filteredTransactions, currentYear);
-
-// 2. Dépenses par Discipline (Maintenant dynamique)
-const { depensesDisciplinesData, chartOptions: chartOptionsDisciplines } =
-    useDepensesDisciplinesChart(filteredTransactions, currentYear);
 
 // ===============================
-// 🔹 ICONES PAR DÉFAUT
+// 🔹 COMPOSABLES CHARTS
+// ===============================
+const { depensesData, chartOptions: chartOptionsGenerales } =
+  useDepensesGeneralesChart(filteredTransactions, currentYear);
+
+const { depensesDisciplinesData, chartOptions: chartOptionsDisciplines } =
+  useDepensesDisciplinesChart(filteredTransactions, currentYear);
+
+// ===============================
+// 🔹 ICONS DYNAMIQUES
 // ===============================
 const comptaIcons = {
-    1: 'https://img.icons8.com/bubbles/100/money.png', // Compte courant
-    2: 'https://img.icons8.com/bubbles/100/stack-of-money.png', // Compte épargne
+  1: 'https://img.icons8.com/bubbles/100/money.png',
+  2: 'https://img.icons8.com/bubbles/100/stack-of-money.png',
 };
+
 function getIconUrl(compteId) {
-    return comptaIcons[compteId] || 'https://img.icons8.com/color/96/money.png';
+  return comptaIcons[compteId] || 'https://img.icons8.com/color/96/money.png';
 }
 
-// 💡 Icône statique pour les dépenses cumulées
 const depensesIconUrl = 'https://img.icons8.com/bubbles/100/cash-in-hand.png';
-
 
 // ===============================
 // 🔹 MONTAGE
 // ===============================
 onMounted(async () => {
-    await fetchCompte();
-    await fetchTransactions();
-    // Afficher les graphiques seulement après le chargement des données
-    setTimeout(() => loadingChart.value = false, 500);
+  await fetchCompte();
+  await fetchTransactions();
+  setTimeout(() => loadingChart.value = false, 500);
 });
 </script>
 
 <template>
-    <div class="container-fluid py-4">
-
-        <!-- Affichage conditionnel basé sur le compte actuel -->
-        <div v-if="!currentCompte" class="text-center text-danger p-4">
-            <p>Compte non trouvé ou en cours de chargement...</p>
-        </div>
-        <div v-else>
-            <!-- ══════ Cartes Hautes ══════ -->
-            <div class="gestionTransaction-grid">
-
-                <div class="gestionTransaction-card rounded">
-                    <h4 class="fs-2">Solde Actuel</h4>
-                    <!-- Icône dynamique (pour Solde Actuel) -->
-                    <img :src="getIconUrl(currentCompte.compteId)" :alt="`Icône ${currentCompte.nom}`" width="100"
-                        height="100" class="mb-3" />
-                    <div>
-                        <p class="fs-3 m-0">{{ currentCompte.nom }}</p>
-                        <p class="fs-3 fw-bold">{{ currentCompte.solde }} €</p>
-                        <button class="btn btn-outline-light"
-                            @click="$router.push(`/admin/comptes/${currentCompte.compteId}`)">Voir
-                            détails</button>
-                    </div>
-                </div>
-
-                <div class="gestionTransaction-card d-flex flex-column justify-content-center align-items-center rounded">
-                    <!-- Titre reflétant le calcul annuel -->
-                    <h4 class="fs-2">Dépenses Cumulées Annuelles: {{ currentYear }}</h4>
-                    <!-- Icône statique (pour Dépenses Cumulées) -->
-                    <img width="100" height="100" :src="depensesIconUrl" alt="Icône Dépenses" class="mb-3" />
-                    <div>
-                        <p class="fs-3 m-0">Montant Total des Dépenses:</p>
-                        <!-- Utilisation de la computed property -->
-                        <p class="fs-3 fw-bold">{{ totalDepensesAnnuelle }} €</p>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- ══════ Graphiques ══════ -->
-            <div class="gestionTransactionGraphs" v-if="!loadingChart">
-                <div class="graphs-container">
-                    <div class="graph-item">
-                        <!-- Utilisation des données et options du composable de dépenses générales -->
-                        <h4>Dépenses Mensuelles  Année: {{ currentYear }}</h4>
-                        <LineChart :chartData="depensesData" :options="chartOptionsGenerales" />
-                    </div>
-
-                    <div class="graph-item">
-                        <!-- Utilisation des données et options du composable de dépenses par discipline -->
-                        <h4>Dépenses par Discipline Année: {{ currentYear }}</h4>
-                        <BarChart :chartData="depensesDisciplinesData" :options="chartOptionsDisciplines" />
-                    </div>
-                </div>
-            </div>
-            <div v-else class="text-center p-5 text-white">
-                <p>Chargement des données de graphique...</p>
-                <!-- Vous pouvez ajouter un spinner ici si vous en avez un (par exemple avec Bootstrap) -->
-            </div>
-        </div>
+  <div class="dashboard-container">
+    <!-- State: Compte non trouvé ou Chargement -->
+    <div v-if="!currentCompte && isLoading" class="state-card loading-state">
+      <div class="spinner"></div>
+      <span>Chargement des informations du compte...</span>
     </div>
+
+    <div v-else-if="!currentCompte" class="state-card error-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p>Compte introuvable ou inaccessible.</p>
+    </div>
+
+    <div v-else class="dashboard-content">
+      <!-- ══════ Cartes Hautes ══════ -->
+      <section class="summary-grid">
+        <!-- Carte Solde -->
+        <div class="stat-card">
+          <div class="card-icon-wrapper">
+            <img :src="getIconUrl(currentCompte.compteId)" :alt="`Icône ${currentCompte.nom}`" width="72" height="72" />
+          </div>
+          <div class="card-info">
+            <span class="card-subtitle">Solde Actuel · {{ currentCompte.nom }}</span>
+            <div class="card-value font-highlight">{{ currentCompte.solde }} €</div>
+          </div>
+          <button class="btn-card-action" @click="$router.push(`/admin/comptes/${currentCompte.compteId}`)">
+            <span>Voir le détail</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Carte Dépenses -->
+        <div class="stat-card">
+          <div class="card-icon-wrapper">
+            <img :src="depensesIconUrl" alt="Icône Dépenses" width="72" height="72" />
+          </div>
+          <div class="card-info">
+            <span class="card-subtitle">Dépenses Cumulées (Saison {{ currentYear }})</span>
+            <div class="card-value text-danger font-highlight">- {{ totalDepensesAnnuelle }} €</div>
+          </div>
+          <div class="card-badge">
+            Saison en cours
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════ Graphiques ══════ -->
+      <section class="charts-section">
+        <div v-if="!loadingChart" class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Dépenses Mensuelles</h3>
+              <span class="chart-tag">Saison {{ currentYear }}</span>
+            </div>
+            <div class="chart-wrapper">
+              <LineChart :chartData="depensesData" :options="chartOptionsGenerales" />
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Dépenses par Discipline</h3>
+              <span class="chart-tag">Saison {{ currentYear }}</span>
+            </div>
+            <div class="chart-wrapper">
+              <BarChart :chartData="depensesDisciplinesData" :options="chartOptionsDisciplines" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Loader pour graphiques -->
+        <div v-else class="chart-loading-card">
+          <div class="spinner"></div>
+          <span>Génération des graphiques financiers...</span>
+        </div>
+      </section>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-/* ══════════════════════════════ */
-/* Grid pour les cartes hautes */
-/* ══════════════════════════════ */
-.gestionTransaction-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2rem;
-    justify-items: center;
+/* ===============================
+   🔹 LAYOUT PRINCIPAL
+   =============================== */
+.dashboard-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-/* Cartes statistiques */
-.gestionTransaction-card {
-    background-color: #343a40;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    width: 100%;
-    text-align: center;
-    padding: 1.5rem;
-    color: #fff;
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.gestionTransaction-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+/* ===============================
+   🔹 CARTES DE SYNTHÈSE (GRID)
+   =============================== */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
 }
 
-/* ══════════════════════════════ */
-/* Grid responsive pour les graphiques */
-/* ══════════════════════════════ */
-.graphs-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 2rem;
-    align-items: stretch;
+.stat-card {
+  background: #1e2126;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.graph-item {
-    background-color: #343a40;
-    border-radius: 1rem;
-    padding: 1rem;
-    height: 500px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 187, 51, 0.3);
 }
 
-/* Titres graphiques */
-.graph-item h4 {
-    color: #fff;
-    text-align: center;
-    margin-bottom: 1rem;
+.card-icon-wrapper {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
 }
 
-/* ══════════════════════════════ */
-/* Mobile */
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.card-subtitle {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #8a919e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card-value {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.font-highlight {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+.text-danger {
+  color: #ff4757;
+}
+
+.card-badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  color: #a0a6b1;
+  padding: 0.35rem 0.75rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-card-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f1f3f5;
+  padding: 0.65rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-card-action:hover {
+  background: #ffbb33;
+  color: #121417;
+  border-color: #ffbb33;
+}
+
+/* ===============================
+   🔹 SECTION GRAPHIQUES
+   =============================== */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: 1.5rem;
+}
+
+.chart-card {
+  background: #1e2126;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.chart-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.chart-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffbb33;
+  background: rgba(255, 187, 51, 0.1);
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(255, 187, 51, 0.2);
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 340px;
+  width: 100%;
+}
+
+/* ===============================
+   🔹 ÉTATS DE CHARGEMENT & ERREUR
+   =============================== */
+.state-card, .chart-loading-card {
+  background: #1e2126;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #8a919e;
+  font-size: 0.95rem;
+}
+
+.error-state {
+  color: #ff4757;
+  border-color: rgba(255, 71, 87, 0.2);
+  background: rgba(255, 71, 87, 0.05);
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255, 187, 51, 0.15);
+  border-top-color: #ffbb33;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .graph-item {
-        height: 350px;
-    }
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-wrapper {
+    height: 260px;
+  }
 }
 </style>

@@ -1,42 +1,62 @@
 <script setup>
+// ===============================
+// 🔹 IMPORTS
+// ===============================
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
 
+// ===============================
+// 🔹 ÉTATS
+// ===============================
 const disciplines = ref([])
 const tarifs = ref([])
 const isLoading = ref(false)
 const errorMessage = ref(null)
 
+// ===============================
+// 🔹 CONSTANTES D’API
+// ===============================
 const API_PATH_DISCIPLINE = '/Discipline'
 const API_PATH_TARIF = '/Tarif'
 
-async function fetchDisciplines() {
+// ===============================
+// 🔹 COULEURS DES DISCIPLINES
+// ===============================
+const disciplineColors = {
+  Judo: '#FF6384',
+  Aïkido: '#3B82F6',
+  Jujitsu: '#efd844ff',
+  'Judo Détente': '#10B981',
+}
+
+function getDisciplineColor(nom) {
+  return disciplineColors[nom] || '#FFC107'
+}
+
+// ===============================
+// 🔹 CHARGEMENT DES DONNÉES
+// ===============================
+async function loadData() {
+  isLoading.value = true
+  errorMessage.value = null
   try {
-    isLoading.value = true
-    const res = await api.get(API_PATH_DISCIPLINE)
-    disciplines.value = res.data
+    const [resDisciplines, resTarifs] = await Promise.all([
+      api.get(API_PATH_DISCIPLINE),
+      api.get(API_PATH_TARIF)
+    ])
+    disciplines.value = resDisciplines.data
+    tarifs.value = resTarifs.data
   } catch (err) {
-    console.error(err)
-    errorMessage.value = "Erreur lors du chargement des disciplines."
+    console.error('❌ Erreur lors du chargement :', err)
+    errorMessage.value = "Erreur lors du chargement des données de tarification."
   } finally {
     isLoading.value = false
   }
 }
 
-async function fetchTarifs() {
-  try {
-    isLoading.value = true
-    const res = await api.get(API_PATH_TARIF)
-    tarifs.value = res.data
-  } catch (err) {
-    console.error(err)
-    errorMessage.value = "Erreur lors du chargement des tarifs."
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// Fonction pour regrouper les tarifs par période pour une discipline
+// ===============================
+// 🔹 REGROUPEMENT DES TARIFS
+// ===============================
 function groupTarifsByPeriod(disciplineId) {
   const tarifsDiscipline = tarifs.value.filter(t => t.disciplineId === disciplineId)
   const grouped = {}
@@ -49,6 +69,9 @@ function groupTarifsByPeriod(disciplineId) {
   return grouped
 }
 
+// ===============================
+// 🔹 ICONES PAR DÉFAUT
+// ===============================
 const disciplineIcons = {
   1: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png',
   2: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png',
@@ -61,75 +84,126 @@ function getIconUrl(disciplineId) {
   return disciplineIcons[disciplineId] || defaultIcon
 }
 
-onMounted(() => {
-  fetchDisciplines()
-  fetchTarifs()
-})
+onMounted(loadData)
 </script>
 
 <template>
-  <div class="container-fluid py-4">
-    <div v-if="isLoading" class="text-center text-light p-4">Chargement...</div>
-    <div v-else-if="errorMessage" class="text-center text-danger p-4">{{ errorMessage }}</div>
+  <div class="py-5 px-3 md:px-6 surface-ground min-vh-100 text-white">
 
-    <div v-else class="discipline-grid">
-      <div v-for="discipline in disciplines" :key="discipline.disciplineId" class="discipline-card p-4 rounded">
-        <div class="discipline-header d-flex justify-content-center align-items-center mb-3">
-          <img :src="getIconUrl(discipline.disciplineId)" width="48" height="48" class="me-3" />
-          <h3 class="mb-0 text-warning">{{ discipline.nom }}</h3>
-        </div>
+    <!-- En-tête -->
+    <div class="text-center mb-6">
+      <h1 class="text-4xl font-bold text-warning mb-2 flex align-items-center justify-content-center gap-3">
+        <i class="pi pi-tags text-3xl"></i> Grille Tarifaire
+      </h1>
+      <p class="text-400 text-lg m-0">Retrouvez les cotisations et formules d'abonnement par discipline.</p>
+    </div>
 
-        <!-- Tarifs regroupés par période -->
-        <div class="tarifs-container d-flex flex-column gap-2">
-          <div v-for="(tarifsPerPeriod, period) in groupTarifsByPeriod(discipline.disciplineId)" :key="period" class="tarif-card p-3 rounded">
-            <h5 class="period-title mb-2 text-light">{{ period }}</h5>
-            <div class="d-flex flex-wrap gap-2">
-              <div v-for="tarif in tarifsPerPeriod" :key="tarif.nom" class="tarif-mini p-2 rounded bg-dark ">
-                {{ tarif.nom }} : {{ tarif.montant }} €
+    <!-- 🔄 Chargement -->
+    <div v-if="isLoading" class="flex flex-column align-items-center justify-content-center py-8">
+      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+      <span class="text-500 mt-3 font-medium">Chargement des tarifs...</span>
+    </div>
+
+    <!-- ❌ Erreur -->
+    <Message v-else-if="errorMessage" severity="error" :closable="false" class="max-w-md mx-auto mb-5">
+      {{ errorMessage }}
+    </Message>
+
+    <!-- ✅ Liste des disciplines et leurs tarifs -->
+    <div v-else class="max-w-7xl mx-auto grid grid-nogutter gap-4 justify-content-center">
+      <div
+        v-for="discipline in disciplines"
+        :key="discipline.disciplineId"
+        class="col-12 sm:col-6 lg:col-4 flex"
+      >
+        <div
+          class="discipline-card w-full p-4 border-round-xl border-1 flex flex-column justify-content-between"
+          :style="{ '--card-theme-color': getDisciplineColor(discipline.nom) }"
+        >
+          <div>
+            <!-- Header carte discipline -->
+            <div class="flex align-items-center gap-3 mb-4 pb-3 border-bottom-1 border-white-alpha-10">
+              <div
+                class="icon-wrapper p-2 border-round-circle flex align-items-center justify-content-center flex-shrink-0"
+              >
+                <img :src="getIconUrl(discipline.disciplineId)" :alt="discipline.nom" width="40" height="40" />
+              </div>
+              <h3
+                class="text-2xl font-bold m-0"
+                :style="{ color: getDisciplineColor(discipline.nom) }"
+              >
+                {{ discipline.nom }}
+              </h3>
+            </div>
+
+            <!-- Tarifs regroupés par période -->
+            <div
+              v-if="Object.keys(groupTarifsByPeriod(discipline.disciplineId)).length > 0"
+              class="flex flex-column gap-3"
+            >
+              <div
+                v-for="(tarifsPerPeriod, period) in groupTarifsByPeriod(discipline.disciplineId)"
+                :key="period"
+                class="period-box p-3 border-round-lg"
+              >
+                <div class="flex align-items-center gap-2 mb-2">
+                  <i class="pi pi-calendar text-xs text-400"></i>
+                  <span class="text-xs font-semibold text-400 uppercase tracking-wider">{{ period }}</span>
+                </div>
+
+                <div class="flex flex-column gap-2">
+                  <div
+                    v-for="tarif in tarifsPerPeriod"
+                    :key="tarif.nom"
+                    class="tarif-item p-2 border-round-md flex align-items-center justify-content-between"
+                  >
+                    <span class="text-sm text-200 font-medium">{{ tarif.nom }}</span>
+                    <Tag
+                      severity="warning"
+                      class="font-bold text-sm px-2 py-1"
+                      :style="{ backgroundColor: getDisciplineColor(discipline.nom), color: '#1e222a' }"
+                    >
+                      {{ tarif.montant }} €
+                    </Tag>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <p v-if="tarifs.filter(t => t.disciplineId === discipline.disciplineId).length === 0" class="text-muted mt-2">
-          Aucun tarif disponible
-        </p>
+            <!-- Aucun tarif disponible -->
+            <div v-else class="text-center py-4 text-500 italic">
+              <i class="pi pi-info-circle text-2xl mb-2 block"></i>
+              <span>Aucun tarif renseigné pour cette discipline.</span>
+            </div>
+          </div>
+
+          <!-- Actions d'administration -->
+          <div class="flex justify-content-end gap-2 mt-4 pt-3 border-top-1 border-white-alpha-10">
+            <Button icon="pi pi-plus" class="p-button-text p-button-warning p-button-sm" v-tooltip.top="'Ajouter un tarif'" />
+          </div>
+
+        </div>
       </div>
     </div>
+
   </div>
 </template>
 
 <style scoped>
-.discipline-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-}
-
 .discipline-card {
-  background-color: #2c2f33;
-  color: #fff;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-  width: 100%;
-  transition: transform 0.3s ease;
+  background: #2a2e35;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+
 }
 
-.discipline-card:hover {
-  transform: translateY(-5px);
+
+.period-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.discipline-header img {
-  border-radius: 50%;
-}
-
-.tarif-card {
-  background-color: rgba(255,255,255,0.05);
-}
-
-.tarif-mini {
-  min-width: 100px;
-  text-align: center;
-  font-weight: 600;
-  padding: 0.3rem 0.5rem;
+.tarif-item {
+  background: rgba(0, 0, 0, 0.2);
 }
 </style>
