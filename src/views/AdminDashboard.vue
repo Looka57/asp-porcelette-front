@@ -21,7 +21,6 @@ import SaisonStatisticsChart from '@/composables/SaisonStatisticsChart.vue';
 
 Chart.register(...registerables);
 
-
 /* ════════════════════════════════════════════════════════════════════════ */
 /* 🎯 UTILISATION DU COMPOSABLE */
 /* ════════════════════════════════════════════════════════════════════════ */
@@ -43,8 +42,6 @@ const totalCompta = ref(0);
 /* 🧠 LOGIQUE DU COMPOSANT */
 /* ════════════════════════════════════════════════════════════════════════ */
 
-/* 🎯 Mapping ID -> Nom */
-
 const DISCIPLINES_MAP = {
   1: 'Judo',
   2: 'Aïkido',
@@ -56,7 +53,6 @@ const DISCIPLINES_NAMES = Object.values(DISCIPLINES_MAP);
 
 
 /* 📅 Mois de la saison sportive : Septembre → Juin */
-
 const MONTHS = [
   'Sept',
   'Oct',
@@ -81,19 +77,15 @@ const processInscriptionsData = (allUsers) => {
   /* 📅 DÉTERMINATION DE LA SAISON ACTUELLE */
   /* ────────────────────────────────────────────────────────────────────── */
 
-  const today = new Date('2026-10-15');
+  const today = new Date();
 
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
 
   /*
-   * Saison sportive :
-   *
-   * Septembre 2026 → Juin 2027 = saison 2026-2027
-   *
+   * Saison sportive : Septembre 2026 → Juin 2027 = saison 2026-2027
    * Si on est entre septembre et décembre :
    *     saison = année actuelle
-   *
    * Si on est entre janvier et juin :
    *     saison = année précédente
    */
@@ -102,41 +94,26 @@ const processInscriptionsData = (allUsers) => {
     ? currentYear
     : currentYear - 1;
 
-
   /* ────────────────────────────────────────────────────────────────────── */
   /* 📍 MOIS ACTUEL DANS LA SAISON */
   /* ────────────────────────────────────────────────────────────────────── */
 
-  /*
-   * Septembre = 0
-   * Octobre   = 1
-   * Novembre  = 2
-   * Décembre  = 3
-   * Janvier   = 4
-   * ...
-   * Juin      = 9
-   */
-
   const currentMonthIndex = currentMonth >= 8
     ? currentMonth - 8
     : currentMonth + 4;
-
 
   /* ────────────────────────────────────────────────────────────────────── */
   /* 📦 INITIALISATION DES DONNÉES */
   /* ────────────────────────────────────────────────────────────────────── */
 
   const monthlyData = DISCIPLINES_NAMES.reduce((acc, disc) => {
-
     acc[disc] = new Array(MONTHS.length).fill(0);
-
     return acc;
 
-  }, {});
-
+  },
+    {});
 
   let usersComptes = 0;
-
 
   /* ══════════════════════════════════════════════════════════════════════ */
   /* 👥 PARCOURS DES ADHÉRENTS */
@@ -148,29 +125,11 @@ const processInscriptionsData = (allUsers) => {
     /* 1️⃣ Vérification de l'adhérent */
     /* ──────────────────────────────────────────────────────────────────── */
 
-    const isAdherent =
-      user.roles &&
-      user.roles.includes('Adherent');
+    const isAdherent = user.roles && user.roles.includes('Adherent');
+    const userDiscipline = DISCIPLINES_MAP[user.disciplineId];
+    const dateAdhesion = user.dateAdhesion;
 
-    const userDiscipline =
-      DISCIPLINES_MAP[user.disciplineId];
-
-    const dateAdhesion =
-      user.dateAdhesion;
-
-
-    /*
-     * On ignore :
-     * - les utilisateurs qui ne sont pas adhérents
-     * - les disciplines inconnues
-     * - les adhérents sans date d'adhésion
-     */
-
-    if (
-      !isAdherent ||
-      !userDiscipline ||
-      !dateAdhesion
-    ) {
+    if (!isAdherent || !userDiscipline || !dateAdhesion) {
       return;
     }
 
@@ -179,70 +138,38 @@ const processInscriptionsData = (allUsers) => {
     /* 2️⃣ Conversion de la date */
     /* ──────────────────────────────────────────────────────────────────── */
 
-    const inscriptionDate =
-      new Date(dateAdhesion);
-
+    const inscriptionDate = new Date(dateAdhesion);
 
     if (isNaN(inscriptionDate.getTime())) {
       return;
     }
 
-
     /* ══════════════════════════════════════════════════════════════════════ */
     /* 🚫 IGNORER LES ANCIENNES SAISONS */
     /* ══════════════════════════════════════════════════════════════════════ */
 
-    /*
-     * Exemple :
-     *
-     * Saison actuelle = 2026-2027
-     *
-     * Une inscription de 2025
-     * → ignorée
-     *
-     * Une inscription de septembre 2026
-     * → conservée
-     */
-
-    if (
-      inscriptionDate.getFullYear() < seasonStartYear
-    ) {
+    if (inscriptionDate.getFullYear() < seasonStartYear) {
       return;
     }
-
-
     /* ══════════════════════════════════════════════════════════════════════ */
     /* 📅 CALCUL DU MOIS DANS LA SAISON */
     /* ══════════════════════════════════════════════════════════════════════ */
 
-    const month =
-      inscriptionDate.getMonth();
-
+    const month = inscriptionDate.getMonth();
     let monthIndex;
-
-
     /* Septembre → Décembre */
 
     if (month >= 8) {
-
-      monthIndex =
-        month - 8;
-
+      monthIndex = month - 8;
     }
 
     /* Janvier → Juin */
 
     else if (month <= 5) {
-
-      monthIndex =
-        month + 4;
-
+      monthIndex = month + 4;
     }
-
     /* Juillet / Août */
-
     else {
-
       return;
 
     }
@@ -252,19 +179,7 @@ const processInscriptionsData = (allUsers) => {
     /* 🚫 NE PAS AFFICHER LES MOIS FUTURS */
     /* ══════════════════════════════════════════════════════════════════════ */
 
-    /*
-     * Exemple en octobre :
-     *
-     * Septembre → affiché
-     * Octobre   → affiché
-     * Novembre  → 0
-     * Décembre  → 0
-     * etc.
-     */
-
-    if (
-      monthIndex > currentMonthIndex
-    ) {
+    if (monthIndex > currentMonthIndex) {
       return;
     }
 
@@ -273,17 +188,11 @@ const processInscriptionsData = (allUsers) => {
     /* 3️⃣ Ajout de l'inscription */
     /* ──────────────────────────────────────────────────────────────────── */
 
-    if (
-      monthIndex >= 0 &&
-      monthIndex < MONTHS.length
-    ) {
+    if (monthIndex >= 0 && monthIndex < MONTHS.length) {
 
       monthlyData[userDiscipline][monthIndex]++;
-
       usersComptes++;
-
     }
-
   });
 
 
@@ -311,16 +220,11 @@ const processInscriptionsData = (allUsers) => {
     monthlyData
   );
 
-
   /* ══════════════════════════════════════════════════════════════════════ */
   /* 💾 ENVOI AU COMPOSABLE */
   /* ══════════════════════════════════════════════════════════════════════ */
-
-  rawInscriptionsData.value =
-    monthlyData;
-
+  rawInscriptionsData.value = monthlyData;
 };
-
 
 /* ════════════════════════════════════════════════════════════════════════ */
 /* 📡 RÉCUPÉRATION DES STATISTIQUES */
@@ -338,11 +242,9 @@ const fetchStats = async () => {
       await api.get('/User/admin/list');
 
     const allUsers = licenciesResponse.data || [];
-
-
     processInscriptionsData(allUsers);
 
-    const today = new Date('2026-10-15');
+    const today = new Date();
 
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
@@ -372,63 +274,58 @@ const fetchStats = async () => {
       59,
       999
     );
-console.table(
-  allUsers
-    .filter(user => {
-      const isAdherent = user.roles?.includes('Adherent');
-      const isActif = Number(user.statut) === 1;
+    console.table(
+      allUsers
+        .filter(user => {
+          const isAdherent = user.roles?.includes('Adherent');
+          const isActif = Number(user.statut) === 1;
 
-      if (!user.dateRenouvellement) return false;
+          if (!user.dateRenouvellement) return false;
 
-      const dateRenouvellement = new Date(user.dateRenouvellement);
+          const dateRenouvellement = new Date(user.dateRenouvellement);
 
-      if (isNaN(dateRenouvellement.getTime())) return false;
+          if (isNaN(dateRenouvellement.getTime())) return false;
 
-      const isDansLaSaison =
-        dateRenouvellement >= seasonStart &&
-        dateRenouvellement <= seasonEnd;
+          const isDansLaSaison =
+            dateRenouvellement >= seasonStart &&
+            dateRenouvellement <= seasonEnd;
 
-      return isAdherent && isActif && isDansLaSaison;
-    })
-    .map(user => ({
-      nom: user.nom,
-      prenom: user.prenom,
-      roles: user.roles,
-      statut: user.statut,
-      dateRenouvellement: user.dateRenouvellement
-    }))
-);
+          return isAdherent && isActif && isDansLaSaison;
+        })
+        .map(user => ({
+          nom: user.nom,
+          prenom: user.prenom,
+          roles: user.roles,
+          statut: user.statut,
+          dateRenouvellement: user.dateRenouvellement
+        }))
+    );
 
 
     totalLicencies.value = allUsers.filter(user => {
 
       // 1. Doit être adhérent
-      const isAdherent =
-        user.roles?.includes('Adherent');
+      const isAdherent = user.roles?.includes('Adherent');
 
-     // 2. Doit avoir une date de renouvellement
-  if (!user.dateRenouvellement) {
-    return false;
-  }
+      // 2. Doit avoir une date de renouvellement
+      if (!user.dateRenouvellement) {
+        return false;
+      }
 
-  const dateRenouvellement =
-    new Date(user.dateRenouvellement);
+      const dateRenouvellement = new Date(user.dateRenouvellement);
 
-  // Date invalide
-  if (isNaN(dateRenouvellement.getTime())) {
-    return false;
-  }
+      // Date invalide
+      if (isNaN(dateRenouvellement.getTime())) {
+        return false;
+      }
 
-  // 3. Le renouvellement doit être dans la saison actuelle
-  const isDansLaSaison =
-    dateRenouvellement >= seasonStart &&
-    dateRenouvellement <= seasonEnd;
+      // 3. Le renouvellement doit être dans la saison actuelle
+      const isDansLaSaison = dateRenouvellement >= seasonStart && dateRenouvellement <= seasonEnd;
 
-  return (
-    isAdherent &&
-    isDansLaSaison
-  );
-}).length;
+      return (
+        isAdherent && isDansLaSaison
+      );
+    }).length;
 
     console.log(
       '>>> SAISON =',
@@ -454,41 +351,26 @@ console.table(
     /* 2️⃣ ÉVÉNEMENTS */
     /* ──────────────────────────────────────────────────────────────────── */
 
-    const eventsResponse =
-      await api.get('/Evenement');
+    const eventsResponse = await api.get('/Evenement');
 
-    totalEvenements.value =
-      eventsResponse.data.length || 0;
+    totalEvenements.value = eventsResponse.data.length || 0;
 
 
     /* ──────────────────────────────────────────────────────────────────── */
     /* 3️⃣ COMPTABILITÉ */
     /* ──────────────────────────────────────────────────────────────────── */
 
-    const comptaReponse =
-      await api.get('/Compte');
+    const comptaReponse = await api.get('/Compte');
+    const comptes = comptaReponse.data || [];
 
-    const comptes =
-      comptaReponse.data || [];
+    const soldeTotal = comptes.reduce((sum, compte) => {
+      const soldeDuCompte = compte.solde || 0;
+      return sum + soldeDuCompte;
+    },
+      0
+    );
 
-
-    const soldeTotal =
-      comptes.reduce(
-        (sum, compte) => {
-
-          const soldeDuCompte =
-            compte.solde || 0;
-
-          return sum + soldeDuCompte;
-
-        },
-        0
-      );
-
-
-    totalCompta.value =
-      soldeTotal;
-
+    totalCompta.value = soldeTotal;
 
   } catch (err) {
 
@@ -498,9 +380,7 @@ console.table(
     );
 
     rawInscriptionsData.value = {};
-
   }
-
 };
 
 
@@ -509,22 +389,15 @@ console.table(
 /* ════════════════════════════════════════════════════════════════════════ */
 
 const loading = ref(true);
-
-
 onMounted(async () => {
-
   await fetchStats();
-
   setTimeout(() => {
-
     loading.value = false;
-
   }, 500);
 
 });
 
 </script>
-```
 
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
@@ -601,9 +474,6 @@ onMounted(async () => {
             <SaisonStatisticsChart />
           </div>
         </div>
-
-
-
       </div>
     </div>
   </div>
