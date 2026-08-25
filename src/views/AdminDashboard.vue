@@ -405,7 +405,29 @@ onMounted(async () => {
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <template>
   <div class="container-fluid text-center bg-dark text-white min-h-screen p-4">
-    <h1 class="m-3">Tableau de bord Admin</h1>
+    <!-- Header Admin Premium -->
+    <!-- Header Admin Premium -->
+    <div class="header-banner position-relative overflow-hidden p-4 p-md-5 mb-5 rounded-4 text-start shadow-lg">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="badge rounded-pill bg-danger bg-gradient px-3 py-2 text-uppercase tracking-wider fw-semibold">
+              Espace d'administration
+            </span>
+            <span class="badge rounded-pill bg-dark border border-secondary text-light px-3 py-2">
+              Gestion & suivi de l'association
+            </span>
+          </div>
+          <h1 class="display-3 fw-black text-white mb-2 position-relative d-inline-block">
+            Tableau de bord <span class="text-warning">Admin</span>
+          </h1>
+          <p class="text-white-50 fs-6 mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle text-warning"></i>
+            Vue d'ensemble de l'association, des inscrits et du suivi financier.
+          </p>
+        </div>
+      </div>
+    </div>
 
     <!-- ════════════ 🧾 CARTES DU HAUT ════════════ -->
     <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
@@ -454,7 +476,7 @@ onMounted(async () => {
 
     <!-- 🔹 TOTAL INSCRIPTIONS -->
     <div class="mb-4">
-      <h3 class="text-light">Total des inscrits toutes disciplines : {{ totalInscriptions }}</h3>
+      <h3 class="display-6 text-warning">Total des inscrits toutes disciplines : {{ totalInscriptions }}</h3>
     </div>
 
     <!-- 🔹 Graphique -->
@@ -468,7 +490,10 @@ onMounted(async () => {
           </div>
         </div>
         <!-- 📊 STATISTIQUES PAR SAISON -->
-
+        <div class="mb-4">
+          <h3 class="display-6 text-warning mt-5">Total des inscrits toutes disciplines pour les années précédentes
+          </h3>
+        </div>
         <div class="row justify-content-center mt-5">
           <div class="col-md-12">
             <SaisonStatisticsChart />
@@ -486,6 +511,21 @@ onMounted(async () => {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+
+/* Bannière d'en-tête */
+.header-banner {
+  background: linear-gradient(135deg, #1e2530 0%, #2b3035 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tracking-wider {
+  letter-spacing: 0.08em;
+}
+
+.container-fluid.bg-dark {
+  background-color: #121417 !important;
 }
 
 .card {
