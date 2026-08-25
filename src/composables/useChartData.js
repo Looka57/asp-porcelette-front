@@ -14,13 +14,10 @@ const cumulativeSum = (data) => {
   return data.map((value) => (sum += value))
 }
 
-// 🎯 Modification : Accepte la *Ref* contenant les données brutes en paramètre
 export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
   const labels = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin']
 
-  // 💡 Utilisez un computed pour calculer les datasets DYNAMIQUEMENT
   const inscriptionsData = computed(() => {
-    // L'accès à la ref est sécurisé ici :
     const rawData =
       rawInscriptionsDataRef && rawInscriptionsDataRef.value ? rawInscriptionsDataRef.value : {}
 
@@ -88,11 +85,17 @@ export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
   })
 
   // 🎯 OPTIONS pour les INSCRIPTIONS (nombres entiers)
+  // 🎯 OPTIONS pour les INSCRIPTIONS (nombres entiers)
   const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top' },
+      legend: {
+        position: 'top',
+        labels: {
+          color: '#ffffff', // Couleur du texte de la légende
+        },
+      },
       tooltip: {
         callbacks: {
           label: (context) => {
@@ -111,11 +114,16 @@ export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
     scales: {
       y: {
         beginAtZero: true,
+        grid: {
+          color: 'rgba(255, 255, 255, 0.1)', // (Optionnel) Couleur des lignes de grille
+        },
         title: {
           display: true,
           text: "Nombre d'Inscriptions Cumulées",
+          color: '#ffffff', // Couleur du titre de l'axe Y
         },
         ticks: {
+          color: '#ffffff', // Couleur des graduations (textes) de l'axe Y
           stepSize: 1, // Force les pas à être des entiers
           callback: (value) => {
             if (Number.isInteger(value)) {
@@ -125,9 +133,16 @@ export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
         },
       },
       x: {
+        grid: {
+          color: 'rgba(255, 255, 255, 0.1)', // (Optionnel) Couleur des lignes de grille
+        },
         title: {
           display: true,
           text: "Mois de l'Année en cours",
+          color: '#ffffff', // Couleur du titre de l'axe X
+        },
+        ticks: {
+          color: '#ffffff', // Couleur des graduations (textes) de l'axe X
         },
       },
     },

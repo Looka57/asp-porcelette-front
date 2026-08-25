@@ -44,12 +44,17 @@ async function fetchTransactions() {
 
 // 🔹 Calcul de l'année de référence
 const currentYearGlobal = computed(() => {
-  if (transactions.value.length === 0) return new Date().getFullYear();
-  const latestDate = transactions.value.reduce((latest, t) => {
-    const d = new Date(t.dateTransaction);
-    return isNaN(d.getTime()) ? latest : (d > latest ? d : latest);
-  }, new Date(0));
-  return latestDate.getFullYear();
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0 = janvier, 8 = septembre
+
+  // De septembre à décembre → saison commencée cette année
+  // De janvier à août → saison commencée l'année précédente
+  return month >= 8 ? year : year - 1;
+});
+
+const currentSeasonLabel = computed(() => {
+  return `${currentYearGlobal.value}-${currentYearGlobal.value + 1}`;
 });
 
 // 🔹 Icônes
@@ -104,7 +109,7 @@ onMounted(async () => {
     <div class="row mt-5 g-4">
       <div class="col-lg-12">
         <div class="card bg-secondary text-white shadow-lg border-0 rounded-3 p-4 h-100">
-          <h4 class="card-title mb-3 text-center">Évolution des Flux Financiers: {{ currentYearGlobal }}</h4>
+          <h4 class="card-title mb-3 text-center">Évolution des Flux Financiers: {{ currentSeasonLabel }}</h4>
           <div class="chart-container">
             <LineChart :chartData="fluxComptaChart" :options="chartOptions" />
           </div>
@@ -112,7 +117,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <pre class="text-white mt-4">Année de référence : {{ currentYearGlobal }}</pre>
+    <pre class="text-white mt-4">Année de référence : {{ currentSeasonLabel }}</pre>
   </div>
 </div>
 </template>

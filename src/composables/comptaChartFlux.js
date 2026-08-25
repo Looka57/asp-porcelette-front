@@ -2,7 +2,7 @@ import { ref, watch } from 'vue';
 
 export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) {
   const fluxComptaChart = ref({
-    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'],
+    labels: ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
     datasets: []
   });
 
@@ -33,9 +33,13 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
     }
 
 
-    const months = [...Array(12).keys()];
-    const year = parseInt(currentYearRef.value, 10);
+    const months = [8, 9, 10, 11, 0, 1, 2, 3, 4, 5];
 
+
+    const seasonStartYear = parseInt(currentYearRef.value, 10);
+
+const seasonStart = new Date(seasonStartYear, 8, 1); // 1er septembre
+const seasonEnd = new Date(seasonStartYear + 1, 5, 30); // 30 juin
 
     fluxComptaChart.value.datasets = comptesRef.value.map(compte => {
       if (!compte?.compteId || !compte?.nom) {
@@ -112,7 +116,11 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
             montant: parseFloat(transaction.montant) || 0
           };
         })
-        .filter(t => t !== null && t.transactionYear === year)
+        .filter(t =>
+  t !== null &&
+  t.parsedDate >= seasonStart &&
+  t.parsedDate <= seasonEnd
+)
         .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
 
 
