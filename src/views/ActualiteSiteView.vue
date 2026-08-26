@@ -1,8 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '@/api/axios';
-
-
 import PlaceholderImage from '@/assets/img/placeholder-styling.jpg';
 
 const actualites = ref([]);
@@ -39,10 +37,7 @@ async function fetchActualites() {
     const response = await api.get(API_PATH_ACTUALITE);
 
     actualites.value = response.data
-      // 1. S'assurer que les clés critiques existent
       .filter(a => a.actualiteId && a.dateDePublication)
-
-      // 2. MAPPING : Ajouter la disciplineId et le nom au niveau racine via l'objet user
       .map(actu => ({
         ...actu,
         disciplineId: actu.user?.disciplineId,
@@ -50,8 +45,6 @@ async function fetchActualites() {
           ? DISCIPLINE_MAPPING[actu.user.disciplineId]?.toLowerCase()
           : 'unknown',
       }))
-
-      // 3. Trier par date de publication décroissante par défaut (la plus récente d'abord)
       .sort((a, b) => new Date(b.dateDePublication) - new Date(a.dateDePublication));
 
   } catch (_error) {
@@ -71,20 +64,16 @@ const filteredActualites = computed(() => {
   );
 });
 
-// --- Séparation des Actualités Passées et Futures au sein du filtre de discipline ---
-
-// Liste des actualités Passées (DateDePublication < Aujourd'hui)
+// --- Séparation des Actualités Passées et Futures ---
 const actualitesPassees = computed(() => {
   return filteredActualites.value
     .filter(a => new Date(a.dateDePublication) < today)
     .sort((a, b) => new Date(b.dateDePublication) - new Date(a.dateDePublication));
 });
 
-// Liste des actualités Futures (DateDePublication >= Aujourd'hui), triées de la plus proche à la plus éloignée
 const actualitesFutures = computed(() => {
   return filteredActualites.value
     .filter(a => {
-      // Rendre la date de l'actualité 'J-J' pour la comparaison
       const actuDate = new Date(a.dateDePublication);
       actuDate.setHours(0, 0, 0, 0);
       return actuDate >= today;
@@ -92,191 +81,201 @@ const actualitesFutures = computed(() => {
     .sort((a, b) => new Date(a.dateDePublication) - new Date(b.dateDePublication));
 });
 
-
-// 2. À la une (Le prochain événement de la discipline sélectionnée)
 const actualitePrincipale = computed(() => actualitesFutures.value[0]);
 
-// 3. Actus secondaires (4 max - Les 4 actualités passées les plus récentes)
 const actualitesSecondaires = computed(() => {
-  // On prend les 4 premières actualités passées
   return actualitesPassees.value.slice(0, 4);
 });
 
+// ===============================
+// 🔹 COULEURS & STYLES DYNAMIQUES
+// ===============================
+function getDisciplineColor(discipline) {
+  switch (discipline) {
+    case 'judo': return '#d9534f';       // Rouge
+    case 'aikido': return '#31b3d0';     // Bleu Aïkido
+    case 'jujitsu': return '#5cb85c';    // Vert
+    case 'judo-detente': return '#f0ad4e'; // Jaune / Orange
+    default: return '#6c757d';           // Gris
+  }
+}
 
-// ===============================
-// 🔹 CONSTRUCTION DE L’URL DE LA PHOTO
-// ===============================
 function getPhotoUrl(photoPath) {
-  // L'URL de base n'est plus nécessaire en production derrière Nginx/HTTPS.
-
   if (photoPath && typeof photoPath === 'string' && photoPath.startsWith('/')) {
-    // Si le chemin est déjà relatif (ex: /images/profiles/...), on le retourne directement.
     return photoPath;
   }
-
-  // Retourne le chemin original (soit null, soit une URL complète externe)
   return photoPath;
 }
-
-function getBadgeClass(discipline) {
-  switch (discipline) {
-    case 'judo':
-      return 'badge-judo';
-    case 'aikido':
-      return 'badge-aikido';
-    case 'jujitsu':
-      return 'badge-jujitsu';
-    case 'judo-detente':
-      return 'badge-judo-detente';
-    default:
-      return 'badge-unknown';
-  }
-}
-
-
-function getButtonClass(discipline) {
-  switch (discipline) {
-    case 'judo':
-      return 'btn-outline-judo';
-    case 'aikido':
-      return 'btn-outline-aikido';
-    case 'jujitsu':
-      return 'btn-outline-jujitsu';
-    case 'judo-detente':
-      return 'btn-outline-judo-detente';
-    default:
-      return 'btn-outline-unknown';
-  }
-}
-
 
 onMounted(fetchActualites);
 </script>
 
 <template>
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
-    <div class="imgBaniereJudo">
+
+    <!-- Bannière profil / actualité -->
+    <div class="imgBaniereAikido">
       <div class="overlay">
-        <h1 class="display-3 text-white text-center">ACTUALITÉS DU CLUB</h1>
-        <p class="lead text-white text-center mb-4">
-          Restez informés des événements à venir et des nouvelles récentes de l'AS Porcelette Art Martiaux .
+        <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-2">Informations & Événements</span>
+        <h1 class="display-3 text-uppercase text-white fw-black">
+          Actualités du Club
+        </h1>
+        <p class="lead text-light opacity-85 mt-2 mb-0 max-w-700">
+          Restez informés des événements à venir et des actualités récentes de l'AS Porcelette Arts Martiaux.
         </p>
       </div>
     </div>
-<div class="text-center my-5">
-    <div class="d-flex flex-wrap justify-content-center gap-2">
-        <button
-            :class="['btn btn-lg', selectedDiscipline === 'all' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-            @click="selectedDiscipline = 'all'">Toutes</button>
-        <button
-            :class="['btn btn-lg', selectedDiscipline === 'judo' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-            @click="selectedDiscipline = 'judo'">Judo</button>
-        <button
-            :class="['btn btn-lg', selectedDiscipline === 'aikido' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-            @click="selectedDiscipline = 'aikido'">Aïkido</button>
-        <button
-            :class="['btn btn-lg', selectedDiscipline === 'jujitsu' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-            @click="selectedDiscipline = 'jujitsu'">Jujitsu</button>
-        <button
-            :class="['btn btn-lg', selectedDiscipline === 'judo-detente' ? 'btn-warning text-dark' : 'btn-outline-warning']"
-            @click="selectedDiscipline = 'judo-detente'">Judo Détente</button>
-    </div>
-</div>
 
-    <div v-if="isLoading" class="text-center text-danger p-5">
-      <div class="spinner-border text-warning" role="status">
-        <span class="visually-hidden">Chargement...</span>
+    <!-- Filtres par discipline -->
+    <div class="container my-5">
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        <button
+          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'all' ? 'btn-info-custom shadow' : 'btn-outline-custom-muted']"
+          @click="selectedDiscipline = 'all'">
+          Toutes
+        </button>
+        <button
+          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'judo' ? 'btn-judo shadow' : 'btn-outline-custom-muted']"
+          @click="selectedDiscipline = 'judo'">
+          Judo
+        </button>
+        <button
+          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'aikido' ? 'btn-aikido shadow' : 'btn-outline-custom-muted']"
+          @click="selectedDiscipline = 'aikido'">
+          Aïkido
+        </button>
+        <button
+          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'jujitsu' ? 'btn-jujitsu shadow' : 'btn-outline-custom-muted']"
+          @click="selectedDiscipline = 'jujitsu'">
+          Jujitsu
+        </button>
+        <button
+          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'judo-detente' ? 'btn-judo-detente shadow' : 'btn-outline-custom-muted']"
+          @click="selectedDiscipline = 'judo-detente'">
+          Judo Détente
+        </button>
       </div>
-      <p>Chargement des actualités...</p>
-    </div>
-    <div v-else-if="errorMessage" class="alert alert-danger mx-5">{{ errorMessage }}</div>
-
-    <div v-else-if="filteredActualites.length === 0" class="alert alert-info mx-5 text-center">
-      Aucune actualité trouvée pour cette discipline.
     </div>
 
-    <div v-else class="container-fluid p-5 my-5">
+    <!-- Chargement & Erreurs -->
+    <div v-if="isLoading" class="text-center py-5">
+      <div class="spinner-border text-info-custom mb-3" role="status"></div>
+      <p class="m-0 text-light">Chargement des actualités...</p>
+    </div>
+
+    <div v-else-if="errorMessage" class="alert alert-danger bg-danger bg-opacity-15 text-danger border-0 text-center py-4 mx-4">
+      {{ errorMessage }}
+    </div>
+
+    <div v-else-if="filteredActualites.length === 0" class="container py-4">
+      <div class="alert alert-dark bg-dark-card text-light border-secondary text-center py-5 rounded-4 shadow">
+        <i class="bi bi-info-circle fs-1 text-info-custom d-block mb-3"></i>
+        <h4>Aucune actualité trouvée</h4>
+        <p class="text-light mb-0">Aucun article n'est disponible pour cette discipline pour le moment.</p>
+      </div>
+    </div>
+
+    <!-- Contenu Principal -->
+    <div v-else class="container pb-5 mb-5">
       <div class="row g-5">
 
+        <!-- Colonne de Gauche : Actualité à venir -->
         <div class="col-lg-7 mb-4 mb-lg-0">
-          <h2 class="text-warning border-bottom border-danger pb-2 mb-4 display-5">
-            <i class="pi pi-calendar-check-fill"></i> ACTUALITE À VENIR
-          </h2>
+          <div class="d-flex align-items-center mb-4 pb-2 border-bottom border-secondary opacity-75">
+            <h2 class="text-white h3 text-uppercase fw-bold m-0 tracking-wider">
+              <i class="bi bi-calendar-check text-info-custom me-2"></i> Événement à venir
+            </h2>
+          </div>
 
-          <div v-if="actualitePrincipale" class="card bg-dark border-secondary shadow-lg actu-principale-card">
+          <div v-if="actualitePrincipale" class="card bg-dark-card text-light rounded-4 shadow-lg actu-card overflow-hidden"
+               :style="{ border: '2px solid ' + getDisciplineColor(actualitePrincipale.discipline) }">
             <div class="card-body p-0 d-flex flex-column">
-              <img :src="getPhotoUrl(actualitePrincipale.imageUrl) || PlaceholderImage"
-                class="card-img-top object-fit-cover actu-principale-img" :alt="actualitePrincipale.titre" />
 
-              <div class="p-4 flex-grow-1">
-                <span :class="['badge mb-2', getBadgeClass(actualitePrincipale.discipline)]">
+              <div class="img-wrapper position-relative">
+                <img :src="getPhotoUrl(actualitePrincipale.imageUrl) || PlaceholderImage"
+                  class="card-img-top object-fit-cover actu-principale-img" :alt="actualitePrincipale.titre" />
+                <span class="badge position-absolute top-0 end-m-3 m-3 text-uppercase px-3 py-2 rounded-pill shadow"
+                      :style="{ backgroundColor: getDisciplineColor(actualitePrincipale.discipline), color: '#fff' }">
                   {{ actualitePrincipale.discipline }}
                 </span>
-                <h3 class="card-title text-warning mb-2 display-6">
+              </div>
+
+              <div class="p-4 p-md-5 flex-grow-1">
+                <div class="d-flex align-items-center text-muted fs-7 fw-bold mb-2">
+                  <i class="bi bi-clock me-2 text-info-custom" :style="{ color: getDisciplineColor(actualitePrincipale.discipline) }"></i>
+                  Prévu le : {{ formatDate(actualitePrincipale.dateDePublication) }}
+                </div>
+
+                <h3 class="card-title text-white fw-bold display-6 mb-3">
                   {{ actualitePrincipale.titre }}
                 </h3>
-                <p class="text-light small mb-3 fw-bold">
-                  Prévu le : {{ formatDate(actualitePrincipale.dateDePublication) }}
-                </p>
 
-                <p class="card-text text-light description-text mb-4">
+                <p class="card-text text-light opacity-85 description-text mb-4">
                   {{ actualitePrincipale.contenu || 'Description de l’événement à venir...' }}
                 </p>
 
                 <router-link :to="`/actualite/${actualitePrincipale.actualiteId}`"
-                  :class="['btn btn-lg w-100 fw-bold', getButtonClass(actualitePrincipale.discipline)]">
-                  Voir les détails de l'événement
+                  class="btn w-100 rounded-pill py-3 fw-bold shadow-sm transition-all text-white"
+                  :style="{ backgroundColor: getDisciplineColor(actualitePrincipale.discipline) }">
+                  Voir les détails de l'événement <i class="bi bi-arrow-right ms-2"></i>
                 </router-link>
               </div>
             </div>
           </div>
 
-          <div v-else class="card bg-dark border-secondary text-center p-5">
-            <i class="pi pi-info-circle-fill text-warning display-1 mb-3"></i>
-
-            <img :src="PlaceholderImage" class="w-100 mb-3 rounded" alt="Événement" />
-
-            <h3 class="text-light mt-3">Aucune actualité à venir.</h3>
-            <p class="text-light">
-              De nouvelles actualités seront bientôt disponibles.
-            </p>
+          <div v-else class="card bg-dark-card text-center p-5 rounded-4 shadow border-secondary">
+            <i class="bi bi-calendar-x display-1 text-muted mb-3"></i>
+            <h3 class="text-light h4">Aucun événement à venir</h3>
+            <p class="text-light mb-0">De nouvelles dates seront bientôt annoncées.</p>
           </div>
         </div>
 
-
+        <!-- Colonne de Droite : News récentes / Passées -->
         <div class="col-lg-5">
-          <h2 class="text-warning border-bottom border-danger pb-2 mb-4 display-5">
-            <i class="bi bi-clock-history"></i> NEWS RÉCENTES
-          </h2>
+          <div class="d-flex align-items-center mb-4 pb-2 border-bottom border-secondary opacity-75">
+            <h2 class="text-white h3 text-uppercase fw-bold m-0 tracking-wider">
+              <i class="bi bi-clock-history text-info-custom me-2"></i> News Récentes
+            </h2>
+          </div>
 
-          <div v-for="actu in actualitesSecondaires" :key="actu.actualiteId"
-            class="card bg-dark border-secondary mb-3 shadow-sm actu-secondaire-card">
-            <div class="row g-0 align-items-center">
-              <div class="col-5 actu-secondaire-img-container">
-                <img :src="getPhotoUrl(actu.imageUrl) || PlaceholderImage"
-                  class="img-fluid rounded-start object-fit-cover w-100 h-100 actu-secondaire-img" :alt="actu.titre" />
-              </div>
-              <div class="col-7">
-                <div class="card-body p-3">
-                  <span :class="['badge mb-1', getBadgeClass(actu.discipline)]">
-                    {{ actu.discipline }}
-                  </span>
-                  <h5 class="card-title text-light actu-secondaire-title">{{ actu.titre }}</h5>
-                  <p class="card-text text-light small mb-2">{{ formatDate(actu.dateDePublication) }}</p>
-                  <router-link :to="`/actualite/${actu.actualiteId}`"
-                    :class="['btn btn-outline', 'btn-sm', getButtonClass(actu.discipline)]">
-                    Lire l'article
-                  </router-link>
+          <div v-if="actualitesSecondaires.length > 0">
+            <div v-for="actu in actualitesSecondaires" :key="actu.actualiteId"
+              class="card bg-dark-card text-light rounded-4 mb-3 shadow-sm actu-secondaire-card overflow-hidden border-secondary border-opacity-50">
+              <div class="row g-0 align-items-center">
+                <div class="col-4 position-relative h-100">
+                  <img :src="getPhotoUrl(actu.imageUrl) || PlaceholderImage"
+                    class="img-fluid object-fit-cover w-100 h-100 min-h-120" :alt="actu.titre" />
+                </div>
+                <div class="col-8">
+                  <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="badge fs-8 text-uppercase px-2 py-1 rounded"
+                            :style="{ backgroundColor: getDisciplineColor(actu.discipline), color: '#fff' }">
+                        {{ actu.discipline }}
+                      </span>
+                      <small class="text-muted fs-8">{{ formatDate(actu.dateDePublication) }}</small>
+                    </div>
+
+                    <h5 class="card-title text-white fw-bold fs-6 mb-2 text-truncate-2">
+                      {{ actu.titre }}
+                    </h5>
+
+                    <router-link :to="`/actualite/${actu.actualiteId}`"
+                      class="btn btn-sm rounded-pill px-3 py-1 fw-bold text-white transition-all"
+                      :style="{ backgroundColor: 'transparent', border: '1px solid ' + getDisciplineColor(actu.discipline), color: getDisciplineColor(actu.discipline) }">
+                      Lire l'article
+                    </router-link>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div v-if="actualitesSecondaires.length === 0 && actualitePrincipale"
-            class="alert alert-secondary text-center">
-            Aucune archive d'actualité trouvée pour cette discipline.
+          <div v-else class="alert alert-dark bg-dark-card text-light text-center py-4 rounded-4 border-secondary">
+            Aucune archive récente trouvée.
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -284,29 +283,25 @@ onMounted(fetchActualites);
 
 <style scoped>
 /* --- BANNIÈRE --- */
-.imgBaniereJudo {
+.imgBaniereAikido {
+  position: relative;
   background-image: url('@/assets/img/banniereActualite.png');
   background-size: cover;
   background-position: center 30%;
   width: 100%;
-  height: 600px;
+  height: 420px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  position: relative;
   color: white;
   text-align: center;
 }
 
 .overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.65);
-  /* Overlay sombre plus prononcé */
+  inset: 0;
+  background-color: rgba(26, 29, 33, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -314,230 +309,126 @@ onMounted(fetchActualites);
   padding: 2rem;
 }
 
-.overlay h1 {
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  text-shadow: 2px 2px 4px #000;
+/* --- CARTES & DESIGN --- */
+.bg-dark-card {
+  background-color: #1a1d21;
 }
 
-
-
-
-.text-center.my-5 button {
-  transition: all 0.3s ease;
-  border-radius: 50px;
-  font-weight: 600;
+.actu-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.btn-outline-warning {
-  color: #ffc107;
-  border-color: #ffc107;
-}
-
-.btn-outline-warning:hover {
-  color: #212529 !important;
-  background-color: #ffc107;
-}
-
-/* --- CARTES GÉNÉRALES --- */
-.card.bg-dark {
-  background-color: #1a1a1a !important;
-  border: 1px solid #333 !important;
-  border-radius: 12px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-}
-
-.card .badge {
-  text-transform: uppercase;
-  font-weight: bold;
-  padding: 0.4em 0.8em;
-  border-radius: 5px;
-  font-size: 0.85rem;
-}
-
-/* --- CARTE PRINCIPALE (ÉVÉNEMENT À VENIR) --- */
-.actu-principale-card {
-  min-height: 550px;
-  overflow: hidden;
-}
-
-.actu-principale-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+.actu-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
 .actu-principale-img {
-  height: 350px;
-  border-radius: 12px 12px 0 0;
+  height: 320px;
   width: 100%;
+  filter: brightness(0.85);
+  transition: filter 0.4s ease;
 }
 
-.actu-principale-card h3.display-6 {
-  font-weight: 700;
+.actu-card:hover .actu-principale-img {
+  filter: brightness(1);
 }
 
 .description-text {
   line-height: 1.6;
-  font-size: 1rem;
-  color: #ddd !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* Limiter à quelques lignes */
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* --- CARTES SECONDAIRES (NEWS RÉCENTES) --- */
+/* --- CARTES SECONDAIRES --- */
 .actu-secondaire-card {
-  border-radius: 8px;
-  overflow: hidden;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .actu-secondaire-card:hover {
-  background-color: #2c3034 !important;
-  transform: translateX(5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  transform: translateX(4px);
+  background-color: #22262b !important;
 }
 
-.actu-secondaire-img-container {
-  height: 150px;
+.min-h-120 {
+  min-height: 120px;
+  max-height: 140px;
 }
 
-.actu-secondaire-img {
-  border-radius: 8px 0 0 8px !important;
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.actu-secondaire-title {
-  font-size: 1.15rem;
-  font-weight: 700;
+/* --- BOUTONS DE FILTRE & STYLES DISCIPLINES --- */
+.btn-outline-custom-muted {
+  background-color: #1a1d21;
+  color: #adb5bd;
+  border: 1px solid #343a40;
 }
 
-
-/* --- EFFET IMAGE (Ajouté pour les deux types de cartes) --- */
-.actu-principale-img,
-.actu-secondaire-img {
-  filter: grayscale(80%) brightness(0.7);
-  transition: filter 0.5s ease;
+.btn-outline-custom-muted:hover {
+  background-color: #2c3034;
+  color: #ffffff;
 }
 
-.actu-principale-card:hover .actu-principale-img,
-.actu-secondaire-card:hover .actu-secondaire-img {
-  filter: grayscale(0%) brightness(1);
+.btn-info-custom {
+  background-color: #31b3d0 !important;
+  color: #1a1d21 !important;
 }
 
-/* --- COULEURS DES DISCIPLINES (Badges et Boutons) --- */
-
-/* Couleurs des disciplines (existant, mais vérifié) */
-.badge-judo {
-  background-color: #d32f2f;
-  color: white;
+.btn-judo {
+  background-color: #d9534f !important;
+  color: #fff !important;
 }
 
-.badge-aikido {
-  background-color: #1976d2;
-  color: white;
+.btn-aikido {
+  background-color: #31b3d0 !important;
+  color: #1a1d21 !important;
 }
 
-.badge-jujitsu {
-  background-color: #388e3c;
-  color: white;
+.btn-jujitsu {
+  background-color: #5cb85c !important;
+  color: #fff !important;
 }
 
-.badge-judo-detente {
-  background-color: #fbc02d;
-  color: black;
+.btn-judo-detente {
+  background-color: #f0ad4e !important;
+  color: #1a1d21 !important;
 }
 
-.badge-unknown {
-  background-color: #757575;
-  color: white;
+/* --- UTILITAIRES --- */
+.text-info-custom {
+  color: #31b3d0 !important;
 }
 
-/* Judo */
-.btn-outline-judo {
-  border: 2px solid #d32f2f;
-  color: #d32f2f;
+.tracking-wider {
+  letter-spacing: 0.1em;
 }
 
-.btn-outline-judo:hover {
-  background-color: #d32f2f;
-  color: white;
+.fw-black {
+  font-weight: 900;
 }
 
-/* Aïkido */
-.btn-outline-aikido {
-  border: 2px solid #1976d2;
-  color: #1976d2;
+.fs-7 {
+  font-size: 0.8rem;
 }
 
-.btn-outline-aikido:hover {
-  background-color: #1976d2;
-  color: white;
+.fs-8 {
+  font-size: 0.7rem;
 }
 
-/* Jujitsu */
-.btn-outline-jujitsu {
-  border: 2px solid #388e3c;
-  color: #388e3c;
+.max-w-700 {
+  max-width: 700px;
 }
 
-.btn-outline-jujitsu:hover {
-  background-color: #388e3c;
-  color: white;
-}
-
-/* Judo détente */
-.btn-outline-judo-detente {
-  border: 2px solid #fbc02d;
-  color: #fbc02d;
-}
-
-.btn-outline-judo-detente:hover {
-  background-color: #fbc02d;
-  color: black;
-}
-
-/* Discipline inconnue */
-.btn-outline-unknown {
-  border: 2px solid #757575;
-  color: #757575;
-}
-
-.btn-outline-unknown:hover {
-  background-color: #757575;
-  color: white;
-}
-
-
-/* --- RESPONSIVE --- */
-@media (max-width: 991.98px) {
-  .imgBaniereJudo {
-    height: 400px;
-  }
-
-  .actu-principale-img {
-    height: 250px;
-  }
-
-}
-
-@media (max-width: 767.98px) {
-
-  /* Sur mobile, les images des cartes secondaires prennent 100% */
-  .actu-secondaire-img-container {
-    height: 100px;
-    width: 100%;
-  }
-
-  .actu-secondaire-img {
-    border-radius: 8px 8px 0 0 !important;
-  }
-
-  .actu-secondaire-card .col-5,
-  .actu-secondaire-card .col-7 {
-    width: 100%;
+@media (max-width: 991px) {
+  .imgBaniereAikido {
+    height: 350px;
   }
 }
 </style>
