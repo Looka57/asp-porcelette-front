@@ -220,21 +220,26 @@ onMounted(fetchActualites);
           <summary
             class="cursor-pointer font-bold text-lg text-300 py-2 px-3 border-round bg-dark-eval hover:text-white transition-colors duration-200">
             <span class="capitalize">{{ month }}</span>
-            <span class="text-sm font-normal text-400 ml-2">({{ articles.length }} article{{ articles.length > 1 ? 's' :
-              '' }})</span>
+            <span class="text-sm font-normal text-400 ml-2">({{ articles.length }} article{{ articles.length > 1 ? 's' : '' }})</span>
           </summary>
 
           <div class="grid pt-3">
             <div v-for="article in articles" :key="article.actualiteId" class="col-12 md:col-6 lg:col-4">
               <div
                 class="article-card surface-card border-round-xl overflow-hidden flex flex-column h-full border-1 border-white-alpha-10">
-                <div class="relative">
-                  <img :src="article.imageUrl || '/images/actualites/placeholder-styling.jpg'" alt="Image Actualité"
-                    class="w-full h-12rem object-cover block" />
-                  <Tag :value="isArchived(article.dateDePublication) ? 'Archivé' : 'Publié'"
-                    :severity="isArchived(article.dateDePublication) ? 'secondary' : 'success'"
-                    class="absolute top-0 right-0 m-2 text-xs" />
-                </div>
+            <div class="relative article-img-container">
+  <img
+    :src="article.imageUrl || '/images/actualites/placeholder-styling.jpg'"
+    alt="Image Actualité"
+    class="article-img"
+    @error="handleImageError"
+  />
+  <Tag
+    :value="isArchived(article.dateDePublication) ? 'Archivé' : 'Publié'"
+    :severity="isArchived(article.dateDePublication) ? 'secondary' : 'success'"
+    class="absolute top-0 right-0 m-2 text-xs"
+  />
+</div>
 
                 <div class="p-4 flex flex-column flex-grow-1 justify-content-between">
                   <div>
@@ -269,13 +274,19 @@ onMounted(fetchActualites);
     <div v-for="article in filteredListUnpaged" :key="article.actualiteId" class="col-12 md:col-6 lg:col-4">
       <div
         class="article-card surface-card border-round-xl overflow-hidden flex flex-column h-full border-1 border-white-alpha-10">
-        <div class="relative">
-          <img :src="article.imageUrl || '/images/actualites/placeholder-styling.jpg'" alt="Image Actualité"
-            class="w-full h-13rem object-cover block" />
-          <Tag :value="isArchived(article.dateDePublication) ? 'Archivé' : 'Publié'"
-            :severity="isArchived(article.dateDePublication) ? 'secondary' : 'success'"
-            class="absolute top-0 right-0 m-2 text-xs" />
-        </div>
+        <div class="relative article-img-container">
+  <img
+    :src="article.imageUrl || '/images/actualites/placeholder-styling.jpg'"
+    alt="Image Actualité"
+    class="article-img"
+    @error="handleImageError"
+  />
+  <Tag
+    :value="isArchived(article.dateDePublication) ? 'Archivé' : 'Publié'"
+    :severity="isArchived(article.dateDePublication) ? 'secondary' : 'success'"
+    class="absolute top-0 right-0 m-2 text-xs"
+  />
+</div>
 
         <div class="p-4 flex flex-column flex-grow-1 justify-content-between gap-3">
           <div>
@@ -374,4 +385,23 @@ onMounted(fetchActualites);
 .group-details[open] summary::before {
   transform: rotate(90deg);
 }
+
+
+/* Fix pour conteneur et rognage parfait des images */
+.article-img-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background-color: #1e2227; /* Couleur de fond pendant le chargement */
+}
+
+.article-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block;
+}
+
+
 </style>
