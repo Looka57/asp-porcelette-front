@@ -10,6 +10,9 @@ import { Chart, registerables } from 'chart.js';
 import api from '@/api/axios';
 import CountUp from 'vue-countup-v3';
 
+import ProgressSpinner from 'primevue/progressspinner';
+import Tag from 'primevue/tag';
+
 import { useEvolutionInscriptionsChart } from '@/composables/useChartData';
 import SaisonStatisticsChart from '@/composables/SaisonStatisticsChart.vue';
 
