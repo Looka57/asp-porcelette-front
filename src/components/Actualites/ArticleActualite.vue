@@ -1,8 +1,12 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue';
 import api from '@/api/axios';
 import CreateArticleModal from './CreateArticleModal.vue';
 import UpdateArticleModal from './UpdateArticleModal.vue';
+import ProgressSpinner from 'primevue/progressspinner';
+import Message from 'primevue/message';
+import Button from 'primevue/button';
+import Tag from 'primevue/tag';
 
 /* -------------------------------------------------------------------------- */
 /* 💾 VARIABLES RÉACTIVES */
@@ -15,12 +19,12 @@ const isUpdateModalOpen = ref(false);
 const selectedArticleId = ref(null);
 
 /* -------------------------------------------------------------------------- */
-/* 🎯 PROPS et EMITS */
+/* 🎯 PROPS ET EMITS */
 /* -------------------------------------------------------------------------- */
 const props = defineProps({
   isModalOpen: { type: Boolean, required: true },
   searchTerm: { type: String, default: '' },
-  currentFilter: { type: String, default: 'publies' } // 'publies', 'archives', 'total'
+  currentFilter: { type: String, default: 'publies' }
 });
 
 const emit = defineEmits(['update:isModalOpen', 'articleUpdated', 'update-stats']);
@@ -57,8 +61,7 @@ function formatDate(dateString) {
   if (!dateString) return 'Date inconnue';
   try {
     const date = new Date(dateString);
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return new Intl.DateTimeFormat('fr-FR', options).format(date);
+    return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
   } catch {
     return dateString;
   }
@@ -71,33 +74,77 @@ function getArchiveCutoffDate() {
   return cutoff;
 }
 
+function isArchived(dateString) {
+  if (!dateString) return false;
+  const pubDate = new Date(dateString);
+  pubDate.setUTCHours(0, 0, 0, 0);
+  return pubDate < getArchiveCutoffDate();
+}
+
 /* -------------------------------------------------------------------------- */
-/* 🧾 STATS */
+/* 🧾 STATS & FILTRES */
 /* -------------------------------------------------------------------------- */
 const totalArticles = computed(() => actualites.value.length);
 
 const articlesArchives = computed(() => {
-  const cutoff = getArchiveCutoffDate();
-  return actualites.value.filter(a => {
-    if (!a.dateDePublication) return false;
-    const pubDate = new Date(a.dateDePublication);
-    pubDate.setUTCHours(0, 0, 0, 0);
-    return pubDate < cutoff;
-  }).length;
+  return actualites.value.filter(a => isArchived(a.dateDePublication)).length;
 });
 
 const articlesActifs = computed(() => {
-  const cutoff = getArchiveCutoffDate();
-  return actualites.value.filter(a => {
-    if (!a.dateDePublication) return false;
-    const pubDate = new Date(a.dateDePublication);
-    pubDate.setUTCHours(0, 0, 0, 0);
-    return pubDate >= cutoff;
-  }).length;
+  return actualites.value.filter(a => a.dateDePublication && !isArchived(a.dateDePublication)).length;
+});
+
+const filteredListUnpaged = computed(() => {
+  let list = actualites.value;
+
+  if (props.currentFilter === 'publies') {
+    list = list.filter(a => !isArchived(a.dateDePublication));
+  } else if (props.currentFilter === 'archives') {
+    list = list.filter(a => isArchived(a.dateDePublication));
+  }
+
+  if (props.searchTerm) {
+    const term = props.searchTerm.toLowerCase();
+    list = list.filter(a =>
+      a.titre?.toLowerCase().includes(term) ||
+      a.contenu?.toLowerCase().includes(term) ||
+      a.user?.nom?.toLowerCase().includes(term)
+    );
+  }
+
+  return list;
 });
 
 /* -------------------------------------------------------------------------- */
-/* 🧱 MODALES & SUPPRESSION */
+/* 🗂️ GROUPEMENT ARCHIVES / TOTAL */
+/* -------------------------------------------------------------------------- */
+function groupByYearMonth(list) {
+  const grouped = {};
+  for (const article of list) {
+    const date = new Date(article.dateDePublication);
+    const year = date.getFullYear();
+    const month = date.toLocaleString('fr-FR', { month: 'long' });
+
+    if (!grouped[year]) grouped[year] = {};
+    if (!grouped[year][month]) grouped[year][month] = [];
+
+    grouped[year][month].push(article);
+  }
+  return grouped;
+}
+
+const archivesGrouped = computed(() => {
+  if (props.currentFilter !== 'archives') return {};
+  return groupByYearMonth(actualites.value.filter(a => isArchived(a.dateDePublication)));
+});
+
+const totalGrouped = computed(() => {
+  if (props.currentFilter !== 'total') return {};
+  return groupByYearMonth(filteredListUnpaged.value);
+});
+
+/* -------------------------------------------------------------------------- */
+/* 🧱 MODALES & GESTION */
 /* -------------------------------------------------------------------------- */
 function handleCloseCreateModal(newValue) {
   emit('update:isModalOpen', newValue);
@@ -132,64 +179,7 @@ async function deleteActualite(id) {
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* 🔍 FILTRAGE PUR */
-/* -------------------------------------------------------------------------- */
-const filteredListUnpaged = computed(() => {
-  let list = actualites.value;
-
-  if (props.currentFilter === 'publies') {
-    list = list.filter(a => new Date(a.dateDePublication) >= getArchiveCutoffDate());
-  } else if (props.currentFilter === 'archives') {
-    list = list.filter(a => new Date(a.dateDePublication) < getArchiveCutoffDate());
-  }
-
-  if (props.searchTerm) {
-    const term = props.searchTerm.toLowerCase();
-    list = list.filter(a =>
-      a.titre.toLowerCase().includes(term) ||
-      a.contenu.toLowerCase().includes(term) ||
-      a.user?.nom?.toLowerCase().includes(term)
-    );
-  }
-
-  return list;
-});
-
-/* -------------------------------------------------------------------------- */
-/* 🗂️ GROUPÉ PAR ANNÉE / MOIS */
-/* -------------------------------------------------------------------------- */
-function groupByYearMonth(list) {
-  const grouped = {};
-  for (const article of list) {
-    const date = new Date(article.dateDePublication);
-    const year = date.getFullYear();
-    const month = date.toLocaleString('fr-FR', { month: 'long' });
-
-    if (!grouped[year]) grouped[year] = {};
-    if (!grouped[year][month]) grouped[year][month] = [];
-
-    grouped[year][month].push(article);
-  }
-  return grouped;
-}
-
-const archivesGrouped = computed(() => {
-  if (props.currentFilter !== 'archives') return {};
-  const cutoff = getArchiveCutoffDate();
-  return groupByYearMonth(actualites.value.filter(a => new Date(a.dateDePublication) < cutoff));
-});
-
-const totalGrouped = computed(() => {
-  if (props.currentFilter !== 'total') return {};
-  return groupByYearMonth(filteredListUnpaged.value);
-});
-
-/* -------------------------------------------------------------------------- */
-/* 🚀 INIT */
-/* -------------------------------------------------------------------------- */
 onMounted(fetchActualites);
-
 </script>
 
 <template>
@@ -197,29 +187,75 @@ onMounted(fetchActualites);
   <UpdateArticleModal :modelValue="isUpdateModalOpen" @update:modelValue="handleCloseUpdateModal"
     :articleId="selectedArticleId" />
 
-  <div v-if="isLoading" class="alert alert-info text-center">Chargement des actualités...</div>
-  <div v-else-if="errorMessage" class="alert alert-danger text-center">{{ errorMessage }}</div>
+  <!-- ⌛ CHARGEMENT -->
+  <div v-if="isLoading" class="flex flex-column align-items-center justify-content-center py-6 gap-3">
+    <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+    <span class="text-400 font-medium">Chargement des actualités...</span>
+  </div>
 
-  <!-- 🔹 ARCHIVES -->
-  <div v-else-if="props.currentFilter === 'archives'" class="mt-3">
-    <div v-for="(months, year) in archivesGrouped" :key="year" class="mb-4">
-      <h4 class="text-warning border-bottom pb-2">{{ year }}</h4>
-      <div v-for="(articles, month) in months" :key="month" class="mb-3">
-        <details>
-          <summary class="fw-bold text-light">
-            {{ month }} ({{ articles.length }} article{{ articles.length > 1 ? 's' : '' }})
+  <!-- ⚠️ ERREUR -->
+  <Message v-else-if="errorMessage" severity="error" :closable="false" class="mb-4">
+    {{ errorMessage }}
+  </Message>
+
+  <!-- 📭 AUCUN RÉSULTAT -->
+  <div v-else-if="filteredListUnpaged.length === 0"
+    class="text-center py-6 border-round-xl surface-card border-1 border-white-alpha-10 p-5">
+    <i class="pi pi-inbox text-5xl text-400 mb-3"></i>
+    <h3 class="text-xl font-bold text-white m-0 mb-2">Aucune actualité trouvée</h3>
+    <p class="text-400 m-0">Ajustez vos filtres ou la recherche pour afficher du contenu.</p>
+  </div>
+
+  <!-- 🔹 MODE ARCHIVES & TOTAL GROUPÉ -->
+  <div v-else-if="props.currentFilter === 'archives' || props.currentFilter === 'total'" class="flex flex-column gap-5">
+    <div v-for="(months, year) in (props.currentFilter === 'archives' ? archivesGrouped : totalGrouped)" :key="year"
+      class="flex flex-column gap-3">
+      <div class="flex align-items-center gap-3 border-bottom-1 border-white-alpha-10 pb-2">
+        <i class="pi pi-calendar text-warning text-xl"></i>
+        <h3 class="text-2xl font-black text-warning m-0">{{ year }}</h3>
+      </div>
+
+      <div v-for="(articles, month) in months" :key="month" class="mb-2">
+        <details class="group-details">
+          <summary
+            class="cursor-pointer font-bold text-lg text-300 py-2 px-3 border-round bg-dark-eval hover:text-white transition-colors duration-200">
+            <span class="capitalize">{{ month }}</span>
+            <span class="text-sm font-normal text-400 ml-2">({{ articles.length }} article{{ articles.length > 1 ? 's' :
+              '' }})</span>
           </summary>
-          <div class="mt-2 ms-3 cards-grid">
-            <div v-for="article in articles" :key="article.actualiteId" class="card card-actualite">
-              <img :src="article.imageUrl
-                ? article.imageUrl // Si l'URL existe, on l'utilise telle quelle (elle doit être relative ou complète)
-                : '/images/actualites/placeholder-styling.jpg'" class="card-img-top" alt="Image Actualité" />
-              <div class="card-body">
-                <h5 class="card-title text-warning">{{ article.titre }}</h5>
-                <p class="card-text text-light">{{ article.contenu }}</p>
-                <p class="text-end text-secondary small">
-                  Publié le {{ formatDate(article.dateDePublication) }}
-                </p>
+
+          <div class="grid pt-3">
+            <div v-for="article in articles" :key="article.actualiteId" class="col-12 md:col-6 lg:col-4">
+              <div
+                class="article-card surface-card border-round-xl overflow-hidden flex flex-column h-full border-1 border-white-alpha-10">
+                <div class="relative">
+                  <img :src="article.imageUrl || '/images/actualites/placeholder-styling.jpg'" alt="Image Actualité"
+                    class="w-full h-12rem object-cover block" />
+                  <Tag :value="isArchived(article.dateDePublication) ? 'Archivé' : 'Publié'"
+                    :severity="isArchived(article.dateDePublication) ? 'secondary' : 'success'"
+                    class="absolute top-0 right-0 m-2 text-xs" />
+                </div>
+
+                <div class="p-4 flex flex-column flex-grow-1 justify-content-between">
+                  <div>
+                    <h4 class="text-lg font-bold text-warning mt-0 mb-2 line-clamp-1">{{ article.titre }}</h4>
+                    <p class="text-400 text-sm m-0 line-clamp-3 mb-3">{{ article.contenu }}</p>
+                  </div>
+
+                  <div>
+                    <span class="text-xs text-400 block text-right mb-3">
+                      Publié le {{ formatDate(article.dateDePublication) }}
+                    </span>
+
+                    <div class="flex gap-2">
+                      <Button label="Modifier" icon="pi pi-pencil" severity="info" outlined
+                        class="w-full p-button-sm font-bold btn-outline-info"
+                        @click="openUpdateModal(article.actualiteId)" />
+                      <Button icon="pi pi-trash" severity="danger" outlined class="p-button-sm btn-outline-danger"
+                        @click="deleteActualite(article.actualiteId)" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -228,53 +264,35 @@ onMounted(fetchActualites);
     </div>
   </div>
 
-  <!-- 🔹 TOTAL ARTICLES -->
-  <div v-else-if="props.currentFilter === 'total'" class="mt-3">
-    <div v-for="(months, year) in totalGrouped" :key="year" class="mb-4">
-      <h4 class="text-warning border-bottom pb-2">{{ year }}</h4>
-      <div v-for="(articles, month) in months" :key="month" class="mb-3">
-        <details>
-          <summary class="fw-bold text-light">
-            {{ month }} ({{ articles.length }} article{{ articles.length > 1 ? 's' : '' }})
-          </summary>
-          <div class="mt-2 ms-3 cards-grid">
-            <div v-for="article in articles" :key="article.actualiteId" class="card card-actualite">
-              <img :src="article.imageUrl
-                ? article.imageUrl // Utilise l'URL brute (si elle est relative, elle sera demandée à la racine du domaine)
-                : '/images/actualites/placeholder-styling.jpg'" class="card-img-top" alt="Image Actualité" />
-              <div class="card-body">
-                <h5 class="card-title text-warning">{{ article.titre }}</h5>
-                <p class="card-text text-light">{{ article.contenu }}</p>
-                <p class="text-end text-secondary small">
-                  Publié le {{ formatDate(article.dateDePublication) }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </details>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🔹 PUBLIÉS / GRILLE PAR DÉFAUT -->
-  <div v-else class="cards-grid cardsActualite">
-    <div v-for="article in filteredListUnpaged" :key="article.actualiteId" class="card card-actualite">
-      <img :src="article.imageUrl
-        ? article.imageUrl 
-        : '/images/actualites/placeholder-styling.jpg'" class="card-img-top" alt="Image Actualité" />
-      <div class="card-body d-flex flex-column justify-content-between">
-        <div>
-          <h5 class="card-title text-warning fw-bold">{{ article.titre }}</h5>
-          <p class="card-text text-light text-truncate">{{ article.contenu }}</p>
+  <!-- 🔹 VUE PAR DÉFAUT (GRILLE PUBLIÉS) -->
+  <div v-else class="grid">
+    <div v-for="article in filteredListUnpaged" :key="article.actualiteId" class="col-12 md:col-6 lg:col-4">
+      <div
+        class="article-card surface-card border-round-xl overflow-hidden flex flex-column h-full border-1 border-white-alpha-10">
+        <div class="relative">
+          <img :src="article.imageUrl || '/images/actualites/placeholder-styling.jpg'" alt="Image Actualité"
+            class="w-full h-13rem object-cover block" />
+          <Tag :value="isArchived(article.dateDePublication) ? 'Archivé' : 'Publié'"
+            :severity="isArchived(article.dateDePublication) ? 'secondary' : 'success'"
+            class="absolute top-0 right-0 m-2 text-xs" />
         </div>
-        <div class="mt-auto">
-          <p class="m-0 text-end text-secondary small">
-            Publié le {{ formatDate(article.dateDePublication) }}
-          </p>
-          <div class="groupBtn d-flex justify-content-between mt-3 gap-2">
-            <button class="btn btn-outline-info btn-sm" @click="openUpdateModal(article.actualiteId)">Modifier</button>
-            <button class="btn btn-outline-danger btn-sm"
-              @click="deleteActualite(article.actualiteId)">Supprimer</button>
+
+        <div class="p-4 flex flex-column flex-grow-1 justify-content-between gap-3">
+          <div>
+            <h4 class="text-lg font-bold text-warning mt-0 mb-2 line-clamp-1">{{ article.titre }}</h4>
+            <p class="text-400 text-sm m-0 line-clamp-3">{{ article.contenu }}</p>
+          </div>
+
+          <div>
+            <span class="text-xs text-400 block text-right mb-3">
+              Publié le {{ formatDate(article.dateDePublication) }}
+            </span>
+            <div class="flex gap-2">
+              <Button label="Modifier" icon="pi pi-pencil" severity="info" outlined
+                class="w-full p-button-sm font-bold btn-outline-info" @click="openUpdateModal(article.actualiteId)" />
+              <Button icon="pi pi-trash" severity="danger" outlined class="p-button-sm btn-outline-danger"
+                @click="deleteActualite(article.actualiteId)" />
+            </div>
           </div>
         </div>
       </div>
@@ -283,44 +301,77 @@ onMounted(fetchActualites);
 </template>
 
 <style scoped>
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.75rem;
-  margin-top: 1.5rem;
+/* Cartes d'actualités */
+.article-card {
+  background: #2a2e35;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.card-actualite {
-  background-color: #2c3035;
-  color: white;
-  border: none;
-  border-radius: 14px;
+.article-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 193, 7, 0.3) !important;
+}
+
+/* Styles personnalisés forcés pour les boutons Outlined */
+.btn-outline-info {
+  color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.btn-outline-info:hover {
+
+  color: #88beff !important;
+}
+
+.btn-outline-danger {
+  color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+
+.btn-outline-danger:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+}
+
+/* Arrière-plan des éléments d'accordéon */
+.bg-dark-eval {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Tronquage de texte */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card-actualite:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.card-actualite img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
+/* Groupes repliables HTML natifs stylisés */
+.group-details summary {
+  list-style: none;
 }
 
-details summary {
-  cursor: pointer;
-  color: #ffcc00;
+.group-details summary::-webkit-details-marker {
+  display: none;
 }
 
-details[open] summary {
-  color: #ffa500;
+.group-details summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.5rem;
+  transition: transform 0.2s;
+  color: #ffc107;
 }
 
-.groupBtn button {
-  flex: 1;
+.group-details[open] summary::before {
+  transform: rotate(90deg);
 }
 </style>

@@ -161,7 +161,8 @@ onMounted(() => { fetchDisciplines(); fetchEvents(); fetchEventTypes(); });
       <h4 class="text-warning border-bottom pb-2">{{ year }}</h4>
       <div v-for="(events, month) in months" :key="month" class="mb-3">
         <details>
-          <summary class="fw-bold text-light">{{ month }} ({{ events.length }} événement{{ events.length > 1 ? 's' : '' }})
+          <summary class="fw-bold text-light">{{ month }} ({{ events.length }} événement{{ events.length > 1 ? 's' : ''
+            }})
           </summary>
           <div class="mt-2 ms-3 events-grid">
             <div v-for="event in events" :key="event.evenementId"

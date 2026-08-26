@@ -1,13 +1,24 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '@/api/axios';
+
+// PrimeVue Services & Popups
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
+
 import SenseiFormFields from '@/components/Senseis/SenseiFormFields.vue';
 import UserFormFields from '@/components/Users/UserFormFields.vue';
 import UserTable from '@/components/Users/UserTable.vue';
+import SenseisStats from '@/components/Senseis/SenseisStats.vue';
 
 // --------------------
-// Références / état local
+// Services & état local
 // --------------------
+const confirm = useConfirm();
+const toast = useToast();
+
 const userList = ref([]);
 const selectedDiscipline = ref('');
 const disciplineList = ref([]);
@@ -114,17 +125,40 @@ const handleEdit = (user) => {
   }
 };
 
-const handleDelete = async (userId) => {
-  if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-    return;
-  }
-  try {
-    await api.delete(`User/admin/${userId}`);
-    await loadSenseiData();
-  } catch (err) {
-    console.error(err);
-    alert('Erreur lors de la suppression de l\'utilisateur.');
-  }
+const handleDelete = (user) => {
+  const userId = typeof user === 'object' ? (user.id || user.userId) : user;
+  const nomComplet = typeof user === 'object' ? `${user.prenom || ''} ${user.nom || ''}`.trim() : 'cet encadrant';
+
+  confirm.require({
+    header: 'Confirmation de suppression',
+    message: `Voulez-vous vraiment supprimer définitivement ${nomComplet} ?`,
+    icon: 'pi pi-exclamation-triangle',
+    styleClass: 'confirm-delete-dialog',
+    acceptLabel: 'Supprimer',
+    rejectLabel: 'Annuler',
+    acceptClass: 'btn btn-danger btn-sm ms-2',
+    rejectClass: 'btn btn-outline-secondary btn-sm',
+    accept: async () => {
+      try {
+        await api.delete(`User/admin/${userId}`);
+        toast.add({
+          severity: 'error',
+          summary: 'Supprimé',
+          detail: 'L\'utilisateur a été supprimé avec succès.',
+          life: 3000
+        });
+        await loadSenseiData();
+      } catch (err) {
+        console.error(err);
+        toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Échec de la suppression.',
+          life: 4000
+        });
+      }
+    }
+  });
 };
 
 // --------------------
@@ -194,9 +228,21 @@ const saveNewSensei = async () => {
       await api.put(`User/admin/${editingUserId.value}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      toast.add({
+        severity: 'success',
+        summary: 'Mis à jour',
+        detail: 'Informations enregistrées avec succès.',
+        life: 3000
+      });
     } else {
       await api.post('/User/register/sensei', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.add({
+        severity: 'success',
+        summary: 'Créé',
+        detail: 'Nouveau Sensei créé avec succès.',
+        life: 3000
       });
     }
 
@@ -243,43 +289,71 @@ onMounted(async () => {
 
 <template>
   <div class="page-container">
+    <Toast />
+    <ConfirmDialog />
+
     <div class="content-wrapper">
       <!-- En-tête avec titre et bouton d'action -->
-      <header class="page-header">
-        <div class="header-titles">
-          <h1 class="page-title">Gestion des Senseis</h1>
-          <span class="count-badge" v-if="!loading">{{ userList.length }} encadrant(s)</span>
-        </div>
+<!-- ===============================
+           🔹 EN-TÊTE
+     ================================ -->
+<div class="page-header text-center mb-4">
 
-        <button
-          class="btn-primary"
-          data-bs-toggle="modal"
-          data-bs-target="#createAdherent"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>Ajouter un Sensei</span>
-        </button>
-      </header>
+  <div class="page-header-icon">
+    <i class="pi pi-users"></i>
+  </div>
+
+  <h1>
+    Gestion des Senseis
+  </h1>
+
+  <p>
+    Gestion des encadrants,
+    disciplines et informations des Senseis
+  </p>
+
+</div>
+
+
+<!-- ===============================
+     🔹 BARRE D'ACTIONS
+================================ -->
+<div class="actions-bar">
+
+  <button
+    type="button"
+    class="add-member-btn"
+    data-bs-toggle="modal"
+    data-bs-target="#createAdherent"
+    @click="resetForm"
+  >
+    <i class="pi pi-user-plus"></i>
+    <span>
+      Ajouter un Sensei
+    </span>
+  </button>
+
+</div>
+
+      <SenseisStats :userList="userList" :disciplineList="disciplineList" />
+
+
+
+
 
       <!-- Modal de création / édition -->
-      <div class="modal fade" id="createAdherent" tabindex="-1" aria-labelledby="createAdherentLabel" aria-hidden="true">
+      <div class="modal fade" id="createAdherent" tabindex="-1" aria-labelledby="createAdherentLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content custom-modal">
             <div class="modal-header">
               <h5 class="modal-title" id="createAdherentLabel">
                 {{ editingUserId ? 'Modifier le Sensei' : 'Créer un nouveau Sensei' }}
               </h5>
-              <button
-                type="button"
-                class="btn-close-custom"
-                data-bs-dismiss="modal"
-                aria-label="Fermer"
-                @click="resetForm"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Fermer"
+                @click="resetForm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
@@ -288,7 +362,8 @@ onMounted(async () => {
 
             <div class="modal-body">
               <div v-if="validationError" class="alert-error">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="12" y1="8" x2="12" y2="12"></line>
                   <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -298,22 +373,13 @@ onMounted(async () => {
 
               <form @submit.prevent="saveNewSensei" id="senseiForm">
                 <UserFormFields v-model="newSensei" :isPasswordRequired="!editingUserId" />
-                <SenseiFormFields
-                  v-model="newSensei"
-                  v-model:selectedDiscipline="selectedDiscipline"
-                  :disciplineList="disciplineList"
-                  @file-change="onFileChange"
-                />
+                <SenseiFormFields v-model="newSensei" v-model:selectedDiscipline="selectedDiscipline"
+                  :disciplineList="disciplineList" @file-change="onFileChange" />
               </form>
             </div>
 
             <div class="modal-footer">
-              <button
-                type="button"
-                class="btn-secondary"
-                data-bs-dismiss="modal"
-                @click="resetForm"
-              >
+              <button type="button" class="btn-secondary" data-bs-dismiss="modal" @click="resetForm">
                 Annuler
               </button>
               <button type="submit" form="senseiForm" class="btn-primary">
@@ -331,7 +397,8 @@ onMounted(async () => {
       </div>
 
       <div v-else-if="error" class="state-card error-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="8" x2="12" y2="12"></line>
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -341,7 +408,8 @@ onMounted(async () => {
 
       <div v-else class="table-section">
         <div v-if="userList.length === 0" class="state-card empty-state">
-          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
             <circle cx="9" cy="7" r="4"></circle>
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -350,13 +418,8 @@ onMounted(async () => {
           <p>Aucun Sensei ou Administrateur trouvé pour le moment.</p>
         </div>
 
-        <UserTable
-          v-else
-          :userList="userList"
-          :getDisciplineName="getDisciplineName"
-          @edit="handleEdit"
-          @delete="handleDelete"
-        />
+        <UserTable v-else :userList="userList" :getDisciplineName="getDisciplineName" @edit="handleEdit"
+          @delete="handleDelete" />
       </div>
     </div>
   </div>
@@ -382,40 +445,40 @@ onMounted(async () => {
 }
 
 /* ===============================
-   🔹 EN-TÊTE
-   =============================== */
+   HEADER
+================================ */
+
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1rem 0 1.5rem;
 }
 
-.header-titles {
+.page-header-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 0.75rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  border: 1px solid rgba(255, 193, 7, 0.45);
+  border-radius: 12px;
+  color: #ffc107;
+  background: rgba(255, 193, 7, 0.08);
+  font-size: 1.4rem;
+  box-shadow:
+    0 0 25px rgba(255, 193, 7, 0.08);
 }
 
-.page-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #ffffff;
+.page-header h1 {
   margin: 0;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
-.count-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #ffbb33;
-  background: rgba(255, 187, 51, 0.1);
-  padding: 0.3rem 0.75rem;
-  border-radius: 2rem;
-  border: 1px solid rgba(255, 187, 51, 0.2);
+.page-header p {
+  margin: 0.5rem 0 0;
+  color: #8f969d;
+  font-size: 0.95rem;
 }
 
 /* ===============================
@@ -461,6 +524,37 @@ onMounted(async () => {
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+}
+
+/* ===============================
+   BOUTON AJOUT
+================================ */
+
+.add-member-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  background: transparent;
+  color: #ffc107;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.add-member-btn:hover {
+  background: #ffc107;
+  color: #212529;
+  transform: translateY(-1px);
+}
+
+.add-member-btn:active {
+  transform: translateY(0);
 }
 
 /* ===============================
@@ -542,6 +636,8 @@ onMounted(async () => {
   animation: fadeIn 0.3s ease-out;
 }
 
+
+
 .state-card {
   background: #1e2126;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -576,7 +672,9 @@ onMounted(async () => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {
@@ -584,6 +682,7 @@ onMounted(async () => {
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -595,16 +694,161 @@ onMounted(async () => {
   .page-container {
     padding: 1.25rem 1rem;
   }
+
   .page-header {
     flex-direction: column;
     align-items: stretch;
   }
+
   .header-titles {
     justify-content: space-between;
   }
+
   .btn-primary {
     justify-content: center;
     width: 100%;
   }
+
+
+
+
+
+  /* ===============================
+   BARRE D'ACTIONS
+================================ */
+
+.actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(33, 37, 41, 0.85);
+  border: 1px solid #3c434a;
+  border-radius: 12px;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+
+}
+</style>
+
+<!-- 🔹 STYLES GLOBAUX PRIMEVUE (NON SCOPED) -->
+<style>
+/* Modale de Confirmation globale */
+.p-dialog,
+.p-confirm-dialog {
+  background-color: #1e2126 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+  width: 90% !important;
+  max-width: 450px !important;
+  overflow: hidden !important;
+}
+
+.p-dialog .p-dialog-header,
+.p-confirm-dialog .p-dialog-header {
+  background-color: #121417 !important;
+  color: #ffffff !important;
+  padding: 1rem 1.25rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.p-dialog .p-dialog-title,
+.p-confirm-dialog .p-dialog-title {
+  color: #ffbb33 !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+}
+
+.p-dialog .p-dialog-header-icon,
+.p-confirm-dialog .p-dialog-header-close {
+  color: #8a919e !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.p-dialog .p-dialog-content,
+.p-confirm-dialog .p-dialog-content {
+  background-color: #1e2126 !important;
+  color: #ffffff !important;
+  padding: 1.5rem 1.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  white-space: normal !important;
+}
+
+.p-dialog .p-dialog-footer,
+.p-confirm-dialog .p-dialog-footer {
+  background-color: #121417 !important;
+  padding: 0.75rem 1.25rem !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.p-dialog .p-dialog-footer button,
+.p-confirm-dialog .p-dialog-footer button {
+  white-space: nowrap !important;
+}
+
+/* 🔹 Modale Spécifique à la suppression (Rouge) */
+.confirm-delete-dialog {
+  border: 1px solid #dc3545 !important;
+}
+
+.confirm-delete-dialog .p-dialog-title {
+  color: #dc3545 !important;
+}
+
+.confirm-delete-dialog .p-confirm-dialog-icon {
+  font-size: 1.8rem !important;
+  color: #dc3545 !important;
+  flex-shrink: 0 !important;
+}
+
+.confirm-delete-dialog .p-confirm-dialog-message {
+  margin: 0 !important;
+  font-size: 0.95rem !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+
+/* 🔹 Correction de visibilité des Toasts (Notifications) */
+.p-toast .p-toast-message {
+  opacity: 1 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  background-color: #dc3545 !important;
+  color: #ffffff !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  background-color: #198754 !important;
+  color: #ffffff !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-info {
+  background-color: #0dcaf0 !important;
+  color: #ffffff !important;
+}
+
+.p-toast .p-toast-message .p-toast-message-content,
+.p-toast .p-toast-message .p-toast-message-icon,
+.p-toast .p-toast-message .p-toast-icon-close {
+  color: #ffffff !important;
 }
 </style>

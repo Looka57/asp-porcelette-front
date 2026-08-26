@@ -189,7 +189,7 @@ onMounted(async () => {
 }
 
 .stat-card {
-  background: #1e2126;
+  background: #1b1d22;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1rem;
   padding: 1.75rem 1.5rem 1.5rem;

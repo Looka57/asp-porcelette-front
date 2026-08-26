@@ -1,143 +1,163 @@
 <script setup>
+
 import { ref } from 'vue';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
 
 /* -------------------------------------------------------------------------- */
 /* 🎯 PROPS ET EMITS */
 /* -------------------------------------------------------------------------- */
 const props = defineProps({
-    // stats contient le nombre total d'articles, le nombre d'articles publiés, d'archives,
-    // et la catégorie actuellement sélectionnée (currentFilter)
-    stats: {
-        type: Object,
-        default: () => ({ total: 0, publies: 0, archives: 0, currentFilter: 'total' })
-    }
+  stats: {
+    type: Object,
+    default: () => ({ total: 0, publies: 0, archives: 0, currentFilter: 'total' })
+  }
 });
 
-// Définition des événements émis vers le parent
 const emit = defineEmits([
-    'create-actualite',  // Événement pour ouvrir la modale de création d'article
-    'search-updated',    // Événement pour transmettre la valeur du champ de recherche
-    'filter-status'      // Événement pour transmettre le filtre choisi (total, publies, archives)
+  'create-actualite',
+  'search-updated',
+  'filter-status'
 ]);
 
 /* -------------------------------------------------------------------------- */
-/* 💾 VARIABLES LOCALES RÉACTIVES */
+/* 💾 VARIABLES LOCALES ET FONCTIONS */
 /* -------------------------------------------------------------------------- */
-const localSearchTerm = ref(''); // Stocke la valeur saisie dans le champ de recherche localement
+const localSearchTerm = ref('');
 
-/* -------------------------------------------------------------------------- */
-/* 🧭 FONCTIONS DE GESTION */
-/* -------------------------------------------------------------------------- */
-
-// Fonction pour ouvrir la modale de création d'actualité
 function openCreateModal() {
   emit('create-actualite');
 }
 
-// Fonction appelée à chaque saisie dans le champ de recherche
 function updateSearch() {
   emit('search-updated', localSearchTerm.value);
 }
 
-// Fonction appelée lors du clic sur l'un des filtres (Total / Publiés / Archives)
 function filterStatus(status) {
   emit('filter-status', status);
 }
 </script>
 
 <template>
-  <div class="headerLink ">
-    <!-- ====================================================== -->
+  <div class="flex flex-column gap-4">
+
     <!-- 🎴 CARDS DE FILTRAGE ET STATISTIQUES DES ARTICLES -->
-    <!-- ====================================================== -->
-    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5 cardsOrganisation">
+    <div class="grid grid-nogutter gap-3">
 
       <!-- Total articles -->
-      <div class="col">
+      <div class="col-12 md:col">
         <div
-          class="card d-flex align-items-center justify-content-between w-100 p-3 flex-row"
-          :class="{ 'border-warning border-3': props.stats.currentFilter === 'total' }"
-          @click="filterStatus('total')"
-        >
-          <div class="d-flex align-items-center gap-3">
-            <img width="80" height="80" src="https://img.icons8.com/bubbles/100/news.png" alt="news" />
-            <h3 class="mb-0">Total articles</h3>
+          class="stat-card p-4 border-round-xl flex align-items-center justify-content-between cursor-pointer transition-all duration-200"
+          :class="{ 'active-card': props.stats.currentFilter === 'total' }" @click="filterStatus('total')">
+          <div class="flex align-items-center gap-3">
+            <img width="64" height="64" src="https://img.icons8.com/bubbles/100/news.png" alt="news" />
+            <div>
+              <span class="text-400 text-sm font-medium uppercase tracking-wider block">Tous les articles</span>
+              <h3 class="text-xl font-bold text-white m-0">Total</h3>
+            </div>
           </div>
-          <p class="mb-0 fs-2 fw-bold text-end">{{ props.stats.total }}</p>
+          <span class="text-3xl font-black text-warning">{{ props.stats.total }}</span>
         </div>
       </div>
 
       <!-- Articles publiés -->
-      <div class="col">
+      <div class="col-12 md:col">
         <div
-          class="card d-flex align-items-center justify-content-between w-100 p-3 flex-row"
-          :class="{ 'border-warning border-3': props.stats.currentFilter === 'publies' }"
-          @click="filterStatus('publies')"
-        >
-          <div class="d-flex align-items-center gap-3">
-            <img width="80" height="80" src="https://img.icons8.com/bubbles/100/edit-file.png" alt="edit-file" />
-            <h3 class="mb-0">Articles publiés</h3>
+          class="stat-card p-4 border-round-xl flex align-items-center justify-content-between cursor-pointer transition-all duration-200"
+          :class="{ 'active-card': props.stats.currentFilter === 'publies' }" @click="filterStatus('publies')">
+          <div class="flex align-items-center gap-3">
+            <img width="64" height="64" src="https://img.icons8.com/bubbles/100/edit-file.png" alt="edit-file" />
+            <div>
+              <span class="text-400 text-sm font-medium uppercase tracking-wider block">Visibles en ligne</span>
+              <h3 class="text-xl font-bold text-white m-0">Publiés</h3>
+            </div>
           </div>
-          <p class="mb-0 fs-2 fw-bold text-end">{{ props.stats.publies }}</p>
+          <span class="text-3xl font-black text-green-400">{{ props.stats.publies }}</span>
         </div>
       </div>
 
       <!-- Archives -->
-      <div class="col">
+      <div class="col-12 md:col">
         <div
-          class="card d-flex align-items-center justify-content-between w-100 p-3 flex-row"
-          :class="{ 'border-warning border-3': props.stats.currentFilter === 'archives' }"
-          @click="filterStatus('archives')"  
-        >
-          <div class="d-flex align-items-center gap-3">
-            <img width="80" height="80" src="https://img.icons8.com/bubbles/100/archive-folder.png" alt="archive-folder"/>
-            <h3 class="mb-0">Archives</h3>
+          class="stat-card p-4 border-round-xl flex align-items-center justify-content-between cursor-pointer transition-all duration-200"
+          :class="{ 'active-card': props.stats.currentFilter === 'archives' }" @click="filterStatus('archives')">
+          <div class="flex align-items-center gap-3">
+            <img width="64" height="64" src="https://img.icons8.com/bubbles/100/archive-folder.png"
+              alt="archive-folder" />
+            <div>
+              <span class="text-400 text-sm font-medium uppercase tracking-wider block">Masqués / Masquage</span>
+              <h3 class="text-xl font-bold text-white m-0">Archives</h3>
+            </div>
           </div>
-          <p class="mb-0 fs-2 fw-bold text-end">{{ props.stats.archives }}</p>
+          <span class="text-3xl font-black text-500">{{ props.stats.archives }}</span>
         </div>
       </div>
 
     </div>
 
-    <!-- ====================================================== -->
-    <!-- 🔍 BARRE DE RECHERCHE ET BOUTON AJOUT -->
-    <!-- ====================================================== -->
-    <div class="headerSearchBtn d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <!-- 🔍 BARRE DE RECHERCHE ET BOUTON D'ACTION -->
+    <div
+      class="flex flex-column sm:flex-row justify-content-between align-items-center gap-3 bg-dark-eval p-3 border-round-xl border-1 border-white-alpha-10">
 
-      <!-- Bouton pour créer une nouvelle actualité -->
-      <button class="btn btn-outline-warning d-flex align-items-center shadow-sm" type="button"
-        @click="openCreateModal">
-        <i class="pi pi-calendar-plus me-2"></i>
-        Ajouter une actualité
-      </button>
+      <!-- Bouton d'ajout -->
+      <Button label="Ajouter une actualité" icon="pi pi-plus-circle" severity="warning"
+        class="btn-primary w-full sm:w-auto px-4 py-2 gap-3 " @click="openCreateModal" />
 
-      <!-- Champ de recherche -->
-      <div class="input-group w-auto" style="min-width: 250px;">
-        <span class="input-group-text bg-light border-end-0">
-          <i class="pi pi-search text-secondary"></i>
-        </span>
-        <input type="text" class="form-control border-start-0" placeholder="Rechercher..."
-          v-model="localSearchTerm" @input="updateSearch" />
+      <!-- Champ de recherche PrimeVue -->
+      <div
+        class="p-input-icon-left w-full sm:w-auto min-w-18rem flex align-items-center gap-4 border-round-xl border-1 border-white-alpha-20 p-2">
+        <i class="pi pi-search text-warning" />
+        <InputText v-model="localSearchTerm" placeholder="Rechercher une actualité..."
+          class="w-full p-inputtext-sm p-inputtext" @input="updateSearch" />
       </div>
 
     </div>
+
   </div>
 </template>
 
 <style scoped>
-/* ===================================================== */
-/* 🎨 STYLE DES CARDS DE FILTRAGE */
-/* ===================================================== */
-.cardsOrganisation .card {
-  background-color: #343a40;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  transition: transform 0.15s ease;
+/* Cartes de statistiques */
+.stat-card {
+  background: #2a2e35;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-.cardsOrganisation .card:hover {
-  transform: translateY(-3px);
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffbb33;
+  color: #121417;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 187, 51, 0.15);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+/* Carte active sélectionnée */
+.active-card {
+  border: 1px solid #ffc107 !important;
+  background: linear-gradient(135deg, #2a2e35 0%, #353b45 100%);
+  box-shadow: 0 0 15px rgba(255, 193, 7, 0.15);
+}
+
+/* Arrière-plan du conteneur de recherche */
+.bg-dark-eval {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
 }
 </style>

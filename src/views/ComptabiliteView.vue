@@ -6,12 +6,25 @@ import CardsComptes from '@/components/Comptas/CardsComptes.vue';
   <div class="compta-page">
     <div class="compta-wrapper">
       <!-- En-tête de la page -->
-      <header class="compta-header">
-        <div class="header-content">
-          <h1 class="page-title">Comptabilité</h1>
-          <p class="page-subtitle">Vue d'ensemble et gestion de vos comptes financiers</p>
-        </div>
-      </header>
+    <!-- ===============================
+     🔹 EN-TÊTE
+================================ -->
+
+<div class="page-header text-center mb-4">
+
+  <div class="page-header-icon">
+    <i class="pi pi-wallet"></i>
+  </div>
+
+  <h1>
+    Comptabilité
+  </h1>
+
+  <p>
+    Vue d'ensemble et gestion de vos comptes financiers
+  </p>
+
+</div>
 
       <!-- Section principale des cartes -->
       <main class="compta-main">
@@ -25,21 +38,43 @@ import CardsComptes from '@/components/Comptas/CardsComptes.vue';
 /* ===============================
    🔹 LAYOUT PRINCIPAL
    =============================== */
-.compta-page {
-  min-height: 100vh;
-  background-color: #121417;
-  color: #f1f3f5;
-  padding: 2rem 1.5rem;
+/* ===============================
+   HEADER
+================================ */
+
+.page-header {
+  padding: 1rem 0 1.5rem;
+  
 }
 
-.compta-wrapper {
-  max-width: 1400px;
-  margin: 0 auto;
+.page-header-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 0.75rem;
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 193, 7, 0.45);
+  border-radius: 12px;
+  color: #ffc107;
+  background: rgba(241, 238, 227, 0.08);
+  font-size: 1.4rem;
+  box-shadow:
+    0 0 25px rgba(255, 193, 7, 0.08);
 }
 
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.page-header p {
+  margin: 0.5rem 0 0;
+  color: #8f969d;
+  font-size: 0.95rem;
+}
 /* ===============================
    🔹 EN-TÊTE PAGE
    =============================== */
