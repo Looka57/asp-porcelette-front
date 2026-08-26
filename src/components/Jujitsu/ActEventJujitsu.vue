@@ -1,307 +1,338 @@
 <script setup>
+// ===============================
+// 🔹 IMPORTS
+// ===============================
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
 
+// ===============================
+// 🔹 ÉTATS - ACTUALITÉS
+// ===============================
+const actualites = ref([])
+const isLoadingActu = ref(true)
+const errorMessageActu = ref(null)
 
-/* ===============================
-🔹 ACTUALITÉS
- =============================== */
-const actualites = ref([]);
-const isLoadingActu = ref(true);
-const errorMessageActu = ref(null);
-
-const API_PATH_ACTUALITES = 'Actualite';
+const API_PATH_ACTUALITES = 'Actualite'
 
 /* Formatage de date */
 function formatDate(dateString) {
-  if (!dateString) return 'Date non spécifiée';
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString('fr-FR', options);
+  if (!dateString) return 'Date non spécifiée'
+  const options = { year: 'numeric', month: 'long', day: 'numeric' }
+  return new Date(dateString).toLocaleDateString('fr-FR', options)
 }
 
 async function fetchActualites() {
   try {
-    isLoadingActu.value = true;
-    errorMessageActu.value = null;
+    isLoadingActu.value = true
+    errorMessageActu.value = null
 
-    // Utilisation de 'api' pour l'appel à l'API
-    const reponse = await api.get(API_PATH_ACTUALITES);
-    const actuAPI = reponse.data;
+    const reponse = await api.get(API_PATH_ACTUALITES)
+    const actuAPI = reponse.data
 
     if (!Array.isArray(actuAPI)) {
-      errorMessageActu.value = "Erreur : données invalides reçues.";
-      return;
+      errorMessageActu.value = "Erreur : données invalides reçues."
+      return
     }
 
-    const maintenant = new Date();
+    const maintenant = new Date()
 
-    // 🔥 Filtrer seulement les actualités à venir
+    // Filtrer seulement les actualités à venir
     const actuFutures = actuAPI.filter(a =>
       a.dateDePublication && new Date(a.dateDePublication) >= maintenant
-    );
+    )
 
     if (actuFutures.length === 0) {
-      errorMessageActu.value = "Aucune actualité à venir pour le moment.";
-      actualites.value = [];
-      return;
+      errorMessageActu.value = "Aucune actualité à venir pour le moment."
+      actualites.value = []
+      return
     }
 
     // Trier par date ASC (plus proche en premier)
     actuFutures.sort((a, b) =>
       new Date(a.dateDePublication) - new Date(b.dateDePublication)
-    );
+    )
 
     // Limiter à 3 actualités
-    actualites.value = actuFutures.slice(0, 3);
+    actualites.value = actuFutures.slice(0, 3)
 
   } catch (error) {
-    errorMessageActu.value = "Erreur lors du chargement des actualités.";
-    console.error(error);
+    errorMessageActu.value = "Erreur lors du chargement des actualités."
+    console.error(error)
   } finally {
-    isLoadingActu.value = false;
+    isLoadingActu.value = false
   }
 }
 
+// ===============================
+// 🔹 ÉTATS - ÉVÉNEMENTS JUJITSU
+// ===============================
+const evenements = ref([])
+const isLoading = ref(true)
+const errorMessage = ref(null)
 
-/* ===============================
- 🔹 ÉVÉNEMENTS JUJITSU
- =============================== */
-
-const evenements = ref([]);
-const isLoading = ref(true);
-const errorMessage = ref(null);
-
-const API_PATH_EVENEMENT = 'Evenement';
-const JUJITSU_DISCIPLINE_ID = 3;
+const API_PATH_EVENEMENT = 'Evenement'
+const JUJITSU_DISCIPLINE_ID = 3
 
 /* Icônes */
 const iconMap = {
-  1: 'https://placehold.co/50x50/ffc107/343a40?text=JD',
-  2: 'https://placehold.co/50x50/ffc107/343a40?text=AK',
-  3: 'https://placehold.co/50x50/ffc107/343a40?text=JT',
-};
+  1: 'https://img.icons8.com/external-microdots-premium-microdot-graphic/64/external-judo-sport-fitness-vol3-microdots-premium-microdot-graphic.png',
+  2: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-aikido-martial-arts-flaticons-lineal-color-flat-icons-3.png',
+  3: 'https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-jiu-jitsu-martial-arts-flaticons-lineal-color-flat-icons-3.png',
+  4: 'https://img.icons8.com/color/96/martial-arts.png',
+}
 
 function getIconUrl(disciplineId) {
-  return iconMap[disciplineId] || 'https://placehold.co/50x50/cccccc/343a40?text=N/A';
+  return iconMap[disciplineId] || 'https://img.icons8.com/color/96/martial-arts.png'
 }
 
 async function fetchEvenement() {
   try {
-    isLoading.value = true;
-    errorMessage.value = null;
+    isLoading.value = true
+    errorMessage.value = null
 
-    const reponse = await api.get(API_PATH_EVENEMENT);
-    const evenementsAPI = reponse.data;
-    const maintenant = new Date();
-    const evenementsFiltres = evenementsAPI.filter(e =>
+    const reponse = await api.get(API_PATH_EVENEMENT)
+    const evenementsAPI = reponse.data
+    const maintenant = new Date()
+   const evenementsFiltres = evenementsAPI.filter(e =>
       e.disciplineId === JUJITSU_DISCIPLINE_ID &&
-      new Date(e.dateDebut) >= maintenant
-    );
+      new Date(e.dateFin) >= maintenant
+    )
 
     if (evenementsFiltres.length === 0) {
-      errorMessage.value = "Aucun événement de Jujitsu à venir trouvé.";
-      evenements.value = [];
-      return;
+      errorMessage.value = "Aucun événement de Jujitsu à venir trouvé."
+      evenements.value = []
+      return
     }
 
     evenementsFiltres.sort((a, b) =>
       new Date(a.dateDebut) - new Date(b.dateDebut)
-    );
+    )
 
-    evenements.value = evenementsFiltres.slice(0, 3);
+    evenements.value = evenementsFiltres.slice(0, 3)
 
   } catch (error) {
-    errorMessage.value = "Erreur lors du chargement des événements.";
-    console.error(error);
+    errorMessage.value = "Erreur lors du chargement des événements."
+    console.error(error)
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
 onMounted(() => {
-  fetchActualites();
-  fetchEvenement();
-});
+  fetchActualites()
+  fetchEvenement()
+})
 </script>
 
-
 <template>
-  <div class="container-fluid mt-5 bg-dark text-light p-4">
-    <div class="row">
-      <!-- Colonne Actualités -->
-      <div class="col-lg-6 col-md-6 col-sm-12 p-3 news-section">
-        <h2 class="text-center text-warning mb-5 display-5">Actualités</h2>
+  <div class="container-fluid py-5 bg-dark text-light border-top border-secondary border-opacity-10">
+    <div class="container py-4">
+      <div class="row g-5">
 
-        <div v-if="isLoadingActu" class="text-center text-light p-4">
-          Chargement des actualités... 🔄
-        </div>
-
-        <div v-else-if="errorMessageActu" class="text-center text-danger p-4">
-          {{ errorMessageActu }}
-        </div>
-
-        <div v-else-if="actualites.length === 0" class="text-center text-secondary p-4">
-          Aucune actualité n’a encore été publiée. Restez a l'affut !
-        </div>
-
-        <div v-else class="row g-4 justify-content-center">
-          <div v-for="actu in actualites" :key="actu.actualiteId" class="col-lg-4 col-md-12 col-sm-12">
-            <div class="card event-card h-100 shadow-lg">
-              <div class="card-body">
-
-                <p class="date-text mb-2">
-                  {{ formatDate(actu.dateDePublication) }}
-                </p>
-
-                <h5 class="card-title text-warning">
-                  {{ actu.titre || 'Actualité' }}
-                </h5>
-
-                <p class="card-text text-light description-text text-truncate">
-                  {{ actu.contenu || 'Aucune description disponible.' }}
-                </p>
-
-                <img :src="actu.imageUrl
-                  ? actu.imageUrl // Laisse le chemin relatif pur (/images/...)
-                  : '/images/actualites/placeholder-styling.jpg'" alt="Événement" class="news-image mb-3">
-
-                <router-link :to="`/actualite/${actu.actualiteId}`" class="btn btn-success fw-bold">
-                  Lire l'actualité
-                </router-link>
-              </div>
-            </div>
+        <!-- Colonne Actualités -->
+        <div class="col-lg-6 news-section">
+          <div class="text-center mb-5">
+            <span
+              class="text-uppercase tracking-wider fs-7 fw-bold text-success-custom d-block mb-2">Informations</span>
+            <h2 class="display-5 text-white fw-bold m-0">Actualités</h2>
           </div>
-        </div>
-      </div>
 
+          <div v-if="isLoadingActu" class="text-center text-light py-5">
+            <div class="spinner-border text-success-custom mb-3" role="status"></div>
+            <p class="m-0 text-muted">Chargement des actualités...</p>
+          </div>
 
-      <!-- Colonne Événements -->
-      <div class="col-lg-6 col-md-6 col-sm-12 p-3 events-section border-start border-secondary">
-        <h2 class="text-center text-warning mb-5 display-5">Évènements de Jujitsu à Venir</h2>
-        <div v-if="isLoading" class="text-center text-light p-4">
-          Chargement des événements... 🔄
-        </div>
-        <div v-else-if="errorMessage" class="text-center text-danger p-4">
-          {{ errorMessage }}
-        </div>
-        <div v-else-if="evenements.length === 0" class="text-center text-secondary p-4">
-          Aucun événement de Judo à venir n'est planifié. Restez à l'affût !
-        </div>
+          <div v-else-if="errorMessageActu"
+            class="alert alert-judo bg-success-custom text-success-custom border-0 text-center py-4">
+            {{ errorMessageActu }}
+          </div>
 
-        <div v-else class="row cards g-4 justify-content-center">
-          <div v-for="evenement in evenements" :key="evenement.evenementId" class="col-12">
-            <div class="card event-card h-100 shadow-lg">
-              <div class="card-body">
-                <!-- Date et Discipline -->
-                <div class="d-flex justify-content-between align-items-center mb-3 w-100">
-                  <p class="date-text mb-0">{{ formatDate(evenement.dateDebut) }}</p>
-                  <img :src="getIconUrl(evenement.disciplineId)" alt="Discipline Icon" class="discipline-icon">
+          <div v-else class="row g-4 justify-content-center">
+            <div v-for="actu in actualites" :key="actu.actualiteId" class="col-12">
+              <div class="card event-card h-100 shadow-lg border border-secondary border-opacity-10 rounded-4 p-3">
+                <div class="card-body d-flex flex-column">
+
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="date-text text-success-custom fw-semibold fs-6">
+                      {{ formatDate(actu.dateDePublication) }}
+                    </span>
+                  </div>
+
+                  <h3 class="card-title text-white fs-5 fw-bold mb-3">
+                    {{ actu.titre || 'Actualité' }}
+                  </h3>
+
+                  <div class="mb-3 overflow-hidden rounded-3 shadow-sm">
+                    <img :src="actu.imageUrl ? actu.imageUrl : '/images/actualites/placeholder-styling.jpg'"
+                      alt="Illustration actualité" class="news-image">
+                  </div>
+
+                  <p class="card-text text-light opacity-85 description-text text-truncate mb-4">
+                    {{ actu.contenu || 'Aucune description disponible.' }}
+                  </p>
+
+                  <router-link :to="`/actualite/${actu.actualiteId}`"
+                    class="btn btn-success-custom fw-bold rounded-pill mt-auto align-self-start px-4 py-2">
+                    Lire l'actualité
+                  </router-link>
+
                 </div>
-
-                <!-- Titre et Description -->
-                <h5 class="card-title text-warning text-truncate">{{ evenement.titre || 'Evénement' }}</h5>
-                <p class="card-text text-light description-text ">{{ evenement.description || 'Pas de description disponible.' }}</p>
-
-                <!-- Bouton -->
-                <router-link :to="`/evenement/${evenement.evenementId}`"
-                  class="btn btn-success fw-bold mt-auto stretched-link">
-                  Lire l'actualité
-                </router-link>
               </div>
             </div>
           </div>
-
         </div>
+
+        <!-- Colonne Événements -->
+        <div class="col-lg-6 events-section border-lg-start border-secondary border-opacity-10 ps-lg-5">
+          <div class="text-center mb-5">
+            <span class="text-uppercase tracking-wider fs-7 fw-bold text-success-custom d-block mb-2">Agenda</span>
+            <h2 class="display-5 text-white fw-bold m-0">Événements Jujitsu</h2>
+          </div>
+
+          <div v-if="isLoading" class="text-center text-light py-5">
+            <div class="spinner-border text-success-custom mb-3" role="status"></div>
+            <p class="m-0 text-muted">Chargement des événements...</p>
+          </div>
+
+          <div v-else-if="errorMessage"
+            class="alert alert-judo bg-success-custom text-success-custom border-0 text-center py-4">
+            {{ errorMessage }}
+          </div>
+
+          <div v-else class="row g-4 justify-content-center">
+            <div v-for="evenement in evenements" :key="evenement.evenementId" class="col-12">
+              <div class="card event-card h-100 shadow-lg border border-secondary border-opacity-10 rounded-4 p-3">
+                <div class="card-body d-flex flex-column">
+
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="date-text text-success-custom fw-semibold fs-6">
+                      {{ formatDate(evenement.dateDebut) }}
+                    </span>
+                    <div class="discipline-icon-wrapper shadow-sm">
+                      <img :src="getIconUrl(evenement.disciplineId)" alt="Discipline Icon" class="discipline-icon">
+                    </div>
+                  </div>
+
+                  <h3 class="card-title text-white fs-5 fw-bold mb-3 text-truncate">
+                    {{ evenement.titre || 'Événement' }}
+                  </h3>
+
+                  <p class="card-text text-light opacity-85 description-text mb-4">
+                    {{ evenement.description || 'Pas de description disponible.' }}
+                  </p>
+
+                  <router-link :to="`/evenement/${evenement.evenementId}`"
+                    class="btn btn-success-custom fw-bold rounded-pill mt-auto align-self-start px-4 py-2">
+                    En savoir plus
+                  </router-link>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Conteneur principal */
-.container-fluid {
-  padding-top: 40px;
-  padding-bottom: 40px;
-}
-
-/* Sections */
-.events-section {
-  /* Style pour séparer la section Événements des Actualités */
-  padding-left: 30px;
-}
-
-/* Cartes des événements */
+/* Cartes unifiées (Dark Card style) */
 .event-card {
-  background-color: #2b2e31;
-  /* Un peu plus clair que le fond dark */
+  background-color: #1a1d21;
   color: white;
-  border: 1px solid #495057;
-  border-radius: 12px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .event-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.4);
+  border-color: rgba(56, 239, 125, 0.3) !important;
 }
 
 .card-body {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
   text-align: left;
 }
 
 .date-text {
-  font-weight: 600;
-  color: #ced4da;
-  /* Gris clair pour la date */
-  font-size: 0.95rem;
-}
-
-.discipline-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  /* Ajoutez des styles spécifiques si vos icônes sont des logos */
-}
-
-.card-title {
-  font-weight: 700;
-  font-size: 1.3rem;
-}
-
-.news-image {
-width: 100%;
-height: 200px;
-object-fit: cover;
-border-radius: 6px;
-}
-
-
-.description-text {
-  flex-grow: 1;
-  /* Permet à la description de prendre tout l'espace avant le bouton */
-  margin-bottom: 15px;
   font-size: 0.9rem;
 }
 
-.btn-success{
-  background-color: #38ef7d;
-  color: #2b2e31;
-  font-weight: 600;
+.alert-judo {
+  background-color: rgba(56, 239, 125, 0.15);
+  color: #38ef7d !important;
 }
 
+.discipline-icon-wrapper {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #2b2e31;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.discipline-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.news-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: transform 0.4s ease;
+}
+
+.event-card:hover .news-image {
+  transform: scale(1.03);
+}
+
+.description-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Bouton personnalisé couleur verte Jujitsu */
+.btn-success-custom {
+  background-color: transparent;
+  border: 2px solid #38ef7d;
+  color: #38ef7d;
+  transition: all 0.3s ease;
+}
+
+.btn-success-custom:hover {
+  background-color: #38ef7d;
+  color: #1a1d21;
+  box-shadow: 0 4px 12px rgba(56, 239, 125, 0.3);
+}
+
+.text-success-custom {
+  color: #38ef7d !important;
+}
+
+.tracking-wider {
+  letter-spacing: 0.15em;
+}
+
+.fs-7 {
+  font-size: 0.75rem;
+}
 
 /* Responsive pour la bordure de séparation */
-@media (max-width: 991px) {
-
-  /* Pour les écrans < lg */
+@media (max-width: 991.98px) {
   .events-section {
-    border-top: 1px solid #495057 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-left: none !important;
-    margin-top: 30px;
+    padding-top: 3rem;
+    padding-left: 0 !important;
+    margin-top: 1rem;
   }
 }
 </style>

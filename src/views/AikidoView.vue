@@ -4,136 +4,144 @@
 // ===============================
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
-import AikidoCoursView from '@/components/Aikido/AikidoCoursView.vue';
-import ActEventAikidoView from '@/components/Aikido/ActEventAikidoView.vue';
+import AikidoCoursView from '@/components/Aikido/AikidoCoursView.vue'
+import ActEventAikidoView from '@/components/Aikido/ActEventAikidoView.vue'
 
 // ===============================
 // 🔹 ÉTATS
 // ===============================
-const discipline = ref([]);
-const aikidoDiscipline = ref(null);
-const isLoading = ref(true);
-const errorMessage = ref(null);
+const aikidoDiscipline = ref(null)
+const isLoading = ref(true)
+const errorMessage = ref(null)
 
 // ===============================
 // 🔹 CONSTANTES D’API
 // ===============================
-const API_PATH_DISCIPLINE = 'Discipline';
+const API_PATH_DISCIPLINE = 'Discipline'
 
 // ===============================
 // 🔹 FONCTIONS
 // ===============================
-
 async function fetchDiscipline() {
   try {
-    isLoading.value = true;
+    isLoading.value = true
     const reponse = await api.get(API_PATH_DISCIPLINE)
-    const allDiscipline = reponse.data;
-    const foundAikido = allDiscipline.find(d => d.nom === 'Aïkido');
+    const allDiscipline = reponse.data
+    const foundAikido = allDiscipline.find(d => d.nom === 'Aïkido')
     if (foundAikido) {
-      aikidoDiscipline.value = foundAikido;
+      aikidoDiscipline.value = foundAikido
     } else {
-      errorMessage.value = "Discipline Aikido non trouvée.";
+      errorMessage.value = "Discipline Aïkido non trouvée."
     }
-    console.log("Discipline chargés", discipline.value);
   } catch (error) {
-    console.error('❌ Erreur lors du chargement des disciplines :', error);
-    errorMessage.value = "Erreur lors du chargement des disciplines.";
+    console.error('❌ Erreur lors du chargement des disciplines :', error)
+    errorMessage.value = "Erreur lors du chargement des disciplines."
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
-onMounted(fetchDiscipline);
-
+onMounted(fetchDiscipline)
 </script>
 
 <template>
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
-    <div class="imgBaniereJudo">
-      <div class="titlePrincipal">
-        <div class="overlay">
-          <h1 class="fs-1 text-uppercase ">AIKIDO</h1>
-          <p class="fs-3 text-uppercase">L’art de l’harmonie et du mouvement.</p>
+    <!-- Bannière Hero Modernisée -->
+    <div class="imgBaniereAikido">
+      <div class="overlay">
+        <div class="container text-center">
+          <span class="text-uppercase tracking-wider fs-7 fw-bold text-info d-block mb-2">Art Martial</span>
+          <h1 class="display-3 fw-black text-white text-uppercase mb-3">AÏKIDO</h1>
+          <p class="fs-4 text-light opacity-88 text-uppercase m-0">L’art de l’harmonie et du mouvement.</p>
         </div>
       </div>
     </div>
 
-    <div class="container defDisciplineAikido mt-5">
-      <div class="defDiscipline ">
-        <h2>Qu'est ce que l'Aïkido ?</h2>
-        <p v-if="isLoading" class="fs-5 text-warning">Chargement de la description...</p>
-        <p v-else-if="errorMessage" class="fs-5 text-danger">{{ errorMessage }}</p>
-        <p v-else-if="aikidoDiscipline" class="fs-5">
+    <!-- Section Description -->
+    <div class="container py-5">
+      <div class="defDisciplineCard p-4 p-md-5 rounded-4 bg-dark-card border border-secondary border-opacity-10 shadow-lg">
+        <h2 class="text-white fw-bold mb-4 position-relative pb-2 title-underline">Qu'est-ce que l'Aïkido ?</h2>
+
+        <div v-if="isLoading" class="text-center py-4">
+          <div class="spinner-border text-info mb-2" role="status"></div>
+          <p class="m-0 text-muted fs-6">Chargement de la description...</p>
+        </div>
+
+        <div v-else-if="errorMessage" class="alert alert-danger bg-danger bg-opacity-15 text-danger border-0">
+          {{ errorMessage }}
+        </div>
+
+        <p v-else-if="aikidoDiscipline" class="fs-5 text-light lh-lg m-0 opacity-90">
           {{ aikidoDiscipline.description }}
         </p>
       </div>
     </div>
 
-    <div class="container-fluid">
+    <!-- Sous-composants -->
+    <div class="container-fluid px-0">
       <AikidoCoursView />
       <ActEventAikidoView />
     </div>
   </div>
 </template>
 
-
 <style scoped>
-.imgBaniereJudo {
+/* --- BANNIÈRE HERO --- */
+.imgBaniereAikido {
   position: relative;
   background-image: url('@/assets/img/baniereAikido.png');
   background-size: cover;
   background-position: center 32%;
   width: 100%;
-  height: 650px;
+  height: 550px;
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  color: white;
-  text-align: center;
-}
-
-.titlePrincipal {
-  margin-top: 100px;
-  color: #31b3d0;
 }
 
 .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.45); /* Overlay sombre plus prononcé */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: 2rem;
-}
-
-.overlay h1, .overlay p {
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 2px 2px 4px #000;
-}
-
-
-
-.defDisciplineJudo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(26, 29, 33, 0.95));
   display: flex;
-}
-
-.defDisciplineJudo img {
-  width: 100px;
-  margin: 10px;
-}
-
-.defDiscipline {
-  display: flex;
-  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* --- CARTE DE DESCRIPTION --- */
+.bg-dark-card {
+  background-color: #1a1d21;
+  border-left: 6px solid #31b3d0 !important; /* Bordure bleue caractéristique de l'Aïkido */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bg-dark-card:hover {
+  border-color: rgba(49, 179, 208, 0.4) !important;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.5);
+}
+
+.title-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  height: 3px;
+  background-color: #31b3d0;
+  border-radius: 2px;
+}
+
+/* --- TYPO & UTILITAIRES --- */
+.tracking-wider {
+  letter-spacing: 0.15em;
+}
+
+.fw-black {
+  font-weight: 900;
+}
+
+.fs-7 {
+  font-size: 0.75rem;
 }
 </style>

@@ -6,155 +6,221 @@ import ChoisirHome from '@/components/Home/ChoisirHome.vue';
 import EventActuHome from '@/components/Home/EventActuHome.vue';
 
 const showModal = ref(false);
-
-// 2. Clé pour le SessionStorage (à changer si l'alerte change)
 const ALERT_KEY = 'alert_travaux_vu';
 
-// 3. Logique d'affichage au chargement du composant
 onMounted(() => {
-    // Vérifie si l'utilisateur a déjà vu cette alerte
-    const alertAlreadySeen = sessionStorage.getItem(ALERT_KEY);
-
-    if (!alertAlreadySeen) {
-        showModal.value = true; // Affiche la pop-up
-    }
+  const alertAlreadySeen = sessionStorage.getItem(ALERT_KEY);
+  if (!alertAlreadySeen) {
+    showModal.value = true;
+  }
 });
 
-// 4. Logique de fermeture
 const closeModal = () => {
-    showModal.value = false;
-    // Enregistre dans la Session que l'utilisateur a vu/fermé l'alerte
-    sessionStorage.setItem(ALERT_KEY, 'true');
+  showModal.value = false;
+  sessionStorage.setItem(ALERT_KEY, 'true');
 };
-
 </script>
 
 <template>
-    <div v-if="showModal" class="modal-backdrop-custom d-flex justify-content-center align-items-center">
-        <div class="modal-dialog-custom" role="document">
-            <div class="modal-content bg-light text-dark shadow-lg">
-                <div class="modal-header border-bottom border-dark">
-                    <h5 class="modal-title fw-bold">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> INFORMATION IMPORTANTE : Changement de Lieu
-                    </h5>
-                    <button type="button" class="btn-close" @click="closeModal" aria-label="Fermer"></button>
-                </div>
+  <!-- 🔹 MODALE D'INFORMATION -->
+  <Transition name="fade">
+    <div v-if="showModal" class="modal-backdrop-custom d-flex justify-content-center align-items-center p-3">
+      <div class="modal-dialog-custom w-100" role="document">
+        <div class="modal-content border-0 rounded-4 shadow-2xl bg-dark-card text-white overflow-hidden">
 
-                <div class="modal-body">
-                    <p class="lead">
-                        En raison de travaux de rénovation de notre complexe sportif habituel, tous les cours de <strong>Judo, Aïkido et Jujitsu</strong> se déroulent actuellement à une nouvelle adresse temporaire.
-                    </p>
-                    <hr>
-                    <p class="mb-1 fw-bold">📍 Nouvelle Adresse Temporaire :</p>
-                    <p class="mb-3 fs-5">
-                        Complexe Sportif de Tennis <br>
-                    </p>
-                    <p class="small text-muted">
-                        Cette disposition est en vigueur jusqu'à nouvel ordre. Veuillez consulter la section "Actualités" pour les mises à jour.
-                    </p>
-                </div>
-
-                <div class="modal-footer border-top border-dark">
-                    <button type="button" class="btn btn-warning fw-bold mt-2" @click="closeModal">J'ai compris</button>
-                </div>
-
+          <!-- En-tête -->
+          <div
+            class="modal-header border-bottom border-secondary border-opacity-25 p-4 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+              <span class="icon-badge bg-warning bg-opacity-10 text-warning rounded-circle flex-shrink-0">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+              </span>
+              <div>
+                <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-1">Information
+                  importante</span>
+                <h5 class="modal-title fw-bold text-white m-0">Changement de lieu temporaire</h5>
+              </div>
             </div>
+            <button type="button" class="btn-close btn-close-white opacity-75" @click="closeModal"
+              aria-label="Fermer"></button>
+          </div>
+
+          <!-- Corps -->
+          <div class="modal-body p-4">
+            <p class="text-light-50 fs-6 lh-base mb-4">
+              En raison de travaux de rénovation de notre complexe sportif habituel, tous les cours de
+              <strong class="text-white">Judo, Aïkido et Jujitsu</strong> sont déplacés à une adresse temporaire.
+            </p>
+
+            <div class="location-box p-3 rounded-3 border border-secondary border-opacity-25 bg-surface mb-3">
+              <div class="d-flex align-items-center gap-2 text-warning fw-semibold mb-1">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>Nouvelle adresse :</span>
+              </div>
+              <p class="fs-5 fw-bold text-white m-0 ps-4">
+                Complexe Sportif de Tennis
+              </p>
+            </div>
+
+            <p class="small text-muted m-0 d-flex align-items-center gap-2">
+              <i class="bi bi-info-circle"></i>
+              Cette disposition reste en vigueur jusqu'à nouvel ordre.
+            </p>
+          </div>
+
+          <!-- Pied de page -->
+          <div
+            class="modal-footer border-top border-secondary border-opacity-25 p-3 px-4 bg-surface d-flex justify-content-end">
+            <button type="button" class="btn btn-warning fw-bold px-4 py-2 rounded-3 shadow-sm" @click="closeModal">
+              J'ai compris
+            </button>
+          </div>
+
         </div>
+      </div>
+    </div>
+  </Transition>
+
+  <!-- 🔹 CONTENU PRINCIPAL -->
+  <div class="container-fluid p-0 bg-dark text-light min-vh-100">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="hero-overlay"></div>
+      <div class="hero-content text-center px-3">
+        <h1 class="display-3 fw-black text-uppercase text-white tracking-tight mb-3">
+          L'art du mouvement <br>
+          <span class="text-warning">L'esprit des disciplines.</span>
+        </h1>
+        <div
+          class="hero-subtitle-badge d-inline-block px-4 py-2 rounded-pill bg-dark bg-opacity-50 border border-secondary border-opacity-50 backdrop-blur">
+          <p class="fs-5 text-light m-0 fw-medium tracking-wide">Judo — Aïkido — Jujitsu</p>
+        </div>
+      </div>
     </div>
 
+    <!-- Sections -->
+    <CardsHomes />
+    <SenseiHome />
 
-    <div class="container-fluid p-0 bg-dark text-light min-vh-100">
-        <div class="imgBaniereHome">
-            <div class="titlePrincipal">
-                <h1 class="fs-1 text-uppercase display-3 text-white text-center">L'art du mouvement <br> L'esprit des
-                    disciplines.</h1>
-                <p class="fs-3">Judo - Aikido - Jujitsu</p>
-            </div>
-        </div>
-
-        <CardsHomes></CardsHomes>
-        <SenseiHome></SenseiHome>
-        <div class="row secondaryPartie d-flex justify-content-around">
-            <div class="col-lg-6 col-md-8 col-sm-12 pourquoiNousChoisir">
-                <ChoisirHome></ChoisirHome>
-            </div>
-            <div class="col-lg-6 eventAct">
-                <EventActuHome></EventActuHome>
-            </div>
-        </div>
+    <div class="row secondaryPartie d-flex justify-content-around g-4 px-3 px-lg-5 py-5 m-0">
+      <div class="col-lg-6 col-md-8 col-sm-12 pourquoiNousChoisir">
+        <ChoisirHome />
+      </div>
+      <div class="col-lg-6 eventAct">
+        <EventActuHome />
+      </div>
     </div>
+
+  </div>
 </template>
 
-
 <style scoped>
-.imgBaniereHome {
+/* ─── Hero Banner ─── */
+.hero-banner {
   background-image: url('@/assets/img/baniereHome.png');
- background-size: cover;
+  background-size: cover;
   background-position: center 15%;
   width: 100%;
-  height: 600px;
+  height: 620px;
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
   position: relative;
-  color: white;
-  text-align: center;
 }
 
-.titlePrincipal {
-  margin-top: 100px;
-}
-
-h1 {
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  text-shadow: 2px 2px 4px #000;
-}
-
-
-.modal-backdrop-custom {
-  position: fixed;
+.hero-overlay {
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
-  z-index: 1050;
+  background: linear-gradient(180deg, rgba(18, 18, 18, 0.4) 0%, rgba(18, 18, 18, 0.95) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  margin-top: 60px;
+}
+
+h1 {
+  font-weight: 900;
+  letter-spacing: -1px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+
+.tracking-wide {
+  letter-spacing: 0.05em;
+}
+
+.backdrop-blur {
+  backdrop-filter: blur(8px);
+}
+
+/* ─── Modale Custom ─── */
+.modal-backdrop-custom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+  z-index: 2000;
 }
 
 .modal-dialog-custom {
-
-    background: transparent;
-    max-width: 600px;
-    margin: 1.75rem auto;
-    width: 90%;
+  max-width: 540px;
 }
 
-.modal-content {
-    border-radius: 0.5rem;
-    padding: 20px;
+.bg-dark-card {
+  background-color: #1a1d21;
 }
 
-/* Styles pour le bouton de fermeture Bootstrap sur fond sombre */
-.btn-close {
-    background-color: transparent;
-    color: #212529; /* Couleur sombre */
-    opacity: 0.7;
-  }
-
-  .btn-close:hover {
-    opacity: 1;
+.bg-surface {
+  background-color: #141619;
 }
 
+.icon-badge {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.text-light-50 {
+  color: #c5c9d0;
+}
+
+.fs-7 {
+  font-size: 0.75rem;
+}
+
+/* Transitions Vue */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Responsive */
 @media (max-width: 767.98px) {
   .pourquoiNousChoisir {
     display: none;
-
   }
 
-
+  .hero-banner {
+    height: 480px;
+  }
 }
 </style>
