@@ -110,8 +110,8 @@ onMounted(async () => {
     <div class="container-fluid py-5">
       <div class="containerSensei container py-4">
         <div class="text-center mb-5">
-          <span class="text-uppercase tracking-wider fs-7 fw-bold text-info-custom d-block mb-2">Encadrement</span>
-          <h2 class="section-title text-uppercase display-5 text-white fw-bold m-0">L'ÉQUIPE PÉDAGOGIQUE</h2>
+          <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-2">Encadrement</span>
+          <h2 class="section-title text-uppercase display-5 text-white m-0">L'ÉQUIPE PÉDAGOGIQUE</h2>
         </div>
 
         <div v-if="isLoading" class="text-center py-5">
@@ -134,7 +134,7 @@ onMounted(async () => {
               </div>
               <div class="card-body text-center pt-2 pb-4 px-4 d-flex flex-column">
                 <h3 class="card-title fw-bold text-white fs-4 mb-1">{{ sensei.prenom }} {{ sensei.nom }}</h3>
-                <p class="card-subtitle mb-3 text-info-custom fw-semibold">{{ sensei.grade || 'Ceinture Noire - Grade non précisé' }}</p>
+                <p :style="{color: getDisciplineColorId(sensei.disciplineId)}" class="card-subtitle mb-3 fw-semibold">{{ sensei.grade || 'Grade non précisé' }}</p>
                 <p class="card-text disciplines text-light opacity-80 mb-4">
                   Discipline : <span class="text-white fw-semibold">{{ getDisciplineName(sensei.disciplineId) }}</span>
                 </p>
@@ -196,6 +196,7 @@ onMounted(async () => {
   font-size: 1.05rem;
   max-width: 750px;
   line-height: 1.6;
+  font-weight: 600;
 }
 
 .containerSensei {
@@ -244,10 +245,6 @@ onMounted(async () => {
   box-shadow: 0 4px 15px rgba(49, 179, 208, 0.3);
 }
 
-/* Utilitaires */
-.text-info-custom {
-  color: #31b3d0 !important;
-}
 
 .tracking-wider {
   letter-spacing: 0.15em;

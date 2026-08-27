@@ -68,7 +68,7 @@ onMounted(fetchCours)
     <div class="container py-4">
       <div class="text-center mb-5">
         <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-2">Bien-être & Convivialité</span>
-        <h2 class="display-4 text-white fw-black text-uppercase m-0">NOS COURS</h2>
+        <h2 class="display-4 text-white text-uppercase m-0">NOS COURS</h2>
       </div>
 
       <div v-if="isLoading" class="text-center py-5">

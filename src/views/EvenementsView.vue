@@ -130,7 +130,7 @@ onMounted(fetchEvenements);
     <!-- Bannière Événements -->
     <div class="imgBaniereEvent">
       <div class="overlay">
-        <span class="text-uppercase tracking-wider fs-7 fw-bold text-info-custom d-block mb-2">Agenda & Rencontres</span>
+        <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-2">Agenda & Rencontres</span>
         <h1 class="display-3 text-uppercase text-white fw-black">
           Événements du Club
         </h1>
@@ -144,7 +144,7 @@ onMounted(fetchEvenements);
     <div class="container my-5">
       <div class="d-flex flex-wrap justify-content-center gap-2">
         <button
-          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'all' ? 'btn-info-custom shadow' : 'btn-outline-custom-muted']"
+          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'all' ? 'btn btn-warning shadow' : 'btn-outline-custom-muted']"
           @click="selectedDiscipline = 'all'">
           Toutes
         </button>
@@ -399,10 +399,7 @@ onMounted(fetchEvenements);
   color: #ffffff;
 }
 
-.btn-info-custom {
-  background-color: #31b3d0 !important;
-  color: #1a1d21 !important;
-}
+
 
 .btn-judo {
   background-color: #d9534f !important;
@@ -424,10 +421,7 @@ onMounted(fetchEvenements);
   color: #1a1d21 !important;
 }
 
-/* --- UTILITAIRES --- */
-.text-info-custom {
-  color: #31b3d0 !important;
-}
+
 
 .tracking-wider {
   letter-spacing: 0.1em;

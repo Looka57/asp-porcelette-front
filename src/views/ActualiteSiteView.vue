@@ -130,7 +130,7 @@ onMounted(fetchActualites);
     <div class="container my-5">
       <div class="d-flex flex-wrap justify-content-center gap-2">
         <button
-          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'all' ? 'btn-info-custom shadow' : 'btn-outline-custom-muted']"
+          :class="['btn rounded-pill px-4 py-2 fw-semibold transition-all', selectedDiscipline === 'all' ? 'btn btn-warning shadow' : 'btn-outline-custom-muted']"
           @click="selectedDiscipline = 'all'">
           Toutes
         </button>
@@ -376,10 +376,7 @@ onMounted(fetchActualites);
   color: #ffffff;
 }
 
-.btn-info-custom {
-  background-color: #31b3d0 !important;
-  color: #1a1d21 !important;
-}
+
 
 .btn-judo {
   background-color: #d9534f !important;

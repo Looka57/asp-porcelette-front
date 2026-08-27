@@ -134,7 +134,7 @@ onMounted(() => {
           <div class="text-center mb-5">
             <span
               class="text-uppercase tracking-wider fs-7 fw-bold text-success-custom d-block mb-2">Informations</span>
-            <h2 class="display-5 text-white fw-bold m-0">Actualités</h2>
+            <h2 class="display-5 text-white m-0">Actualités</h2>
           </div>
 
           <div v-if="isLoadingActu" class="text-center text-light py-5">
@@ -186,7 +186,7 @@ onMounted(() => {
         <div class="col-lg-6 events-section border-lg-start border-secondary border-opacity-10 ps-lg-5">
           <div class="text-center mb-5">
             <span class="text-uppercase tracking-wider fs-7 fw-bold text-success-custom d-block mb-2">Agenda</span>
-            <h2 class="display-5 text-white fw-bold m-0">Événements Jujitsu</h2>
+            <h2 class="display-5 text-white m-0">Événements Jujitsu</h2>
           </div>
 
           <div v-if="isLoading" class="text-center text-light py-5">

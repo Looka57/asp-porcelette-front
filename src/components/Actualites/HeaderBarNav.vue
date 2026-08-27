@@ -100,8 +100,14 @@ function filterStatus(status) {
       class="flex flex-column sm:flex-row justify-content-between align-items-center gap-3 bg-dark-eval p-3 border-round-xl border-1 border-white-alpha-10">
 
       <!-- Bouton d'ajout -->
-      <Button label="Ajouter une actualité" icon="pi pi-plus-circle" severity="warning"
-        class="btn-primary w-full sm:w-auto px-4 py-2 gap-3 " @click="openCreateModal" />
+<Button
+  label="Ajouter une actualité"
+  icon="pi pi-plus-circle"
+  severity="warn"
+  variant="outlined"
+  class="btn-add-actualite w-full sm:w-auto px-4 py-2 gap-3"
+  @click="openCreateModal"
+/>
 
       <!-- Champ de recherche PrimeVue -->
       <div
@@ -124,20 +130,19 @@ function filterStatus(status) {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #ffbb33;
-  color: #121417;
-  border: none;
-  padding: 0.65rem 1.25rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
+.btn-add-actualite {
+  border: 1px solid #ffbb33 !important;
+  color: #ffbb33 !important;
+  border-radius: 5px;
+  background: transparent !important;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(255, 187, 51, 0.15);
+}
+
+.btn-add-actualite:hover {
+  background: rgba(255, 187, 51) !important;
+  border-color: #ffbb33 !important;
+  color: #070707 !important;
+  box-shadow: 0 0 12px rgba(255, 187, 51, 0.2);
 }
 
 .stat-card:hover {

@@ -131,7 +131,7 @@ onMounted(fetchTarif);
     <!-- Bannière Tarifs -->
     <div class="imgBaniereTarifs">
       <div class="overlay">
-        <span class="text-uppercase tracking-wider fs-7 fw-bold text-info-custom d-block mb-2">Adhésion & Formules</span>
+        <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-2">Adhésion & Formules</span>
         <h1 class="display-3 text-uppercase text-white fw-black">
           Nos Tarifs
         </h1>
@@ -174,7 +174,7 @@ onMounted(fetchTarif);
                  :class="`section-${group.slug}`">
 
               <h2 class="accordion-header" :id="`heading-${group.slug}`">
-                <button class="accordion-button bg-dark-card text-white fw-bold collapsed py-4 px-4 fs-5" type="button"
+                <button class="accordion-button bg-dark-card text-white collapsed py-4 px-4 fs-5" type="button"
                   data-bs-toggle="collapse" :data-bs-target="`#collapse-${group.slug}`" aria-expanded="false"
                   :aria-controls="`collapse-${group.slug}`">
                   <span class="badge me-3 px-3 py-2 rounded-pill shadow-sm fs-7 text-uppercase"
@@ -336,10 +336,6 @@ onMounted(fetchTarif);
 }
 
 /* --- UTILITAIRES --- */
-.text-info-custom {
-  color: #31b3d0 !important;
-}
-
 .tracking-wider {
   letter-spacing: 0.1em;
 }

@@ -144,7 +144,7 @@ onMounted(async () => {
     <!-- Bannière profil -->
     <div class="imgBaniereAikido">
       <div class="overlay">
-        <span class="text-uppercase tracking-wider fs-7 fw-bold text-info-custom d-block mb-2">Encadrement & Pédagogie</span>
+        <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-2">Encadrement & Pédagogie</span>
         <h1 class="display-3 text-uppercase text-white fw-black">
           Profil du Sensei
         </h1>
@@ -189,7 +189,7 @@ onMounted(async () => {
               <div class="row text-start details-row align-items-center g-4">
                 <div class="col-sm-6 mb-3 textDiscipline">
                   <h6 class="text-light text-uppercase fs-7 fw-bold tracking-wider mb-2">Discipline principale</h6>
-                  <p class="fw-bold fs-5 text-white mb-3">{{ getDisciplineName(sensei.disciplineId) }}</p>
+                  <p :style="{ color: getDisciplineColorId(sensei.disciplineId) }" class="fw-bold fs-5 mb-3">{{ getDisciplineName(sensei.disciplineId) }}</p>
                   <SenseiBulleView class="iconDiscipline" :discipline-id="sensei.disciplineId" />
                 </div>
 
