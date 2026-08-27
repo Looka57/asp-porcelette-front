@@ -1,221 +1,99 @@
 <script setup>
-
-/* ════════════════════════════════════════════════════════════════════════ */
-/* 📦 IMPORTS */
-/* ════════════════════════════════════════════════════════════════════════ */
-
+/* ... tes imports et ta logique existante ne changent pas ... */
 import { ref, onMounted } from 'vue';
 import { LineChart } from 'vue-chart-3';
 import { Chart, registerables } from 'chart.js';
 import api from '@/api/axios';
 import CountUp from 'vue-countup-v3';
-
 import ProgressSpinner from 'primevue/progressspinner';
 import Tag from 'primevue/tag';
-
 import { useEvolutionInscriptionsChart } from '@/composables/useChartData';
 import SaisonStatisticsChart from '@/composables/SaisonStatisticsChart.vue';
 
-
-/* ════════════════════════════════════════════════════════════════════════ */
-/* ⚙️ CONFIGURATION DE CHART.JS */
-/* ════════════════════════════════════════════════════════════════════════ */
-
 Chart.register(...registerables);
 
-/* ════════════════════════════════════════════════════════════════════════ */
-/* 🎯 UTILISATION DU COMPOSABLE */
-/* ════════════════════════════════════════════════════════════════════════ */
-
 const rawInscriptionsData = ref({});
-
-const {
-  inscriptionsData,
-  chartOptions,
-  totalInscriptions
-} = useEvolutionInscriptionsChart(rawInscriptionsData);
+const { inscriptionsData, chartOptions, totalInscriptions } = useEvolutionInscriptionsChart(rawInscriptionsData);
 
 const totalLicencies = ref(0);
 const totalEvenements = ref(0);
 const totalCompta = ref(0);
 
-
-/* ════════════════════════════════════════════════════════════════════════ */
-/* 🧠 LOGIQUE DU COMPOSANT */
-/* ════════════════════════════════════════════════════════════════════════ */
-
-const DISCIPLINES_MAP = {
-  1: 'Judo',
-  2: 'Aïkido',
-  3: 'Jujitsu',
-  4: 'Judo Détente',
-};
-
+const DISCIPLINES_MAP = { 1: 'Judo', 2: 'Aïkido', 3: 'Jujitsu', 4: 'Judo Détente' };
 const DISCIPLINES_NAMES = Object.values(DISCIPLINES_MAP);
-
-
-/* 📅 Mois de la saison sportive : Septembre → Juin */
-const MONTHS = [
-  'Sept',
-  'Oct',
-  'Nov',
-  'Déc',
-  'Jan',
-  'Fév',
-  'Mar',
-  'Avr',
-  'Mai',
-  'Juin'
-];
-
-
-/* ════════════════════════════════════════════════════════════════════════ */
-/* 📊 TRAITEMENT DES INSCRIPTIONS */
-/* ════════════════════════════════════════════════════════════════════════ */
+const MONTHS = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
 
 const processInscriptionsData = (allUsers) => {
-
   const today = new Date();
-
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
-
-  const seasonStartYear = currentMonth >= 8
-    ? currentYear
-    : currentYear - 1;
-
-  const currentMonthIndex = currentMonth >= 8
-    ? currentMonth - 8
-    : currentMonth + 4;
+  const seasonStartYear = currentMonth >= 8 ? currentYear : currentYear - 1;
+  const currentMonthIndex = currentMonth >= 8 ? currentMonth - 8 : currentMonth + 4;
 
   const monthlyData = DISCIPLINES_NAMES.reduce((acc, disc) => {
     acc[disc] = new Array(MONTHS.length).fill(0);
     return acc;
   }, {});
 
-  let usersComptes = 0;
-
   allUsers.forEach(user => {
-
     const isAdherent = user.roles && user.roles.includes('Adherent');
     const userDiscipline = DISCIPLINES_MAP[user.disciplineId];
     const dateAdhesion = user.dateAdhesion;
-
-    if (!isAdherent || !userDiscipline || !dateAdhesion) {
-      return;
-    }
-
+    if (!isAdherent || !userDiscipline || !dateAdhesion) return;
     const inscriptionDate = new Date(dateAdhesion);
-
-    if (isNaN(inscriptionDate.getTime())) {
-      return;
-    }
-
-    if (inscriptionDate.getFullYear() < seasonStartYear) {
-      return;
-    }
-
+    if (isNaN(inscriptionDate.getTime()) || inscriptionDate.getFullYear() < seasonStartYear) return;
     const month = inscriptionDate.getMonth();
-    let monthIndex;
-
-    if (month >= 8) {
-      monthIndex = month - 8;
-    } else if (month <= 5) {
-      monthIndex = month + 4;
-    } else {
-      return;
-    }
-
-    if (monthIndex > currentMonthIndex) {
-      return;
-    }
-
-    if (monthIndex >= 0 && monthIndex < MONTHS.length) {
+    let monthIndex = month >= 8 ? month - 8 : (month <= 5 ? month + 4 : -1);
+    if (monthIndex >= 0 && monthIndex <= currentMonthIndex && monthIndex < MONTHS.length) {
       monthlyData[userDiscipline][monthIndex]++;
-      usersComptes++;
     }
   });
-
-  console.log('>>> SAISON ACTUELLE =', `${seasonStartYear}-${seasonStartYear + 1}`);
-  console.log('>>> MOIS ACTUEL =', MONTHS[currentMonthIndex]);
-  console.log('>>> NOMBRE DE LICENCIÉS COMPTÉS =', usersComptes);
-  console.log('>>> DONNÉES BRUTES DU GRAPHIQUE =', monthlyData);
-
   rawInscriptionsData.value = monthlyData;
 };
 
-/* ════════════════════════════════════════════════════════════════════════ */
-/* 📡 RÉCUPÉRATION DES STATISTIQUES */
-/* ════════════════════════════════════════════════════════════════════════ */
-
 const fetchStats = async () => {
-
   try {
     const licenciesResponse = await api.get('/User/admin/list');
-    const allUsers = licenciesResponse.data || [];
-    processInscriptionsData(allUsers);
-
+    processInscriptionsData(licenciesResponse.data || []);
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
-
-    const seasonStartYear = currentMonth >= 8
-      ? currentYear
-      : currentYear - 1;
-
+    const seasonStartYear = currentMonth >= 8 ? currentYear : currentYear - 1;
     const seasonStart = new Date(seasonStartYear, 8, 1, 0, 0, 0, 0);
     const seasonEnd = new Date(seasonStartYear + 1, 5, 30, 23, 59, 59, 999);
 
-    totalLicencies.value = allUsers.filter(user => {
+    totalLicencies.value = (licenciesResponse.data || []).filter(user => {
       const isAdherent = user.roles?.includes('Adherent');
-
       if (!user.dateRenouvellement) return false;
-
       const dateRenouvellement = new Date(user.dateRenouvellement);
-      if (isNaN(dateRenouvellement.getTime())) return false;
-
-      const isDansLaSaison = dateRenouvellement >= seasonStart && dateRenouvellement <= seasonEnd;
-
-      return isAdherent && isDansLaSaison;
+      return isAdherent && dateRenouvellement >= seasonStart && dateRenouvellement <= seasonEnd;
     }).length;
 
     const eventsResponse = await api.get('/Evenement');
     totalEvenements.value = eventsResponse.data.length || 0;
 
     const comptaReponse = await api.get('/Compte');
-    const comptes = comptaReponse.data || [];
-
-    const soldeTotal = comptes.reduce((sum, compte) => sum + (compte.solde || 0), 0);
-    totalCompta.value = soldeTotal;
-
+    totalCompta.value = (comptaReponse.data || []).reduce((sum, c) => sum + (c.solde || 0), 0);
   } catch (err) {
-    console.error('Erreur lors du chargement des statistiques du tableau de bord :', err);
-    rawInscriptionsData.value = {};
+    console.error('Erreur stats :', err);
   }
 };
-
-/* ════════════════════════════════════════════════════════════════════════ */
-/* ⏳ CHARGEMENT */
-/* ════════════════════════════════════════════════════════════════════════ */
 
 const loading = ref(true);
 onMounted(async () => {
   await fetchStats();
-  setTimeout(() => {
-    loading.value = false;
-  }, 500);
+  setTimeout(() => { loading.value = false; }, 500);
 });
-
 </script>
 
 <template>
   <div class="py-5 px-3 md:px-6 surface-ground min-vh-100 text-white">
 
-    <!-- Header Admin Premium -->
-    <div class="header-banner position-relative overflow-hidden p-4 p-md-5 mb-5 rounded-4 text-start shadow-lg">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+    <!-- Header Admin -->
+    <div class="header-banner position-relative overflow-hidden p-3 p-md-5 mb-5 rounded-4 text-start shadow-lg">
+      <div class="d-flex flex-column justify-content-between gap-3">
         <div>
-          <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
             <span class="badge rounded-pill bg-danger bg-gradient px-3 py-2 text-uppercase tracking-wider fw-semibold">
               Espace d'administration
             </span>
@@ -223,21 +101,19 @@ onMounted(async () => {
               Gestion & suivi de l'association
             </span>
           </div>
-          <h1 class="display-3 fw-black text-white mb-2 position-relative d-inline-block">
+          <h1 class="fs-3 md:fs-2 lg:display-5 fw-bold text-white mb-2 text-break">
             Tableau de bord <span class="text-warning">Admin</span>
           </h1>
-          <p class="text-white-50 fs-6 mb-0 d-flex align-items-center gap-2">
-            <i class="bi bi-info-circle text-warning"></i>
-            Vue d'ensemble de l'association, des inscrits et du suivi financier.
+          <p class="text-white-50 fs-6 mb-0 d-flex align-items-start align-items-md-center gap-2">
+            <i class="bi bi-info-circle text-warning mt-1 mt-md-0"></i>
+            <span>Vue d'ensemble de l'association, des inscrits et du suivi financier.</span>
           </p>
         </div>
       </div>
     </div>
 
-    <!-- ════════════ 🧾 CARTES DU HAUT Modernisées PrimeFlex ════════════ -->
+    <!-- 🧾 CARTES KPI -->
     <div class="grid grid-nogutter gap-4 mb-6">
-
-      <!-- 🧍 Licenciés -->
       <div class="col-12 md:col flex">
         <router-link :to="{ name: 'admin-licencies' }" class="w-full no-underline">
           <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
@@ -250,7 +126,6 @@ onMounted(async () => {
         </router-link>
       </div>
 
-      <!-- 📅 Événements -->
       <div class="col-12 md:col flex">
         <router-link :to="{ name: 'admin-events' }" class="w-full no-underline">
           <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
@@ -263,7 +138,6 @@ onMounted(async () => {
         </router-link>
       </div>
 
-      <!-- 📦 Comptabilité -->
       <div class="col-12 md:col flex">
         <router-link :to="{ name: 'admin-compta' }" class="w-full no-underline">
           <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
@@ -275,12 +149,9 @@ onMounted(async () => {
           </div>
         </router-link>
       </div>
-
     </div>
 
-    <!-- ════════════ 📊 SECTION GRAPHIQUE ════════════ -->
-
-    <!-- Indicateur de Chargement Global -->
+    <!-- 📊 SECTION GRAPHIQUE -->
     <div v-if="loading" class="flex flex-column align-items-center justify-content-center py-8">
       <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
       <span class="text-500 mt-3 font-medium">Chargement des données analytiques...</span>
@@ -288,11 +159,11 @@ onMounted(async () => {
 
     <div v-else class="max-w-7xl mx-auto flex flex-column gap-5">
 
-      <!-- 🔹 Synthèse Saison -->
+      <!-- 🔹 Synthèse Saison avec Conteneur Scrollable sur Mobile -->
       <div class="chart-box p-4 border-round-xl border-1">
         <div class="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom-1 border-white-alpha-10">
           <div>
-            <h3 class="text-2xl font-bold text-white m-0 mb-1 flex align-items-center gap-2">
+            <h3 class="text-xl md:text-2xl font-bold text-white m-0 mb-1 flex align-items-center gap-2">
               <i class="pi pi-chart-line text-warning"></i> Évolution des Inscriptions
             </h3>
             <p class="text-400 text-sm m-0">Inscriptions enregistrées au cours de la saison sportive actuelle</p>
@@ -302,20 +173,27 @@ onMounted(async () => {
           </Tag>
         </div>
 
-        <div class="w-full" style="height: 420px;">
-          <LineChart :chart-data="inscriptionsData" :options="chartOptions" />
+        <!-- Conteneur avec scroll horizontal fluide sur les petits écrans -->
+        <div class="chart-scroll-container w-full overflow-x-auto pb-2">
+          <div class="chart-inner-wrapper" style="min-width: 600px; height: 380px;">
+            <LineChart :chart-data="inscriptionsData" :options="chartOptions" />
+          </div>
         </div>
       </div>
 
-      <!-- 📊 STATISTIQUES PAR SAISON (Années précédentes) -->
+      <!-- 📊 STATISTIQUES PAR SAISON -->
       <div class="chart-box p-4 border-round-xl border-1">
         <div class="mb-4 pb-3 border-bottom-1 border-white-alpha-10">
-          <h3 class="text-2xl font-bold text-white m-0 mb-1 flex align-items-center gap-2">
+          <h3 class="text-xl md:text-2xl font-bold text-white m-0 mb-1 flex align-items-center gap-2">
             <i class="pi pi-history text-warning"></i> Historique des Inscriptions
           </h3>
           <p class="text-400 text-sm m-0">Comparatif des effectifs totaux par disciplines sur les saisons précédentes</p>
         </div>
-        <SaisonStatisticsChart />
+        <div class="overflow-x-auto">
+          <div style="min-width: 500px;">
+            <SaisonStatisticsChart />
+          </div>
+        </div>
       </div>
 
     </div>
@@ -324,7 +202,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* Bannière d'en-tête */
 .header-banner {
   background: linear-gradient(135deg, #1e2530 0%, #2b3035 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -334,7 +211,6 @@ onMounted(async () => {
   letter-spacing: 0.08em;
 }
 
-/* Cartes KPI */
 .kpi-card {
   background: #2a2e35;
   border-color: rgba(255, 255, 255, 0.08);
@@ -348,7 +224,6 @@ onMounted(async () => {
   background: #323740;
 }
 
-
 .kpi-img {
   transition: transform 0.3s ease;
 }
@@ -357,10 +232,22 @@ onMounted(async () => {
   transform: scale(1.1);
 }
 
-/* Boîtes de graphiques */
 .chart-box {
   background: #2a2e35;
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar personnalisée discrète pour les graphiques sur mobile */
+.chart-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+.chart-scroll-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+.chart-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 193, 7, 0.4);
+  border-radius: 4px;
 }
 </style>

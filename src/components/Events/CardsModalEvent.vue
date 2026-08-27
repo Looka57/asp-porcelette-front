@@ -1,24 +1,5 @@
 <script setup>
-// ===============================
-// 🔹 IMPORTS
-// ===============================
 import { watch, computed } from 'vue';
-
-// ===============================
-// 🔹 FONCTIONS UTILITAIRES
-// ===============================
-
-// Formater une date au format français
-function formatDate(dateString) {
-  if (!dateString) return 'Date inconnue';
-  try {
-    const date = new Date(dateString);
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return new Intl.DateTimeFormat('fr-FR', options).format(date);
-  } catch {
-    return dateString;
-  }
-}
 
 // ===============================
 // 🔹 PROPS & ÉMISSIONS
@@ -26,7 +7,6 @@ function formatDate(dateString) {
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   event: { type: Object, default: null },
-  // 🎯 CORRECTION 1: Ajouter la prop disciplineMap
   disciplineMap: { type: Object, default: () => ({}) },
   typeEventMap: { type: Object, default: () => ({}) },
 });
@@ -34,43 +14,54 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 // ===============================
+// 🔹 COULEURS DES DISCIPLINES
+// ===============================
+const disciplineColors = {
+  'Judo': '#FF6384',
+  'Aïkido': '#3B82F6',
+  'Jujitsu': '#10B981',
+  'Judo Détente': '#efd844',
+};
+
+// Récupère dynamiquement la couleur selon le nom ou l'ID de la discipline
+const disciplineColor = computed(() => {
+  const name = disciplineName.value;
+  return disciplineColors[name] || '#ffc107';
+});
+
+// ===============================
 // 🔹 COMPUTED PROPERTIES
 // ===============================
 
-// Récupère le nom du type d'événement selon son ID
-const eventTypeName = computed(() => {
-  if (!props.event) return 'Non spécifié';
-
-  // Tente de lire directement l'objet lié si l'API l'a renvoyé
-  if (props.event.typeEvenement?.libelle) {
-    return props.event.typeEvenement.libelle;
-  }
-
-  // Sinon, utilise la map
-  const typeId = Number(props.event.typeEvenementId);
-  return props.typeEventMap[typeId] || 'Non spécifié';
-});
-
-// 🎯 NOUVEAU: Propriété calculée pour la discipline
+// Récupère le nom de la discipline
 const disciplineName = computed(() => {
   if (!props.event) return 'Non spécifiée';
-
-  // Tente de lire directement l'objet lié si l'API l'a renvoyé (grâce à la correction C#)
-  if (props.event.discipline?.nom) {
-    return props.event.discipline.nom;
-  }
-
-  // Sinon, utilise la map pour traduire l'ID
+  if (props.event.discipline?.nom) return props.event.discipline.nom;
   const disciplineId = Number(props.event.disciplineId);
   return props.disciplineMap[disciplineId] || 'Non spécifiée';
 });
 
+// Récupère le nom du type d'événement
+const eventTypeName = computed(() => {
+  if (!props.event) return 'Non spécifié';
+  if (props.event.typeEvenement?.libelle) return props.event.typeEvenement.libelle;
+  const typeId = Number(props.event.typeEvenementId);
+  return props.typeEventMap[typeId] || 'Non spécifié';
+});
 
 // ===============================
-// 🔹 FONCTIONS MÉTHODES
+// 🔹 FONCTIONS UTILITAIRES
 // ===============================
+function formatDate(dateString) {
+  if (!dateString) return 'Date inconnue';
+  try {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+  } catch {
+    return dateString;
+  }
+}
 
-// Ferme la modale
 function closeModal() {
   emit('update:modelValue', false);
 }
@@ -78,8 +69,6 @@ function closeModal() {
 // ===============================
 // 🔹 WATCHERS
 // ===============================
-
-// Empêche le scroll de la page quand la modale est ouverte
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -88,44 +77,92 @@ watch(
 );
 </script>
 
-<!-- ===============================
-  🔹 TEMPLATE (HTML)
-  =============================== -->
 <template>
   <transition name="fade">
     <div v-if="modelValue && event" class="modal-overlay" @click.self="closeModal">
       <transition name="slide-up">
-        <div class="modal-dialogue bg-dark text-white" v-if="modelValue">
-          <div class="modal-content">
+        <div class="modal-dialogue text-white position-relative overflow-hidden" v-if="modelValue">
+
+          <!-- Liseré supérieur coloré dynamique -->
+          <div class="card-top-glow" :style="{ backgroundColor: disciplineColor }"></div>
+
+          <div class="modal-content border-0 bg-transparent">
 
             <!-- ===============================
-        🔸 HEADER DE LA MODALE
-        =============================== -->
-            <div class="modal-header bg-dark text-white">
-              <h5 class="modal-title mb-5 fs-2">{{ event.titre }}</h5>
-              <hr class="my-3" />
-              <button type="button" class="btn-close btn-close-white" @click="closeModal" aria-label="Fermer"></button>
+              🔸 HEADER DE LA MODALE
+            ================================ -->
+            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+              <div>
+                <span class="badge text-uppercase px-3 py-1 rounded-pill fw-bold mb-2 shadow-sm"
+                      :style="{ backgroundColor: disciplineColor, color: '#1a1d24' }">
+                  {{ disciplineName }}
+                </span>
+                <h4 class="modal-title fw-bold text-white m-0">{{ event.titre }}</h4>
+              </div>
+              <button type="button" class="btn-close btn-close-white shadow-none" @click="closeModal" aria-label="Fermer"></button>
             </div>
 
             <!-- ===============================
-        🔸 CORPS DE LA MODALE
-        =============================== -->
-            <div class="modal-body bg-light text-dark p-3 mb-3">
-              <p class="lead fs-4"><strong>Date de début :</strong> {{ formatDate(event.dateDebut) }}</p>
-              <p class="lead fs-4"><strong>Date de fin :</strong> {{ formatDate(event.dateFin) }}</p>
-              <p><strong>Discipline :</strong> {{ disciplineName }}</p>
-              <p><strong>Lieu :</strong> {{ event.lieu || 'Complexe Porcelette' }}</p>
-              <p><strong>Événement :</strong> {{ eventTypeName }}</p>
-              <hr class="my-3" />
-              <h6>Description détaillée :</h6>
-              <p>{{ event.description || 'Aucune description disponible.' }}</p>
+              🔸 CORPS DE LA MODALE
+            ================================ -->
+            <div class="modal-body py-4">
+
+              <!-- Grille d'infos -->
+              <div class="row g-3 mb-4">
+                <div class="col-sm-6">
+                  <div class="info-box p-3 rounded-3 h-100">
+                    <span class="text-light small d-block mb-1">Date de début</span>
+                    <span class="fw-semibold text-light">
+                      <i class="bi bi-calendar-event me-2 text-warning"></i>{{ formatDate(event.dateDebut) }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-sm-6" v-if="event.dateFin">
+                  <div class="info-box p-3 rounded-3 h-100">
+                    <span class="text-light small d-block mb-1">Date de fin</span>
+                    <span class="fw-semibold text-light">
+                      <i class="bi bi-calendar-check me-2 text-warning"></i>{{ formatDate(event.dateFin) }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="info-box p-3 rounded-3 h-100">
+                    <span class="text-light small d-block mb-1">Lieu</span>
+                    <span class="fw-semibold text-light">
+                      <i class="bi bi-geo-alt-fill me-2 text-warning"></i>{{ event.lieu || 'Complexe Porcelette' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="info-box p-3 rounded-3 h-100">
+                    <span class="text-light small d-block mb-1">Type d'événement</span>
+                    <span class="fw-semibold text-light">
+                      <i class="bi bi-tag-fill me-2 text-warning"></i>{{ eventTypeName }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div class="description-section">
+                <h6 class="text-uppercase text-light fs-7 fw-bold mb-2 tracking-wide">Description détaillée</h6>
+                <div class="description-box p-3 rounded-3 text-light">
+                  <p class="m-0" style="white-space: pre-line; line-height: 1.6;">
+                    {{ event.description || 'Aucune description disponible.' }}
+                  </p>
+                </div>
+              </div>
+
             </div>
 
             <!-- ===============================
-        🔸 PIED DE PAGE (FOOTER)
-        =============================== -->
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="closeModal">Fermer</button>
+              🔸 PIED DE PAGE (FOOTER)
+            ================================ -->
+            <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+              <button type="button" class="btn btn-secondary px-4 rounded-pill" @click="closeModal">Fermer</button>
             </div>
 
           </div>
@@ -135,42 +172,72 @@ watch(
   </transition>
 </template>
 
-<!-- ===============================
-🔹 STYLES CSS
-=============================== -->
 <style scoped>
 /* ===============================
-🔸 Overlay sombre (fond de la modale)
- =============================== */
+🔸 Overlay sombre
+=============================== */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.55);
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1055;
+  padding: 1rem;
 }
 
 /* ===============================
- 🔸 Conteneur de la modale
- =============================== */
+🔸 Conteneur de la modale
+=============================== */
 .modal-dialogue {
-  padding: 20px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 85vh;
-  border-radius: 0.5rem;
+  background-color: #1a1d24;
+  padding: 24px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  border-radius: 1rem;
   overflow-y: auto;
-  box-shadow: 0 0 25px rgba(240, 231, 231, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.card-top-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
 }
 
 /* ===============================
- 🔸 Animations de transition
- =============================== */
+🔸 Boîtes d'informations internes
+=============================== */
+.info-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.description-box {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ===============================
+🔸 Utilitaires & Animations
+=============================== */
+.tracking-wide {
+  letter-spacing: 0.05em;
+}
+
+.fs-7 {
+  font-size: 0.8rem;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -183,12 +250,12 @@ watch(
 
 .slide-up-enter-active,
 .slide-up-leave-active {
-  transition: transform 0.35s ease, opacity 0.35s ease;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
 }
 
 .slide-up-enter-from,
 .slide-up-leave-to {
-  transform: translateY(30px);
+  transform: translateY(20px);
   opacity: 0;
 }
 </style>

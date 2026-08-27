@@ -1,8 +1,8 @@
 <script setup>
 /* -------------------------------------------------------------------------- */
-/* 🎯 IMPORTS                                                                 */
+/* 🎯 IMPORTS                                                                */
 /* -------------------------------------------------------------------------- */
-import { ref, watch, defineProps, defineEmits, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import api from '@/api/axios';
 
 /* -------------------------------------------------------------------------- */
@@ -10,7 +10,7 @@ import api from '@/api/axios';
 /* -------------------------------------------------------------------------- */
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
-  eventData: { type: Object, default: null }, // L'événement à éditer
+  eventData: { type: Object, default: null },
   disciplineMap: { type: Object, default: () => ({}) },
   typeEventMap: { type: Object, default: () => ({}) },
 });
@@ -18,7 +18,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'event-updated', 'refresh']);
 
 /* -------------------------------------------------------------------------- */
-/* 💾 VARIABLES RÉACTIVES                                                     */
+/* 💾 VARIABLES RÉACTIVES                                                    */
 /* -------------------------------------------------------------------------- */
 const localEvent = ref({});
 const isLoading = ref(false);
@@ -26,10 +26,26 @@ const errorMessage = ref('');
 const successMessage = ref('');
 
 /* -------------------------------------------------------------------------- */
-/* 📜 OPTIONS DÉRIVÉES (pour les selects)                                    */
+/* 🎨 COULEURS DES DISCIPLINES                                               */
+/* -------------------------------------------------------------------------- */
+const disciplineColors = {
+  'Judo': '#FF6384',
+  'Aïkido': '#3B82F6',
+  'Jujitsu': '#efd844',
+  'Judo Détente': '#10B981',
+};
+
+// Récupère dynamiquement la couleur selon la discipline sélectionnée dans le formulaire
+const currentDisciplineColor = computed(() => {
+  const discId = localEvent.value.disciplineId;
+  const name = props.disciplineMap[discId];
+  return disciplineColors[name] || '#ffc107';
+});
+
+/* -------------------------------------------------------------------------- */
+/* 📜 OPTIONS DÉRIVÉES (pour les selects)                                   */
 /* -------------------------------------------------------------------------- */
 
-// Discipline → transformation en liste d’objets pour le <select>
 const disciplineOptions = ref([]);
 watch(
   () => props.disciplineMap,
@@ -42,7 +58,6 @@ watch(
   { immediate: true }
 );
 
-// Type d’événement → transformation en liste d’objets pour le <select>
 const typeEventOptions = computed(() => {
   return Object.entries(props.typeEventMap).map(([id, nom]) => ({
     id: Number(id),
@@ -53,15 +68,13 @@ const typeEventOptions = computed(() => {
 /* -------------------------------------------------------------------------- */
 /* 🔁 WATCHERS                                                                */
 /* -------------------------------------------------------------------------- */
-
-// Met à jour le formulaire local quand un nouvel event est chargé
-// Watch sur eventData
 watch(
   () => props.eventData,
   (newVal) => {
     if (!newVal) return;
+    errorMessage.value = '';
+    successMessage.value = '';
 
-    // Récupère l’ID du type d’événement selon les différents formats possibles
     const typeId =
       newVal.TypeEvenementId ??
       newVal.typeEvenementId ??
@@ -72,22 +85,15 @@ watch(
 
     localEvent.value = {
       ...newVal,
-      dateDebut: newVal.dateDebut
-        ? new Date(newVal.dateDebut).toISOString().substring(0, 10)
-        : '',
-      dateFin: newVal.dateFin
-        ? new Date(newVal.dateFin).toISOString().substring(0, 10)
-        : '',
+      dateDebut: newVal.dateDebut ? new Date(newVal.dateDebut).toISOString().substring(0, 10) : '',
+      dateFin: newVal.dateFin ? new Date(newVal.dateFin).toISOString().substring(0, 10) : '',
       disciplineId: Number(newVal.disciplineId),
       typeEvenementId: Number(typeId),
     };
-
   },
   { immediate: true }
 );
 
-
-// Gère le scroll de la page quand la modale est ouverte/fermée
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -110,13 +116,11 @@ async function saveEvent() {
   errorMessage.value = '';
   successMessage.value = '';
 
-  // Validation basique
   if (!localEvent.value.titre || !localEvent.value.dateDebut || !localEvent.value.disciplineId) {
     errorMessage.value = 'Veuillez remplir au moins le titre, la date de début et la discipline.';
     return;
   }
 
-  // Validation logique des dates
   const dateDebut = localEvent.value.dateDebut;
   const dateFin = localEvent.value.dateFin;
   if (dateFin && dateDebut && dateFin < dateDebut) {
@@ -128,18 +132,19 @@ async function saveEvent() {
 
   try {
     const payload = {
-      ...localEvent.value,
+      evenementId: Number(localEvent.value.evenementId || localEvent.value.Id),
+      titre: localEvent.value.titre,
+      description: localEvent.value.description || '',
+      dateDebut: localEvent.value.dateDebut,
+      dateFin: localEvent.value.dateFin || null,
+      lieu: localEvent.value.lieu || '',
       disciplineId: Number(localEvent.value.disciplineId),
-      // Toujours envoyer un Number pour le type d'événement (0 = aucun)
       typeEvenementId: localEvent.value.typeEvenementId && localEvent.value.typeEvenementId !== 0
         ? Number(localEvent.value.typeEvenementId)
         : null,
-      dateDebut: localEvent.value.dateDebut,
-      dateFin: localEvent.value.dateFin || null,
-    };
+      imageUrl: localEvent.value.imageUrl || localEvent.value.ImageUrl || props.eventData?.imageUrl || props.eventData?.ImageUrl || 'default-event.jpg',    };
 
     const eventId = payload.evenementId;
-
     const response = await api.put(`/Evenement/${eventId}`, payload);
 
     successMessage.value = 'Événement modifié avec succès !';
@@ -151,6 +156,17 @@ async function saveEvent() {
       closeModal();
     }, 800);
   } catch (error) {
+    console.error('Erreur exacte ImageUrl :', error.response?.data?.errors?.ImageUrl);
+
+    if (error.response?.data?.errors) {
+      const messages = Object.entries(error.response.data.errors)
+        .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
+        .join(' | ');
+      errorMessage.value = `Erreur -> ${messages}`;
+    } else {
+      errorMessage.value = 'Erreur lors de la modification.';
+    }
+    console.error('Erreur complète de l’API:', error.response?.data);
     console.error('Erreur lors de la modification:', error);
     errorMessage.value = error.response?.data?.message || 'Erreur lors de la modification. Veuillez vérifier vos données.';
   } finally {
@@ -163,78 +179,111 @@ async function saveEvent() {
   <transition name="fade">
     <div v-if="modelValue && eventData" class="modal-overlay" @click.self="closeModal">
       <transition name="slide-up">
-        <div class="modal-dialogue bg-dark text-white" v-if="modelValue">
-          <div class="modal-content">
+        <div class="modal-dialogue text-white position-relative overflow-hidden" v-if="modelValue">
+
+          <!-- Liseré supérieur coloré dynamique en fonction de la discipline -->
+          <div class="card-top-glow" :style="{ backgroundColor: currentDisciplineColor }"></div>
+
+          <div class="modal-content border-0 bg-transparent">
+
             <!-- Header -->
-            <div class="modal-header bg-primary text-white border-bottom border-secondary p-3">
-              <h5 class="modal-title">Modification de l'événement : {{ eventData.titre }}</h5>
-              <button type="button" class="btn-close btn-close-white" @click="closeModal"></button>
+            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+              <div>
+                <span class="badge text-uppercase px-3 py-1 rounded-pill fw-bold mb-2 shadow-sm"
+                  :style="{ backgroundColor: currentDisciplineColor, color: '#1a1d24' }">
+                  Édition
+                </span>
+                <h4 class="modal-title fw-bold text-white m-0 text-truncate-2">{{ eventData.titre }}</h4>
+              </div>
+              <button type="button" class="btn-close btn-close-white shadow-none" @click="closeModal"
+                aria-label="Fermer"></button>
             </div>
 
             <!-- Body -->
-            <div class="modal-body bg-light text-dark p-4">
+            <div class="modal-body py-4">
               <form @submit.prevent="saveEvent">
-                <div class="alert alert-danger" v-if="errorMessage">{{ errorMessage }}</div>
-                <div class="alert alert-success" v-if="successMessage">{{ successMessage }}</div>
+
+                <div
+                  class="alert alert-danger bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 py-2 mb-3 small rounded-3"
+                  v-if="errorMessage">
+                  {{ errorMessage }}
+                </div>
+                <div
+                  class="alert alert-success bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-2 mb-3 small rounded-3"
+                  v-if="successMessage">
+                  {{ successMessage }}
+                </div>
 
                 <!-- Titre -->
                 <div class="mb-3">
-                  <label for="titre" class="form-label">Titre *</label>
-                  <input type="text" id="titre" class="form-control" v-model="localEvent.titre" required>
+                  <label for="titre" class="form-label text-light small fw-semibold">Titre de l'événement *</label>
+                  <input type="text" id="titre" class="form-control custom-input" v-model="localEvent.titre" required>
                 </div>
 
                 <!-- Dates -->
                 <div class="row mb-3">
-                  <div class="col-md-6">
-                    <label for="dateDebut" class="form-label">Date de Début *</label>
-                    <input type="date" id="dateDebut" class="form-control" v-model="localEvent.dateDebut" required>
+                  <div class="col-md-6 mb-3 mb-md-0">
+                    <label for="dateDebut" class="form-label text-light small fw-semibold">Date de Début *</label>
+                    <input type="date" id="dateDebut" class="form-control custom-input" v-model="localEvent.dateDebut"
+                      required>
                   </div>
                   <div class="col-md-6">
-                    <label for="dateFin" class="form-label">Date de Fin (optionnel)</label>
-                    <input type="date" id="dateFin" class="form-control" v-model="localEvent.dateFin">
+                    <label for="dateFin" class="form-label text-light small fw-semibold">Date de Fin (optionnel)</label>
+                    <input type="date" id="dateFin" class="form-control custom-input" v-model="localEvent.dateFin">
                   </div>
                 </div>
 
-                <!-- Discipline -->
-                <div class="mb-3">
-                  <label for="discipline" class="form-label">Discipline *</label>
-                  <select id="discipline" class="form-select" v-model="localEvent.disciplineId" required>
-                    <option value="" disabled>Sélectionner une discipline</option>
-                    <option v-for="disc in disciplineOptions" :key="disc.id" :value="disc.id">{{ disc.nom }}</option>
-                  </select>
+                <!-- Discipline & Type d'événement -->
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-3 mb-md-0">
+                    <label for="discipline" class="form-label text-light small fw-semibold">Discipline *</label>
+                    <select id="discipline" class="form-select custom-input" v-model="localEvent.disciplineId" required>
+                      <option value="" disabled class="bg-dark">Sélectionner une discipline</option>
+                      <option v-for="disc in disciplineOptions" :key="disc.id" :value="disc.id"
+                        class="bg-dark text-white">
+                        {{ disc.nom }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="typeEvenement" class="form-label text-light small fw-semibold">Type d'événement</label>
+                    <select id="typeEvenement" class="form-select custom-input"
+                      v-model.number="localEvent.typeEvenementId">
+                      <option :value="0" class="bg-dark">Aucun type spécifique</option>
+                      <option v-for="type in typeEventOptions" :key="type.id" :value="type.id"
+                        class="bg-dark text-white">
+                        {{ type.nom }}
+                      </option>
+                    </select>
+                  </div>
                 </div>
 
-
-
-                <!-- Type d'événement -->
-                <select id="typeEvenement" class="form-select" v-model.number="localEvent.typeEvenementId">
-                  <option :value="0">Choisir un événement</option>
-                  <option v-for="type in typeEventOptions" :key="type.id" :value="type.id">
-                    {{ type.nom }}
-                  </option>
-                </select>
-
-                <!-- lieu -->
+                <!-- Lieu -->
                 <div class="mb-3">
-                  <label for="lieu" class="form-label">Lieu</label>
-                  <input id="lieu" class="form-control" v-model="localEvent.lieu">
+                  <label for="lieu" class="form-label text-light small fw-semibold">Lieu</label>
+                  <input id="lieu" class="form-control custom-input" v-model="localEvent.lieu"
+                    placeholder="Ex: Complexe Porcelette">
                 </div>
-
 
                 <!-- Description -->
-                <div class="mb-3">
-                  <label for="description" class="form-label">Description</label>
-                  <textarea id="description" class="form-control" rows="4" v-model="localEvent.description"></textarea>
+                <div class="mb-2">
+                  <label for="description" class="form-label text-light small fw-semibold">Description détaillée</label>
+                  <textarea id="description" class="form-control custom-input" rows="4"
+                    v-model="localEvent.description"></textarea>
                 </div>
+
               </form>
             </div>
 
             <!-- Footer -->
-            <div class="modal-footer border-top border-secondary p-3 justify-content-between">
-              <button type="button" class="btn btn-secondary" @click="closeModal" :disabled="isLoading">Annuler</button>
-              <button type="submit" class="btn btn-primary" @click="saveEvent" :disabled="isLoading">
+            <div class="modal-footer border-top border-secondary border-opacity-25 pt-3 d-flex justify-content-between">
+              <button type="button" class="btn btn-secondary px-4 rounded-pill btn-sm" @click="closeModal"
+                :disabled="isLoading">Annuler</button>
+              <button type="button" class="btn btn-warning px-4 rounded-pill fw-semibold btn-sm text-dark"
+                @click="saveEvent" :disabled="isLoading">
                 <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? 'Sauvegarde...' : 'Sauvegarder les modifications' }}
+                {{ isLoading ? 'Enregistrement...' : 'Enregistrer' }}
               </button>
             </div>
 
@@ -250,36 +299,64 @@ async function saveEvent() {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.55);
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1055;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .modal-dialogue {
-  padding: 0;
-  width: 95%;
+  background-color: #1a1d24;
+  padding: 24px;
+  width: 100%;
   max-width: 700px;
-  max-height: 95vh;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+  max-height: 90vh;
+  border-radius: 1rem;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.modal-content {
-  background: none;
-  border: none;
-  border-radius: 0.5rem;
+.card-top-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
 }
 
 .modal-body {
   overflow-y: auto;
-  max-height: 80vh;
+  max-height: 75vh;
 }
 
+/* Champs personnalisés pour le thème sombre */
+.custom-input {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.custom-input:focus {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: #ffc107;
+  color: #fff;
+  box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.15);
+}
+
+.custom-input option {
+  background-color: #1a1d24;
+  color: #fff;
+}
+
+/* Animations de transition */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -292,12 +369,12 @@ async function saveEvent() {
 
 .slide-up-enter-active,
 .slide-up-leave-active {
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s ease;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
 }
 
 .slide-up-enter-from,
 .slide-up-leave-to {
-  transform: translateY(50px) scale(0.95);
+  transform: translateY(20px);
   opacity: 0;
 }
 </style>

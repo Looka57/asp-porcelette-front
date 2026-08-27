@@ -68,7 +68,7 @@ onMounted(() => {
       <!-- Main Content -->
       <main v-else class="main-content">
         <CardsGestionTransactions />
-        <TableTransaction :transactions="transactions" />
+        <TableTransaction  />
       </main>
     </div>
   </div>

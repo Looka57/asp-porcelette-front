@@ -34,41 +34,56 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="bob min-h-screen flex items-center justify-center bg-dark text-light ">
-    <div class="loginWrapper">
+  <div class="bob min-h-screen flex items-center justify-center bg-dark text-light">
+
+    <!-- Bouton de retour accueil discret en haut (optionnel mais pratique) -->
+    <div class="position-absolute top-0 start-0 p-4">
+      <router-link to="/" class="btn rounded-pill px-3 py-2 fw-semibold btn-outline-custom-muted shadow-sm small">
+        <i class="bi bi-arrow-left me-1"></i> Accueil
+      </router-link>
+    </div>
+
+    <div class="loginWrapper shadow-lg">
       <div class="loginForm">
+
+        <!-- En-tête -->
         <div class="appHeader">
-          <img src="../assets/img/logo.png" alt="Blason AS Porcelette">
-          <h1 class="text-2xl font-bold text-light mt-4">AS PORCELETTE ART MARTIAUX </h1>
-          <h2 class="text-xl font-extrabold text-primary mt-1">ARTS MARTIAUX</h2>
+          <img src="../assets/img/logo2.png" alt="Blason AS Porcelette" class="img-fluid">
+          <h1 class="h5 fw-bold text-white mt-3 mb-1 text-center">AS PORCELETTE</h1>
+          <span class="text-uppercase tracking-wider fs-7 fw-bold text-gold">Arts Martiaux</span>
         </div>
 
-        <h3 class="text-2xl font-bold mb-6 text-center text-primary">Connexion</h3>
+        <h3 class="h4 font-weight-bold mb-4 text-center text-gold">Espace Connexion</h3>
 
-        <form @submit.prevent="handleLogin" class="space-y-5">
+        <form @submit.prevent="handleLogin" class="d-flex flex-column gap-3">
           <div>
-            <label for="email" class="label">Email:</label>
-            <input type="email" v-model="email" required class="input-field" />
-          </div>
-          <div>
-            <label for="password" class="label">Mot de passe:</label>
-            <input type="password" v-model="password" required class="input-field" />
-            <!-- <div class="text-right mt-1">
-              <router-link :to="{ name: 'forgot-password' }" class="text-link-blue text-sm hover:underline">Mot de passe
-                oublié ?</router-link>
-            </div> -->
+            <label for="email" class="label mb-2 small fw-semibold text-light opacity-85">Adresse email</label>
+            <div class="input-group-custom">
+              <span class="input-icon"><i class="bi bi-envelope"></i></span>
+              <input type="email" id="email" v-model="email" required class="input-field" placeholder="votre@email.com" />
+            </div>
           </div>
 
-          <button type="submit" class="btn-primary mt-6 p-3 rounded-lg w-full font-semibold">
-            Se Connecter
+          <div>
+            <label for="password" class="label mb-2 small fw-semibold text-light opacity-85">Mot de passe</label>
+            <div class="input-group-custom">
+              <span class="input-icon"><i class="bi bi-lock"></i></span>
+              <input type="password" id="password" v-model="password" required class="input-field" placeholder="••••••••" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-gold mt-4 py-3 rounded-pill fw-bold w-100 shadow-sm">
+            <i class="bi bi-box-arrow-in-right me-2"></i> Se Connecter
           </button>
 
-          <p v-if="loginError" class="error-message text-red-500 text-center">
-            ⚠️ {{ errorMessage }}
-          </p>
+          <div v-if="loginError" class="alert alert-danger bg-danger bg-opacity-25 text-danger border-0 p-3 rounded-3 small mt-2 text-center">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage }}
+          </div>
         </form>
+
       </div>
 
+      <!-- Illustration latérale -->
       <div class="formImg">
         <img src="../assets/img/imgConnexion.png" alt="Illustration de connexion" />
       </div>
@@ -78,194 +93,153 @@ async function handleLogin() {
 </template>
 
 <style scoped>
-.text-primary {
-  color: var(--color-primary);
-}
-
-.text-light {
-  color: var(--color-light-text);
-}
-
-/* ------------------------------------------------------------------- */
-
-
-* {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
-
-/* Application des variables au corps */
+/* --- MISE EN PAGE GLOBALE & DESIGN SYSTEM --- */
 .bob {
-  background-color: var(--color-dark-bg);
-  color: var(--color-light-text);
+  background-color: #121417;
+  color: #f8f9fa;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .loginWrapper {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 4rem;
-  /* Écart plus grand */
-  background-color: var(--color-card-bg);
-  padding: 0;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-  max-width: 1100px;
+  background-color: #1a1d21;
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  max-width: 1000px;
   width: 90%;
-  border: 1px solid #30363d;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 
-/* --- 3. Formulaire (loginForm) --- */
+/* --- FORMULAIRE --- */
 .loginForm {
   flex: 1;
-  background-color: var(--color-form-bg);
+  background-color: #1a1d21;
   padding: 40px;
-  border-top-left-radius: var(--radius-lg);
-  border-bottom-left-radius: var(--radius-lg);
-  min-width: 350px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 350px;
 }
 
-
-/* En-tête de l'application (Logo/Titre) */
+/* En-tête */
 .appHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #30363d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .appHeader img {
-  height: 250px;
+  height: 130px;
   width: auto;
-  margin-bottom: 10px;
+  object-fit: contain;
 }
 
-
-/* Labels */
-.label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 500;
-  color: var(--color-light-text);
+/* Inputs avec icônes intégrées */
+.input-group-custom {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-/* Champs de saisie (Inputs) */
+.input-icon {
+  position: absolute;
+  left: 15px;
+  color: #adb5bd;
+}
+
 .input-field {
-  background-color: var(--color-dark-bg);
-  border: 1px solid #30363d;
-  color: var(--color-light-text);
-  padding: 12px;
-  border-radius: 6px;
+  background-color: #121417;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8f9fa;
+  padding: 12px 15px 12px 45px;
+  border-radius: 0.75rem;
   width: 100%;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 0.95rem;
+  transition: all 0.2s ease-in-out;
 }
 
 .input-field:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+  border-color: #ffc107;
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.25);
   outline: none;
 }
 
-/* Bouton Principal */
-.btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-dark-bg);
+/* Bouton principal Doré */
+.btn-gold {
+  background-color: #ffc107;
+  color: #121417;
   border: none;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
 }
 
-.btn-primary:hover {
-  background-color: var(--color-primary-hover);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+.btn-gold:hover {
+  background-color: #ffca2c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
-.btn-primary:active {
-  transform: scale(0.99);
+.btn-gold:active {
+  transform: translateY(0);
 }
 
-/* Lien Mot de passe oublié */
-.text-link-blue {
-  color: #4da6ff;
+/* Bouton retour muted */
+.btn-outline-custom-muted {
+  background-color: #1a1d21;
+  color: #adb5bd;
+  border: 1px solid #343a40;
 }
 
-/* Message d'erreur */
-.error-message {
-  color: var(--color-error);
-  padding: 10px;
-  border: 1px dashed var(--color-error);
-  background-color: rgba(248, 81, 73, 0.1);
-  border-radius: 6px;
-  margin-top: 15px;
+.btn-outline-custom-muted:hover {
+  background-color: #2c3034;
+  color: #ffffff;
 }
 
-/* --- 4. Image (formImg) --- */
+/* Classes utilitaires de cohérence */
+.text-gold {
+  color: #ffc107 !important;
+}
+
+.tracking-wider {
+  letter-spacing: 0.1em;
+}
+
+.fs-7 {
+  font-size: 0.75rem;
+}
+
+/* --- IMAGE LATÉRALE --- */
 .formImg {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 400px;
-  max-width: 500px;
-  border-top-right-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg);
-  padding: 0;
+  min-width: 350px;
+  background-color: #000;
 }
 
 .formImg img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 0;
 }
 
-/* --- 5. Responsive --- */
-@media (max-width: 1024px) {
+/* --- RESPONSIVE --- */
+@media (max-width: 992px) {
   .loginWrapper {
-    gap: 2rem;
-    max-width: 800px;
+    max-width: 700px;
   }
-
   .formImg {
-    min-width: 300px;
-    max-width: 400px;
-  }
-
-  .loginForm {
-    padding: 30px;
-  }
-}
-
-@media (max-width: 768px) {
-  .loginWrapper {
-    flex-direction: column;
-    padding: 0;
-    width: 95%;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-
-  .loginForm {
-    min-width: auto;
-    width: 100%;
-    padding: 30px 20px;
-    border-radius: var(--radius-lg);
-  }
-
-  .formImg {
-    display: none;
+    display: none; /* Cache l'image sur tablettes portrait / mobiles pour garder un formulaire centré et fluide */
   }
 }
 </style>

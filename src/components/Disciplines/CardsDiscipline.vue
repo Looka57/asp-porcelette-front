@@ -5,6 +5,9 @@
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
 
+import ProgressSpinner from 'primevue/progressspinner';
+import Message from 'primevue/message';
+
 // ===============================
 // 🔹 ÉTATS
 // ===============================
@@ -74,7 +77,7 @@ onMounted(fetchDisciplines)
     <!-- En-tête -->
     <div class="text-center mb-6">
       <h1 class="text-4xl font-bold text-warning mb-2 flex align-items-center justify-content-center gap-3">
-        <i class="pi pi-shield text-3xl"></i> Nos Disciplines
+        <i class="pi pi-shield text-3xl"></i> Ce que le club propose
       </h1>
       <p class="text-400 text-lg m-0">Découvrez l'ensemble des arts martiaux enseignés au club.</p>
     </div>
@@ -158,7 +161,7 @@ onMounted(fetchDisciplines)
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
 }
 
- 
+
 
 .discipline-icon {
   object-fit: contain;

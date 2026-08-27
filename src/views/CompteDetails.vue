@@ -284,26 +284,29 @@ const goBack = () => router.back()
           <div v-for="(group, index) in groupedTransactions" :key="group.groupKey" class="accordion-item glass-card overflow-hidden">
 
             <!-- En-tête Groupe -->
+            <!-- En-tête Groupe -->
             <h2 class="accordion-header" :id="`heading-${group.groupKey}`">
               <button
-                class="accordion-button custom-accordion-button d-flex align-items-center justify-content-between p-3"
-                type="button"
-                data-bs-toggle="collapse"
-                :data-bs-target="`#collapse-${group.groupKey}`"
-                :aria-expanded="index === 0"
-                :aria-controls="`collapse-${group.groupKey}`"
+                class="accordion-button custom-accordion-button d-flex align-items-center justify-content-between p-2.5 p-sm-3 gap-2"
+                type="button" data-bs-toggle="collapse" :data-bs-target="`#collapse-${group.groupKey}`"
+                :aria-expanded="index === 0" :aria-controls="`collapse-${group.groupKey}`"
                 :class="{ 'collapsed': index !== 0 }">
 
-                <div class="d-flex align-items-center gap-3">
-                  <span class="accordion-title-text text-white fw-bold fs-5">{{ group.groupTitle }}</span>
-                  <span class="badge bg-dark border border-secondary text-white-50 font-mono px-2 py-1">
-                    {{ group.items.length }} transaction{{ group.items.length > 1 ? 's' : '' }}
+                <!-- Titre et nombre de transactions -->
+                <div class="d-flex align-items-center gap-2 text-truncate me-2">
+                  <span class="accordion-title-text text-white fw-bold fs-6 text-truncate">{{ group.groupTitle }}</span>
+                  <span
+                    class="badge bg-dark border border-secondary text-white-50 font-mono px-1.5 py-0.5 fs-8 d-none d-xs-inline-block">
+                    {{ group.items.length }} tr{{ group.items.length > 1 ? 's' : '' }}
                   </span>
                 </div>
 
-                <div class="d-flex align-items-center me-3">
-                  <span class="net-badge font-mono fw-bold fs-6" :class="group.total < 0 ? 'bg-danger-subtle text-danger border-danger' : 'bg-success-subtle text-success border-success'">
-                    {{ selectedType === 'all' ? 'Total Net' : 'Total' }} : {{ group.total.toFixed(2) }} €
+                <!-- Badge Total (reste à droite sur la même ligne) -->
+                <div class="d-flex align-items-center flex-shrink-0 ms-auto me-2">
+                  <span class="net-badge font-mono fw-bold"
+                    :class="group.total < 0 ? 'bg-danger-subtle text-danger border-danger' : 'bg-success-subtle text-success border-success'">
+                    <span class="d-none d-sm-inline">{{ selectedType === 'all' ? 'Total Net' : 'Total' }} : </span>{{
+                      group.total.toFixed(2) }} €
                   </span>
                 </div>
               </button>
@@ -434,6 +437,10 @@ const goBack = () => router.back()
   font-size: 0.825rem;
 }
 
+.fs-8 {
+  font-size: 0.75rem;
+}
+
 /* ──────── Badges ──────── */
 .badge-category {
   background-color: #1e2430;
@@ -538,9 +545,10 @@ const goBack = () => router.back()
 }
 
 .net-badge {
-  padding: 0.35rem 0.75rem;
-  border-radius: 2rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 1.5rem;
   border: 1px solid;
+  font-size: 0.78rem;
 }
 
 .bg-danger-subtle {

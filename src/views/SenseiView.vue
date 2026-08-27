@@ -224,7 +224,7 @@ const saveNewSensei = async () => {
       formData.append('PhotoFile', photoFile.value);
     }
 
-    if (editingUserId.value) {
+if (editingUserId.value) {
       await api.put(`User/admin/${editingUserId.value}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
@@ -246,15 +246,27 @@ const saveNewSensei = async () => {
       });
     }
 
+    // 1. Retirer le focus du bouton actif avant de fermer (évite les bugs aria-hidden)
+    const activeElement = document.activeElement;
+    if (activeElement) {
+      activeElement.blur();
+    }
+
+    // 2. Fermer la modale Bootstrap proprement
     const modalElement = document.getElementById('createAdherent');
     if (modalElement) {
       const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) modalInstance.hide();
+      if (modalInstance) {
+        modalInstance.hide();
+      }
     }
 
+    // 3. Recharger les données et réinitialiser
     await loadSenseiData();
     resetForm();
+
   }
+
   catch (err) {
     let errorMessage = 'Erreur lors de la sauvegarde. Veuillez réessayer.';
     if (err.response && err.response.data) {
@@ -294,51 +306,40 @@ onMounted(async () => {
 
     <div class="content-wrapper">
       <!-- En-tête avec titre et bouton d'action -->
-<!-- ===============================
+      <!-- ===============================
            🔹 EN-TÊTE
      ================================ -->
-<div class="page-header text-center mb-4">
+      <div class="page-header text-center mb-4">
 
-  <div class="page-header-icon">
-    <i class="pi pi-users"></i>
-  </div>
+        <div class="page-header-icon">
+          <i class="pi pi-users"></i>
+        </div>
 
-  <h1>
-    Gestion des Senseis
-  </h1>
+        <h1>
+          Gestion des Senseis
+        </h1>
 
-  <p>
-    Gestion des encadrants,
-    disciplines et informations des Senseis
-  </p>
+        <p>
+          Gestion des encadrants,
+          disciplines et informations des Senseis
+        </p>
 
-</div>
+      </div>
 
 
-<!-- ===============================
+      <!-- ===============================
      🔹 BARRE D'ACTIONS
 ================================ -->
-<div class="actions-bar">
-
-  <button
-    type="button"
-    class="add-member-btn"
-    data-bs-toggle="modal"
-    data-bs-target="#createAdherent"
-    @click="resetForm"
-  >
-    <i class="pi pi-user-plus"></i>
-    <span>
-      Ajouter un Sensei
-    </span>
-  </button>
-
-</div>
-
+      <div class="actions-bar">
+        <button type="button" class="add-member-btn" data-bs-toggle="modal" data-bs-target="#createAdherent"
+          @click="resetForm">
+          <i class="pi pi-user-plus"></i>
+          <span>
+            Ajouter un Sensei
+          </span>
+        </button>
+      </div>
       <SenseisStats :userList="userList" :disciplineList="disciplineList" />
-
-
-
 
 
       <!-- Modal de création / édition -->
@@ -665,7 +666,7 @@ onMounted(async () => {
 .spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid rgba(255, 187, 51, 0.15);
+  border: 1px solid rgba(255, 187, 51, 0.15);
   border-top-color: #ffbb33;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -717,45 +718,46 @@ onMounted(async () => {
    BARRE D'ACTIONS
 ================================ */
 
-.actions-bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: rgba(33, 37, 41, 0.85);
-  border: 1px solid #3c434a;
-  border-radius: 12px;
-  box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.18);
-}
+  .actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(33, 37, 41, 0.85);
+    border: 1px solid #3c434a;
+    border-radius: 12px;
+    box-shadow:
+      0 6px 20px rgba(0, 0, 0, 0.18);
+  }
 
 
 }
 </style>
 
 <!-- 🔹 STYLES GLOBAUX PRIMEVUE (NON SCOPED) -->
+<!-- 🔹 STYLES GLOBAUX PRIMEVUE (NON SCOPED) -->
 <style>
 /* Modale de Confirmation globale */
 .p-dialog,
 .p-confirm-dialog {
-  background-color: #1e2126 !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+  background-color: #181b20 !important;
+  color: #f1f3f5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
   width: 90% !important;
-  max-width: 450px !important;
+  max-width: 420px !important;
   overflow: hidden !important;
 }
 
 .p-dialog .p-dialog-header,
 .p-confirm-dialog .p-dialog-header {
-  background-color: #121417 !important;
+  background-color: #181b20 !important;
   color: #ffffff !important;
   padding: 1rem 1.25rem !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -765,7 +767,7 @@ onMounted(async () => {
 .p-confirm-dialog .p-dialog-title {
   color: #ffbb33 !important;
   font-weight: 600 !important;
-  font-size: 1.1rem !important;
+  font-size: 1.05rem !important;
 }
 
 .p-dialog .p-dialog-header-icon,
@@ -777,9 +779,9 @@ onMounted(async () => {
 
 .p-dialog .p-dialog-content,
 .p-confirm-dialog .p-dialog-content {
-  background-color: #1e2126 !important;
-  color: #ffffff !important;
-  padding: 1.5rem 1.25rem !important;
+  background-color: #181b20 !important;
+  color: #e2e8f0 !important;
+  padding: 1.25rem !important;
   display: flex !important;
   align-items: center !important;
   gap: 1rem !important;
@@ -788,9 +790,9 @@ onMounted(async () => {
 
 .p-dialog .p-dialog-footer,
 .p-confirm-dialog .p-dialog-footer {
-  background-color: #121417 !important;
+  background-color: #181b20 !important;
   padding: 0.75rem 1.25rem !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
   display: flex !important;
   justify-content: flex-end !important;
   align-items: center !important;
@@ -802,48 +804,54 @@ onMounted(async () => {
   white-space: nowrap !important;
 }
 
-/* 🔹 Modale Spécifique à la suppression (Rouge) */
+/* 🔹 Modale Spécifique à la suppression (plus subtile) */
 .confirm-delete-dialog {
-  border: 1px solid #dc3545 !important;
+  border: 1px solid rgba(220, 53, 69, 0.3) !important;
 }
 
 .confirm-delete-dialog .p-dialog-title {
-  color: #dc3545 !important;
+  color: #ff6b6b !important;
 }
 
 .confirm-delete-dialog .p-confirm-dialog-icon {
-  font-size: 1.8rem !important;
-  color: #dc3545 !important;
+  font-size: 1.5rem !important;
+  color: #ff6b6b !important;
   flex-shrink: 0 !important;
 }
 
 .confirm-delete-dialog .p-confirm-dialog-message {
   margin: 0 !important;
-  font-size: 0.95rem !important;
+  font-size: 0.9rem !important;
   word-break: break-word !important;
   white-space: normal !important;
+  color: #cbd5e1 !important;
 }
 
-/* 🔹 Correction de visibilité des Toasts (Notifications) */
+/* 🔹 Toasts (Notifications) plus fins et épurés */
 .p-toast .p-toast-message {
   opacity: 1 !important;
   border-radius: 8px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+  border-width: 0 !important;
+  margin-bottom: 0.75rem !important;
 }
 
 .p-toast .p-toast-message.p-toast-message-error {
-  background-color: #dc3545 !important;
+  background-color: rgba(220, 53, 69, 0.95) !important;
   color: #ffffff !important;
+  border-left: 3px solid #ff4d4f !important;
 }
 
 .p-toast .p-toast-message.p-toast-message-success {
-  background-color: #198754 !important;
+  background-color: rgba(25, 135, 84, 0.95) !important;
   color: #ffffff !important;
+  border-left: 3px solid #2ecc71 !important;
 }
 
 .p-toast .p-toast-message.p-toast-message-info {
-  background-color: #0dcaf0 !important;
+  background-color: rgba(13, 202, 240, 0.95) !important;
   color: #ffffff !important;
+  border-left: 3px solid #38bdf8 !important;
 }
 
 .p-toast .p-toast-message .p-toast-message-content,
