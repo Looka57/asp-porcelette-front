@@ -75,7 +75,7 @@ const toggleNavbar = () => {
           'collapsed': !isOpen && !isMobile
       }">
       <div class="d-flex justify-content-center align-items-center mb-4">
-        <img class="w-25" src="../assets/img/Blason_Ville_fr_Porcelette.svg" alt="Logo ASP Porcelette" />
+        <img class="w-25" src="../assets/img/Blason_Ville_fr_Porcelette.svg" alt="Blason Porcelette" width="60" height="60" />
         <hr class="my-4 border-light opacity-50" />
       </div>
 

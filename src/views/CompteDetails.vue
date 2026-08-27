@@ -374,10 +374,10 @@ const goBack = () => router.back()
                         <!-- Actions -->
                         <td class="text-center">
                           <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-action btn-edit" title="Modifier" @click="openEditModal(t)">
+                            <button class="btn btn-action btn-edit" aria-label="Modifier la transaction" title="Modifier" @click="openEditModal(t)">
                               <i class="pi pi-pencil"></i>
                             </button>
-                            <button class="btn btn-action btn-delete" title="Supprimer" @click="deleteTransaction(t.transactionId, t.description)">
+                            <button class="btn btn-action btn-delete" aria-label="Supprimer la transaction" title="Supprimer" @click="deleteTransaction(t.transactionId, t.description)">
                               <i class="pi pi-trash"></i>
                             </button>
                           </div>
