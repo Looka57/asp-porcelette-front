@@ -76,7 +76,7 @@ const formatDateForInput = (dateString) => {
     </div>
   </div>
 
-  <!-- ===============================
+<!-- ===============================
        🔹 CONTACT & AUTHENTIFICATION
   =============================== -->
   <div class="row mb-3">
@@ -107,6 +107,11 @@ const formatDateForInput = (dateString) => {
         id="Password"
         placeholder="Définir un mot de passe initial"
         :required="isPasswordRequired">
+
+      <!-- 💡 Texte d'aide ajouté ici -->
+      <small class="form-text text-light d-block mt-1" style="font-size: 0.8rem; color: #6c757d;">
+        Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.
+      </small>
     </div>
   </div>
 
