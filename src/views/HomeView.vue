@@ -1,85 +1,16 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+
 import CardsHomes from '@/components/Home/CardsHome.vue';
 import SenseiHome from '@/components/Home/SenseiHome.vue';
 import ChoisirHome from '@/components/Home/ChoisirHome.vue';
 import EventActuHome from '@/components/Home/EventActuHome.vue';
 
-const showModal = ref(false);
-const ALERT_KEY = 'alert_travaux_vu';
 
-onMounted(() => {
-  const alertAlreadySeen = sessionStorage.getItem(ALERT_KEY);
-  if (!alertAlreadySeen) {
-    showModal.value = true;
-  }
-});
-
-const closeModal = () => {
-  showModal.value = false;
-  sessionStorage.setItem(ALERT_KEY, 'true');
-};
 </script>
 
 <template>
-  <!-- 🔹 MODALE D'INFORMATION -->
-  <Transition name="fade">
-    <div v-if="showModal" class="modal-backdrop-custom d-flex justify-content-center align-items-center p-3">
-      <div class="modal-dialog-custom w-100" role="document">
-        <div class="modal-content border-0 rounded-4 shadow-2xl bg-dark-card text-white overflow-hidden">
 
-          <!-- En-tête -->
-          <div
-            class="modal-header border-bottom border-secondary border-opacity-25 p-4 d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-3">
-              <span class="icon-badge bg-warning bg-opacity-10 text-warning rounded-circle flex-shrink-0">
-                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-              </span>
-              <div>
-                <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-1">Information
-                  importante</span>
-                <h5 class="modal-title fw-bold text-white m-0">Changement de lieu temporaire</h5>
-              </div>
-            </div>
-            <button type="button" class="btn-close btn-close-white opacity-75" @click="closeModal"
-              aria-label="Fermer"></button>
-          </div>
 
-          <!-- Corps -->
-          <div class="modal-body p-4">
-            <p class="text-light-50 fs-6 lh-base mb-4">
-              En raison de travaux de rénovation de notre complexe sportif habituel, tous les cours de
-              <strong class="text-white">Judo, Aïkido et Jujitsu</strong> sont déplacés à une adresse temporaire.
-            </p>
-
-            <div class="location-box p-3 rounded-3 border border-secondary border-opacity-25 bg-surface mb-3">
-              <div class="d-flex align-items-center gap-2 text-warning fw-semibold mb-1">
-                <i class="bi bi-geo-alt-fill"></i>
-                <span>Nouvelle adresse :</span>
-              </div>
-              <p class="fs-5 fw-bold text-white m-0 ps-4">
-                Complexe Sportif de Tennis
-              </p>
-            </div>
-
-            <p class="small text-muted m-0 d-flex align-items-center gap-2">
-              <i class="bi bi-info-circle"></i>
-              Cette disposition reste en vigueur jusqu'à nouvel ordre.
-            </p>
-          </div>
-
-          <!-- Pied de page -->
-          <div
-            class="modal-footer border-top border-secondary border-opacity-25 p-3 px-4 bg-surface d-flex justify-content-end">
-            <button type="button" class="btn btn-warning fw-bold px-4 py-2 rounded-3 shadow-sm" @click="closeModal">
-              J'ai compris
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </Transition>
 
   <!-- 🔹 CONTENU PRINCIPAL -->
   <div class="container-fluid p-0 bg-dark text-light min-vh-100">
@@ -162,56 +93,7 @@ h1 {
   backdrop-filter: blur(8px);
 }
 
-/* ─── Modale Custom ─── */
-.modal-backdrop-custom {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(6px);
-  z-index: 2000;
-}
 
-.modal-dialog-custom {
-  max-width: 540px;
-}
-
-.bg-dark-card {
-  background-color: #1a1d21;
-}
-
-.bg-surface {
-  background-color: #141619;
-}
-
-.icon-badge {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.text-light-50 {
-  color: #c5c9d0;
-}
-
-.fs-7 {
-  font-size: 0.75rem;
-}
-
-/* Transitions Vue */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
 
 /* Responsive */
 @media (max-width: 767.98px) {

@@ -53,12 +53,11 @@ const dateYear = new Date().getFullYear()
           <!-- Contact -->
           <div class="col-lg-3 text-center text-lg-start">
             <h2 class="footer-title mb-2">Contact</h2>
-            <a href="mailto:contact@aspporcelette.com" class="footer-contact" aria-label="Envoyer un e-mail au club">
+            <a href="mailto:asporcelette@gmail.com" class="footer-contact" aria-label="Envoyer un e-mail au club">
               <span class="footer-icon">
-                <!-- 💡 Si l'icône ne s'affiche toujours pas, l'attribut emoji ✉️ sert de solution de secours -->
                <i class="pi pi-envelope"></i>
               </span>
-              <span>contact@aspporcelette.com</span>
+              <span>asporcelette@gmail.com</span>
             </a>
           </div>
 
