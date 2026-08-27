@@ -48,6 +48,17 @@ const disciplineBorderMap = {
   4: 'border-detente'  // Judo détente
 }
 
+const disciplineColorMap = {
+  1: '#ef3838',  // Judo
+  2: '#31b3d0',  // Aïkido
+  3: '#38ef7d',  // Jujitsu
+  4: '#e7d25c'   // Judo détente
+}
+
+function getDisciplineColor(disciplineId) {
+  return disciplineColorMap[disciplineId] || '#ffffff'
+}
+
 function getBorderClass(disciplineId) {
   return disciplineBorderMap[disciplineId] || 'border-judo'
 }
@@ -91,7 +102,9 @@ onMounted(fetchSensei)
           </div>
 
           <h3 class="mt-4 mb-1 text-white fs-5 fw-bold">{{ sensei.prenom }} {{ sensei.nom }}</h3>
-          <p class="text-warning fs-6 fw-medium m-0">{{ sensei.grade }}</p>
+          <p :style="{ color: getDisciplineColor(sensei.disciplineId) }" class="fs-6 fw-medium m-0">
+            {{ sensei.grade || 'Grade non précisé' }}
+          </p>
 
         </div>
       </div>
