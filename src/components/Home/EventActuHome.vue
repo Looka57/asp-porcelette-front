@@ -55,7 +55,6 @@ async function fetchEvenement() {
     isLoading.value = true
     const maintenant = new Date()
 
-    // 👈 Appel simultané des deux endpoints API
     const [reponseEvents, reponseActus] = await Promise.all([
       api.get(API_PATH_EVENEMENT),
       api.get(API_PATH_ACTUALITE)
@@ -67,10 +66,10 @@ async function fetchEvenement() {
       .map(event => ({
         id: event.evenementId,
         titre: event.titre || 'Événement',
-        date: event.dateDebut,
+        datePublication: event.dateDebut || event.datePublication || event.date || event.createdAt,
         lieu: event.lieu || 'Pas de lieu disponible.',
         disciplineId: event.disciplineId,
-        type: 'evenement', // Pour le conditionnement et la redirection
+        type: 'evenement',
         route: `/evenement/${event.evenementId}`
       }))
 
@@ -78,17 +77,19 @@ async function fetchEvenement() {
     const actusFormatees = reponseActus.data.map(actu => ({
       id: actu.actualiteId || actu.id,
       titre: actu.titre || 'Actualité',
-      date: actu.datePublication || actu.date,
-      lieu: actu.chapeau || actu.description || 'Actualité récente', // Utilise le chapeau/description courte comme sous-titre
+      datePublication: actu.dateDePublication,
+      lieu: actu.chapeau || actu.description || 'Actualité récente',
       disciplineId: actu.disciplineId,
       type: 'actualite',
       route: `/actualite/${actu.actualiteId || actu.id}`
     }))
 
-    // Fusion, tri chronologique croissant et limitation aux 3 plus récents
     const combinelist = [...eventsFormates, ...actusFormatees]
-    combinelist.sort((a, b) => new Date(a.date) - new Date(b.date))
 
+    // 👈 1. Tri DÉCROISSANT (b - a) pour garder les plus récents
+    combinelist.sort((a, b) => new Date(b.datePublication) - new Date(a.datePublication))
+
+    // 👈 2. Conservation des 3 derniers arrivés
     evenements.value = combinelist.slice(0, 3)
   } catch (error) {
     console.error('❌ Erreur lors du chargement des données :', error)
@@ -100,8 +101,11 @@ async function fetchEvenement() {
 
 function formatDate(dateString) {
   if (!dateString) return 'Date non spécifiée'
+  const parsed = new Date(dateString)
+  if (isNaN(parsed.getTime())) return 'Date non spécifiée'
+
   const options = { year: 'numeric', month: 'long', day: 'numeric' }
-  return new Date(dateString).toLocaleDateString('fr-FR', options)
+  return parsed.toLocaleDateString('fr-FR', options)
 }
 
 function getIconUrl(disciplineId) {
@@ -134,7 +138,7 @@ onMounted(fetchEvenement)
       <!-- En-tête de section -->
       <div class="text-center mb-5">
         <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-2">Agenda</span>
-        <h3 class="display-3 text-white m-0">Prochains Évènements</h3>
+        <h3 class="display-3 text-white m-0">Prochains Évènements / Actualités</h3>
       </div>
 
       <!-- États de chargement / erreur / vide -->
@@ -152,49 +156,60 @@ onMounted(fetchEvenement)
         <p class="m-0">Aucun événement ou actualité à venir pour le moment.</p>
       </div>
 
-<!-- Grille des événements et actualités -->
-<div v-else class="row g-4 justify-content-center">
-  <div v-for="item in evenements" :key="`${item.type}-${item.id}`" class="col-lg-4 col-md-6 col-sm-12 d-flex">
+      <!-- Grille des événements et actualités -->
+      <div v-else class="row g-4 justify-content-center">
+        <div v-for="item in evenements" :key="`${item.type}-${item.id}`" class="col-lg-4 col-md-6 col-sm-12 d-flex">
 
-    <div class="card event-card w-100 p-4 rounded-4 bg-dark-card border border-secondary border-opacity-10 d-flex flex-column justify-content-between shadow-lg"
-         :style="{ '--discipline-color': getDisciplineColor(item.disciplineId) }">
+          <div
+            class="card event-card w-100 p-4 rounded-4 bg-dark-card border border-secondary border-opacity-10 d-flex flex-column justify-content-between shadow-lg"
+            :style="{ '--discipline-color': getDisciplineColor(item.disciplineId) }">
 
-      <div class="card-body p-0 d-flex flex-column align-items-center text-center">
+            <div class="card-body p-0 d-flex flex-column align-items-center text-center">
 
-        <!-- Icône de discipline -->
-        <div class="icon-wrapper mb-3 p-2 rounded-3 bg-surface border"
-             :style="{ borderColor: getDisciplineColor(item.disciplineId) + '40 !important' }">
-          <img width="48" height="48" :src="getIconUrl(item.disciplineId)" alt="logo discipline" loading="lazy" />
+              <!-- Icône de discipline -->
+              <div class="icon-wrapper mb-3 p-2 rounded-3 bg-surface border"
+                :style="{ borderColor: getDisciplineColor(item.disciplineId) + '40 !important' }">
+                <img width="48" height="48" :src="getIconUrl(item.disciplineId)" alt="logo discipline" loading="lazy" />
+              </div>
+
+              <!-- Badge de discipline + type (Événement / Actualité) -->
+              <!-- Badge de discipline + type -->
+              <span class="badge px-3 py-1 rounded-pill fw-semibold fs-7 mb-2 text-uppercase shadow-sm"
+                :style="{ backgroundColor: getDisciplineColor(item.disciplineId) + '20', color: getDisciplineColor(item.disciplineId) }">
+
+                {{ item.type === 'actualite' ? 'Actualité' : 'Événement' }}
+
+                <!-- Affiche la discipline seulement si elle est définie -->
+                <template v-if="item.disciplineId && getDisciplineName(item.disciplineId)">
+                  • {{ getDisciplineName(item.disciplineId) }}
+                </template>
+
+                • {{ formatDate(item.datePublication) }}
+              </span>
+
+              <h5 class="card-title text-white fw-bold fs-5 mb-2 ellipsis-3">
+                {{ item.titre }}
+              </h5>
+
+              <p
+                class="card-text text-light fs-6 mb-4 d-flex align-items-center justify-content-center gap-1 ellipsis-3">
+                <i :class="item.type === 'actualite' ? 'bi bi-newspaper' : 'bi bi-geo-alt-fill'"
+                  :style="{ color: getDisciplineColor(item.disciplineId) }"></i>
+                <span>{{ item.lieu }}</span>
+              </p>
+            </div>
+
+            <!-- Bouton vers la route dynamique -->
+            <div class="card-footer bg-transparent border-0 p-0 text-center mt-auto">
+              <router-link :to="item.route" class="btn w-100 rounded-pill py-2 fw-semibold btn-dynamic-outline">
+                Voir le détail
+              </router-link>
+            </div>
+
+          </div>
+
         </div>
-
-        <!-- Badge de discipline + type (Événement / Actualité) -->
-        <span class="badge px-3 py-1 rounded-pill fw-semibold fs-7 mb-2 text-uppercase shadow-sm"
-              :style="{ backgroundColor: getDisciplineColor(item.disciplineId) + '20', color: getDisciplineColor(item.disciplineId) }">
-          {{ item.type === 'actualite' ? 'Actu' : 'Événement' }} • {{ getDisciplineName(item.disciplineId) }} • {{ formatDate(item.date) }}
-        </span>
-
-        <h5 class="card-title text-white fw-bold fs-5 mb-2 ellipsis-3">
-          {{ item.titre }}
-        </h5>
-
-        <p class="card-text text-light fs-6 mb-4 d-flex align-items-center justify-content-center gap-1 ellipsis-3">
-          <i :class="item.type === 'actualite' ? 'bi bi-newspaper' : 'bi bi-geo-alt-fill'"
-             :style="{ color: getDisciplineColor(item.disciplineId) }"></i>
-          <span>{{ item.lieu }}</span>
-        </p>
       </div>
-
-      <!-- Bouton vers la route dynamique -->
-      <div class="card-footer bg-transparent border-0 p-0 text-center mt-auto">
-        <router-link :to="item.route" class="btn w-100 rounded-pill py-2 fw-semibold btn-dynamic-outline">
-          Voir le détail
-        </router-link>
-      </div>
-
-    </div>
-
-  </div>
-</div>
 
     </div>
   </div>
