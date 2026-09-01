@@ -4,9 +4,10 @@ import { ref, computed } from 'vue'
 const DISCIPLINE_COLORS = {
   Judo: '#FF6384',
   Aïkido: '#3B82F6',
-  Jujitsu: '#efd844ff',
-  'Judo Détente': '#10B981',
+  Jujitsu: '#10B981',
+  'Judo Détente': '#efd844ff',
 }
+
 
 // 💡 Fonction Utilitaire pour le Calcul Cumulatif
 const cumulativeSum = (data) => {

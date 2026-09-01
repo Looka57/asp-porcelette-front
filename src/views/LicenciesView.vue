@@ -36,6 +36,17 @@ const selectedUser = ref(null);
 const searchTerm = ref('');
 const activeAccordion = ref(null);
 
+const disciplineColors = {
+  Judo: '#FF6384',
+  Aïkido: '#3B82F6',
+  Jujitsu: '#10B981',
+  'Judo Détente': '#EFD844',
+};
+
+function getDisciplineColor(discipline) {
+  return disciplineColors[discipline] || '#8A919E';
+}
+
 
 // ===============================
 // 🔹 API CONSTANTS
@@ -454,9 +465,15 @@ onMounted(() => {
               ">
 
               <div class="discipline-title">
-                <div class="discipline-icon">
-                  <i class="pi pi-shield"></i>
-                </div>
+              <div
+  class="discipline-icon"
+  :style="{
+    color: getDisciplineColor(discipline.nom),
+    background: `${getDisciplineColor(discipline.nom)}18`
+  }"
+>
+  <i class="pi pi-shield"></i>
+</div>
 
                 <div>
                   <span class="discipline-name">
@@ -984,8 +1001,8 @@ onMounted(() => {
   justify-content: center;
   border-radius: 9px;
   background: rgba(255, 193, 7, 0.08);
-  color: #ffc107;
 }
+
 
 .discipline-name {
   display: block;

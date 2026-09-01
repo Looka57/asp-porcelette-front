@@ -25,8 +25,8 @@ const API_PATH_TARIF = '/Tarif'
 const disciplineColors = {
   Judo: '#FF6384',
   Aïkido: '#3B82F6',
-  Jujitsu: '#efd844ff',
-  'Judo Détente': '#10B981',
+  Jujitsu: '#10B981',
+  'Judo Détente': '#efd844ff'
 }
 
 function getDisciplineColor(nom) {

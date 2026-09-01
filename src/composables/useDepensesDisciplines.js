@@ -7,8 +7,8 @@ const MOIS_SAISON = ['Sept', 'Oct', 'Nov', 'Déc', 'Janv', 'Fév', 'Mar', 'Avr',
 const DISCIPLINE_COLOR_MAP = {
   Judo: { bg: 'rgba(255, 99, 132, 0.7)', border: 'rgba(255, 99, 132, 1)' }, // Rouge
   Aïkido: { bg: 'rgba(54, 162, 235, 0.7)', border: 'rgba(54, 162, 235, 1)' }, // Bleu
-  Jujitsu: { bg: 'rgba(255, 206, 86, 0.7)', border: 'rgba(255, 206, 86, 1)' }, // Jaune
-  'Judo Détente': { bg: 'rgba(75, 192, 192, 0.7)', border: 'rgba(75, 192, 192, 1)' }, // Turquoise
+  Jujitsu: { bg: 'rgba(75, 192, 192, 0.7)', border: 'rgba(75, 192, 192, 1)' }, // Turquoise
+  'Judo Détente':{ bg: 'rgba(255, 206, 86, 0.7)', border: 'rgba(255, 206, 86, 1)' }, // Jaune
 }
 
 // Couleurs de secours si d'autres disciplines apparaissent
