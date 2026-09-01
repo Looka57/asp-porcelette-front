@@ -25,127 +25,25 @@ const MONTHS = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai'
 
 const processInscriptionsData = (allUsers) => {
   const today = new Date();
-
-  // ==========================================================
-  // 🔹 DÉTERMINATION DE LA SAISON SPORTIVE ACTUELLE
-  // ==========================================================
-
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
-
-  // Septembre = mois 8
-  // De septembre à décembre → saison qui commence cette année
-  // De janvier à août → saison qui a commencé l'année précédente
-  const seasonStartYear =
-    currentMonth >= 8
-      ? currentYear
-      : currentYear - 1;
-
-  // Exemple au 01/09/2026 :
-  // saison = 2026-2027
-  const seasonStart = new Date(
-    seasonStartYear,
-    8,
-    1,
-    0,
-    0,
-    0,
-    0
-  );
-
-  const seasonEnd = new Date(
-    seasonStartYear + 1,
-    5,
-    30,
-    23,
-    59,
-    59,
-    999
-  );
-
-  console.log(
-    '📅 Saison actuelle :',
-    `${seasonStartYear}-${seasonStartYear + 1}`
-  );
-
-  console.log(
-    '📅 Début saison :',
-    seasonStart
-  );
-
-  console.log(
-    '📅 Fin saison :',
-    seasonEnd
-  );
-
-  // ==========================================================
-  // 🔹 INITIALISATION DES DONNÉES
-  // ==========================================================
+  const seasonStartYear = currentMonth >= 8 ? currentYear : currentYear - 1;
 
   const monthlyData = DISCIPLINES_NAMES.reduce((acc, disc) => {
     acc[disc] = new Array(MONTHS.length).fill(0);
     return acc;
   }, {});
 
-  // ==========================================================
-  // 🔹 TRAITEMENT DES ADHÉRENTS
-  // ==========================================================
-
   allUsers.forEach(user => {
+    const isAdherent = user.roles && user.roles.includes('Adherent');
+    const userDiscipline = DISCIPLINES_MAP[user.disciplineId];
+    const dateAdhesion = user.dateAdhesion;
+    if (!isAdherent || !userDiscipline || !dateAdhesion) return;
+    const inscriptionDate = new Date(dateAdhesion);
+    if (isNaN(inscriptionDate.getTime()) || inscriptionDate.getFullYear() < seasonStartYear) return;
+    const month = inscriptionDate.getMonth();
+    let monthIndex = month >= 8 ? month - 8 : (month <= 5 ? month + 4 : -1);
 
-    const isAdherent =
-      user.roles &&
-      user.roles.includes('Adherent');
-
-    const userDiscipline =
-      DISCIPLINES_MAP[user.disciplineId];
-
-    const dateAdhesion =
-      user.dateAdhesion;
-
-    if (
-      !isAdherent ||
-      !userDiscipline ||
-      !dateAdhesion
-    ) {
-      return;
-    }
-
-    const inscriptionDate =
-      new Date(dateAdhesion);
-
-    // Date invalide
-    if (isNaN(inscriptionDate.getTime())) {
-      return;
-    }
-
-    // ========================================================
-    // 🔹 FILTRE STRICT SUR LA SAISON SPORTIVE
-    // ========================================================
-
-    if (
-      inscriptionDate < seasonStart ||
-      inscriptionDate > seasonEnd
-    ) {
-      return;
-    }
-
-    // ========================================================
-    // 🔹 CALCUL DU MOIS DANS LA SAISON
-    // ========================================================
-
-    const month =
-      inscriptionDate.getMonth();
-
-    let monthIndex;
-
-    if (month >= 8) {
-      // Septembre → Décembre
-      monthIndex = month - 8;
-    } else {
-      // Janvier → Juin
-      monthIndex = month + 4;
-    }
 
     console.log(
       user.prenom,
@@ -153,29 +51,14 @@ const processInscriptionsData = (allUsers) => {
       'dateAdhesion =',
       user.dateAdhesion,
       '=> mois =',
-      month,
+      inscriptionDate.getMonth(),
       '=> index =',
-      monthIndex,
-      '=> SAISON =',
-      `${seasonStartYear}-${seasonStartYear + 1}`
+      monthIndex
     );
-
-    // ========================================================
-    // 🔹 AJOUT AU MOIS CORRESPONDANT
-    // ========================================================
-
-    if (
-      monthIndex >= 0 &&
-      monthIndex < MONTHS.length
-    ) {
+    if (monthIndex >= 0 && monthIndex < MONTHS.length) {
       monthlyData[userDiscipline][monthIndex]++;
     }
   });
-
-  // ==========================================================
-  // 🔹 ENVOI DES DONNÉES AU GRAPHIQUE
-  // ==========================================================
-
   rawInscriptionsData.value = monthlyData;
 };
 
