@@ -28,7 +28,6 @@ const processInscriptionsData = (allUsers) => {
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
   const seasonStartYear = currentMonth >= 8 ? currentYear : currentYear - 1;
-  const currentMonthIndex = currentMonth >= 8 ? currentMonth - 8 : currentMonth + 4;
 
   const monthlyData = DISCIPLINES_NAMES.reduce((acc, disc) => {
     acc[disc] = new Array(MONTHS.length).fill(0);
@@ -44,9 +43,21 @@ const processInscriptionsData = (allUsers) => {
     if (isNaN(inscriptionDate.getTime()) || inscriptionDate.getFullYear() < seasonStartYear) return;
     const month = inscriptionDate.getMonth();
     let monthIndex = month >= 8 ? month - 8 : (month <= 5 ? month + 4 : -1);
-    if (monthIndex >= 0 && monthIndex <= currentMonthIndex && monthIndex < MONTHS.length) {
-      monthlyData[userDiscipline][monthIndex]++;
-    }
+
+
+    console.log(
+  user.prenom,
+  user.nom,
+  'dateAdhesion =',
+  user.dateAdhesion,
+  '=> mois =',
+  inscriptionDate.getMonth(),
+  '=> index =',
+  monthIndex
+);
+ if (monthIndex >= 0 && monthIndex < MONTHS.length) {
+  monthlyData[userDiscipline][monthIndex]++;
+}
   });
   rawInscriptionsData.value = monthlyData;
 };

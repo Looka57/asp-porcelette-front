@@ -9,22 +9,75 @@ const props = defineProps({
 });
 
 // ===============================
+// 🔹 SAISON SPORTIVE
+// ===============================
+
+const getCurrentSeason = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0 = janvier, 8 = septembre
+
+  // De septembre à décembre → saison year/year+1
+  if (month >= 8) {
+    return {
+      start: new Date(year, 8, 1), // 1er septembre
+      end: new Date(year + 1, 5, 30) // 30 juin
+    };
+  }
+
+  // De janvier à juin → saison year-1/year
+  return {
+    start: new Date(year - 1, 8, 1),
+    end: new Date(year, 5, 30)
+  };
+};
+
+const currentSeason = computed(() => getCurrentSeason());
+
+// ===============================
 // 🔹 UTILITAIRES
 // ===============================
+
+const isDateInCurrentSeason = (dateString) => {
+  if (!dateString) {
+    return false;
+  }
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  const start = new Date(currentSeason.value.start);
+  const end = new Date(currentSeason.value.end);
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+
+  return date >= start && date <= end;
+};
+
 const isCertificatExpire = (dateExpiration) => {
   if (!dateExpiration) {
     return false;
   }
+
   const aujourdHui = new Date();
   aujourdHui.setHours(0, 0, 0, 0);
+
   const expiration = new Date(dateExpiration);
   expiration.setHours(0, 0, 0, 0);
+
   return expiration < aujourdHui;
 };
 
 // ===============================
 // 🔹 STATISTIQUES
 // ===============================
+// Total et certificats portent sur TOUS les adhérents.
+// Seuls les "renouvellements" sont filtrés sur la saison en cours.
+
 const totalAdherents = computed(() => {
   return props.userList.length;
 });
@@ -34,9 +87,8 @@ const certificatsValides = computed(() => {
     if (!user.dateExpirationCertificatMedical) {
       return false;
     }
-    return !isCertificatExpire(
-      user.dateExpirationCertificatMedical
-    );
+
+    return !isCertificatExpire(user.dateExpirationCertificatMedical);
   }).length;
 });
 
@@ -45,23 +97,18 @@ const certificatsExpires = computed(() => {
     if (!user.dateExpirationCertificatMedical) {
       return false;
     }
-    return isCertificatExpire(
-      user.dateExpirationCertificatMedical
-    );
+
+    return isCertificatExpire(user.dateExpirationCertificatMedical);
   }).length;
 });
 
-/*
- * Pour le moment, on compte les adhérents
- * possédant une date de renouvellement.
- *
- * Ce compteur pourra être adapté plus tard
- * pour suivre réellement les renouvellements
- * de la saison 2026-2027.
- */
+// ===============================
+// 🔹 RENOUVELLEMENTS (uniquement ceux déjà faits pour la saison en cours)
+// ===============================
+
 const renouvellements = computed(() => {
   return props.userList.filter(user => {
-    return user.dateRenouvellement;
+    return isDateInCurrentSeason(user.dateRenouvellement);
   }).length;
 });
 </script>

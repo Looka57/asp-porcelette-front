@@ -84,7 +84,7 @@ export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
     }, 0)
   })
 
-  // 🎯 OPTIONS pour les INSCRIPTIONS (nombres entiers)
+
   // 🎯 OPTIONS pour les INSCRIPTIONS (nombres entiers)
   const chartOptions = ref({
     responsive: true,
