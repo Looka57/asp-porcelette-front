@@ -25,40 +25,157 @@ const MONTHS = ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai'
 
 const processInscriptionsData = (allUsers) => {
   const today = new Date();
+
+  // ==========================================================
+  // 🔹 DÉTERMINATION DE LA SAISON SPORTIVE ACTUELLE
+  // ==========================================================
+
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
-  const seasonStartYear = currentMonth >= 8 ? currentYear : currentYear - 1;
+
+  // Septembre = mois 8
+  // De septembre à décembre → saison qui commence cette année
+  // De janvier à août → saison qui a commencé l'année précédente
+  const seasonStartYear =
+    currentMonth >= 8
+      ? currentYear
+      : currentYear - 1;
+
+  // Exemple au 01/09/2026 :
+  // saison = 2026-2027
+  const seasonStart = new Date(
+    seasonStartYear,
+    8,
+    1,
+    0,
+    0,
+    0,
+    0
+  );
+
+  const seasonEnd = new Date(
+    seasonStartYear + 1,
+    5,
+    30,
+    23,
+    59,
+    59,
+    999
+  );
+
+  console.log(
+    '📅 Saison actuelle :',
+    `${seasonStartYear}-${seasonStartYear + 1}`
+  );
+
+  console.log(
+    '📅 Début saison :',
+    seasonStart
+  );
+
+  console.log(
+    '📅 Fin saison :',
+    seasonEnd
+  );
+
+  // ==========================================================
+  // 🔹 INITIALISATION DES DONNÉES
+  // ==========================================================
 
   const monthlyData = DISCIPLINES_NAMES.reduce((acc, disc) => {
     acc[disc] = new Array(MONTHS.length).fill(0);
     return acc;
   }, {});
 
-  allUsers.forEach(user => {
-    const isAdherent = user.roles && user.roles.includes('Adherent');
-    const userDiscipline = DISCIPLINES_MAP[user.disciplineId];
-    const dateAdhesion = user.dateAdhesion;
-    if (!isAdherent || !userDiscipline || !dateAdhesion) return;
-    const inscriptionDate = new Date(dateAdhesion);
-    if (isNaN(inscriptionDate.getTime()) || inscriptionDate.getFullYear() < seasonStartYear) return;
-    const month = inscriptionDate.getMonth();
-    let monthIndex = month >= 8 ? month - 8 : (month <= 5 ? month + 4 : -1);
+  // ==========================================================
+  // 🔹 TRAITEMENT DES ADHÉRENTS
+  // ==========================================================
 
+  allUsers.forEach(user => {
+
+    const isAdherent =
+      user.roles &&
+      user.roles.includes('Adherent');
+
+    const userDiscipline =
+      DISCIPLINES_MAP[user.disciplineId];
+
+    const dateAdhesion =
+      user.dateAdhesion;
+
+    if (
+      !isAdherent ||
+      !userDiscipline ||
+      !dateAdhesion
+    ) {
+      return;
+    }
+
+    const inscriptionDate =
+      new Date(dateAdhesion);
+
+    // Date invalide
+    if (isNaN(inscriptionDate.getTime())) {
+      return;
+    }
+
+    // ========================================================
+    // 🔹 FILTRE STRICT SUR LA SAISON SPORTIVE
+    // ========================================================
+
+    if (
+      inscriptionDate < seasonStart ||
+      inscriptionDate > seasonEnd
+    ) {
+      return;
+    }
+
+    // ========================================================
+    // 🔹 CALCUL DU MOIS DANS LA SAISON
+    // ========================================================
+
+    const month =
+      inscriptionDate.getMonth();
+
+    let monthIndex;
+
+    if (month >= 8) {
+      // Septembre → Décembre
+      monthIndex = month - 8;
+    } else {
+      // Janvier → Juin
+      monthIndex = month + 4;
+    }
 
     console.log(
-  user.prenom,
-  user.nom,
-  'dateAdhesion =',
-  user.dateAdhesion,
-  '=> mois =',
-  inscriptionDate.getMonth(),
-  '=> index =',
-  monthIndex
-);
- if (monthIndex >= 0 && monthIndex < MONTHS.length) {
-  monthlyData[userDiscipline][monthIndex]++;
-}
+      user.prenom,
+      user.nom,
+      'dateAdhesion =',
+      user.dateAdhesion,
+      '=> mois =',
+      month,
+      '=> index =',
+      monthIndex,
+      '=> SAISON =',
+      `${seasonStartYear}-${seasonStartYear + 1}`
+    );
+
+    // ========================================================
+    // 🔹 AJOUT AU MOIS CORRESPONDANT
+    // ========================================================
+
+    if (
+      monthIndex >= 0 &&
+      monthIndex < MONTHS.length
+    ) {
+      monthlyData[userDiscipline][monthIndex]++;
+    }
   });
+
+  // ==========================================================
+  // 🔹 ENVOI DES DONNÉES AU GRAPHIQUE
+  // ==========================================================
+
   rawInscriptionsData.value = monthlyData;
 };
 
@@ -127,9 +244,11 @@ onMounted(async () => {
     <div class="grid grid-nogutter gap-4 mb-6">
       <div class="col-12 md:col flex">
         <router-link :to="{ name: 'admin-licencies' }" class="w-full no-underline">
-          <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
+          <div
+            class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
             <div class="kpi-icon-wrapper mb-3 p-3 border-round-circle flex align-items-center justify-content-center">
-              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/user-group-man-woman.png" alt="Licenciés" class="kpi-img" />
+              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/user-group-man-woman.png"
+                alt="Licenciés" class="kpi-img" />
             </div>
             <span class="text-light font-semibold text-lg uppercase tracking-wider mb-2">Licenciés</span>
             <CountUp :end-val="totalLicencies" :duration="2" class="text-4xl font-bold text-white m-0" />
@@ -139,9 +258,11 @@ onMounted(async () => {
 
       <div class="col-12 md:col flex">
         <router-link :to="{ name: 'admin-events' }" class="w-full no-underline">
-          <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
+          <div
+            class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
             <div class="kpi-icon-wrapper mb-3 p-3 border-round-circle flex align-items-center justify-content-center">
-              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/today.png" alt="Événements" class="kpi-img" />
+              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/today.png" alt="Événements"
+                class="kpi-img" />
             </div>
             <span class="text-light font-semibold text-lg uppercase tracking-wider mb-2">Événements</span>
             <CountUp :end-val="totalEvenements" :duration="2" class="text-4xl font-bold text-white m-0" />
@@ -151,12 +272,15 @@ onMounted(async () => {
 
       <div class="col-12 md:col flex">
         <router-link :to="{ name: 'admin-compta' }" class="w-full no-underline">
-          <div class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
+          <div
+            class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
             <div class="kpi-icon-wrapper mb-3 p-3 border-round-circle flex align-items-center justify-content-center">
-              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/bank.png" alt="Comptabilité" class="kpi-img" />
+              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/bank.png" alt="Comptabilité"
+                class="kpi-img" />
             </div>
             <span class="text-light font-semibold text-lg uppercase tracking-wider mb-2">Comptabilité</span>
-            <CountUp :end-val="totalCompta" :duration="2" :options="{ decimalPlaces: 2, suffix: ' €' }" class="text-4xl font-bold text-warning m-0" />
+            <CountUp :end-val="totalCompta" :duration="2" :options="{ decimalPlaces: 2, suffix: ' €' }"
+              class="text-4xl font-bold text-warning m-0" />
           </div>
         </router-link>
       </div>
@@ -172,7 +296,8 @@ onMounted(async () => {
 
       <!-- 🔹 Synthèse Saison avec Conteneur Scrollable sur Mobile -->
       <div class="chart-box p-4 border-round-xl border-1">
-        <div class="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom-1 border-white-alpha-10">
+        <div
+          class="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom-1 border-white-alpha-10">
           <div>
             <h3 class="text-xl md:text-2xl font-bold text-white m-0 mb-1 flex align-items-center gap-2">
               <i class="pi pi-chart-line text-warning"></i> Évolution des Inscriptions
@@ -198,7 +323,8 @@ onMounted(async () => {
           <h3 class="text-xl md:text-2xl font-bold text-white m-0 mb-1 flex align-items-center gap-2">
             <i class="pi pi-history text-warning"></i> Historique des Inscriptions
           </h3>
-          <p class="text-400 text-sm m-0">Comparatif des effectifs totaux par disciplines sur les saisons précédentes</p>
+          <p class="text-400 text-sm m-0">Comparatif des effectifs totaux par disciplines sur les saisons précédentes
+          </p>
         </div>
         <div class="overflow-x-auto">
           <div style="min-width: 500px;">
@@ -253,10 +379,12 @@ onMounted(async () => {
 .chart-scroll-container::-webkit-scrollbar {
   height: 6px;
 }
+
 .chart-scroll-container::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 4px;
 }
+
 .chart-scroll-container::-webkit-scrollbar-thumb {
   background: rgba(255, 193, 7, 0.4);
   border-radius: 4px;
