@@ -27,6 +27,7 @@ const processInscriptionsData = (allUsers) => {
   const today = new Date();
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
+
   const seasonStartYear = currentMonth >= 8 ? currentYear : currentYear - 1;
 
   const monthlyData = DISCIPLINES_NAMES.reduce((acc, disc) => {
@@ -38,53 +39,79 @@ const processInscriptionsData = (allUsers) => {
     const isAdherent = user.roles && user.roles.includes('Adherent');
     const userDiscipline = DISCIPLINES_MAP[user.disciplineId];
     const dateAdhesion = user.dateAdhesion;
+
     if (!isAdherent || !userDiscipline || !dateAdhesion) return;
+
     const inscriptionDate = new Date(dateAdhesion);
-    if (isNaN(inscriptionDate.getTime()) || inscriptionDate.getFullYear() < seasonStartYear) return;
+
+    if (isNaN(inscriptionDate.getTime())) return;
+
+    const inscriptionYear = inscriptionDate.getFullYear();
+    const inscriptionMonth = inscriptionDate.getMonth();
+    const inscriptionDay = inscriptionDate.getDate();
+
+    let userSeasonStartYear = inscriptionYear;
+
+    // À partir du 7 février, l'enregistrement appartient à la saison suivante
+    if (inscriptionMonth > 1 || (inscriptionMonth === 1 && inscriptionDay >= 7)) {
+      userSeasonStartYear = inscriptionYear;
+    } else {
+      userSeasonStartYear = inscriptionYear - 1;
+    }
+
+    if (userSeasonStartYear !== seasonStartYear) return;
+
     const month = inscriptionDate.getMonth();
-    let monthIndex = month >= 8 ? month - 8 : (month <= 5 ? month + 4 : -1);
+    const monthIndex = month >= 8
+      ? month - 8
+      : month <= 5
+        ? month + 4
+        : -1;
 
-
-    console.log(
-      user.prenom,
-      user.nom,
-      'dateAdhesion =',
-      user.dateAdhesion,
-      '=> mois =',
-      inscriptionDate.getMonth(),
-      '=> index =',
-      monthIndex
-    );
     if (monthIndex >= 0 && monthIndex < MONTHS.length) {
       monthlyData[userDiscipline][monthIndex]++;
     }
   });
+
   rawInscriptionsData.value = monthlyData;
 };
 
 const fetchStats = async () => {
   try {
     const licenciesResponse = await api.get('/User/admin/list');
-    processInscriptionsData(licenciesResponse.data || []);
+    const users = licenciesResponse.data || [];
+
+    processInscriptionsData(users);
+
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
+
     const seasonStartYear = currentMonth >= 8 ? currentYear : currentYear - 1;
+
     const seasonStart = new Date(seasonStartYear, 8, 1, 0, 0, 0, 0);
     const seasonEnd = new Date(seasonStartYear + 1, 5, 30, 23, 59, 59, 999);
 
-    totalLicencies.value = (licenciesResponse.data || []).filter(user => {
+    totalLicencies.value = users.filter(user => {
       const isAdherent = user.roles?.includes('Adherent');
-      if (!user.dateRenouvellement) return false;
+
+      if (!isAdherent || !user.dateRenouvellement) return false;
+
       const dateRenouvellement = new Date(user.dateRenouvellement);
-      return isAdherent && dateRenouvellement >= seasonStart && dateRenouvellement <= seasonEnd;
+
+      if (isNaN(dateRenouvellement.getTime())) return false;
+
+      return dateRenouvellement >= seasonStart && dateRenouvellement <= seasonEnd;
     }).length;
 
     const eventsResponse = await api.get('/Evenement');
     totalEvenements.value = eventsResponse.data.length || 0;
 
     const comptaReponse = await api.get('/Compte');
-    totalCompta.value = (comptaReponse.data || []).reduce((sum, c) => sum + (c.solde || 0), 0);
+    totalCompta.value = (comptaReponse.data || []).reduce(
+      (sum, c) => sum + (c.solde || 0),
+      0
+    );
   } catch (err) {
     console.error('Erreur stats :', err);
   }

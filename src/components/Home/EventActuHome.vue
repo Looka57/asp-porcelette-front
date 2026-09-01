@@ -138,7 +138,7 @@ onMounted(fetchEvenement)
       <!-- En-tête de section -->
       <div class="text-center mb-5">
         <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-2">Agenda</span>
-        <h3 class="display-3 text-white m-0">Prochains Évènements / Actualités</h3>
+        <h3 class="display-3 text-white m-0"> Évènements / Actualités</h3>
       </div>
 
       <!-- États de chargement / erreur / vide -->

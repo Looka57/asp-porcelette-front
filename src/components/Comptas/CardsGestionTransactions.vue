@@ -64,19 +64,28 @@ const filteredTransactions = computed(() => {
   return transactions.value.filter(t => t.compte?.compteId === currentCompteId.value);
 });
 
-const currentYear = computed(() => {
+const currentSeasonStartYear = computed(() => {
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
+
   return month >= 8 ? year : year - 1;
 });
 
-const totalDepensesAnnuelle = computed(() => {
-  const annualTransactions = filteredTransactions.value.filter(t =>
-    new Date(t.dateTransaction).getFullYear() === currentYear.value
-  );
+const currentSeason = computed(() => {
+  return `${currentSeasonStartYear.value}/${currentSeasonStartYear.value + 1}`;
+});
 
-  return annualTransactions
+const totalDepensesAnnuelle = computed(() => {
+  const seasonStart = new Date(currentSeasonStartYear.value, 8, 1, 0, 0, 0, 0);
+  const seasonEnd = new Date(currentSeasonStartYear.value + 1, 5, 30, 23, 59, 59, 999);
+
+  const seasonTransactions = filteredTransactions.value.filter(t => {
+    const date = new Date(t.dateTransaction);
+    return date >= seasonStart && date <= seasonEnd;
+  });
+
+  return seasonTransactions
     .filter(t => t.montant < 0)
     .reduce((total, t) => total + Math.abs(t.montant), 0)
     .toLocaleString('fr-FR', { minimumFractionDigits: 2 });
@@ -86,10 +95,10 @@ const totalDepensesAnnuelle = computed(() => {
 // 🔹 COMPOSABLES CHARTS
 // ===============================
 const { depensesData, chartOptions: chartOptionsGenerales } =
-  useDepensesGeneralesChart(filteredTransactions, currentYear);
+  useDepensesGeneralesChart(filteredTransactions, currentSeasonStartYear);
 
 const { depensesDisciplinesData, chartOptions: chartOptionsDisciplines } =
-  useDepensesDisciplinesChart(filteredTransactions, currentYear);
+  useDepensesDisciplinesChart(filteredTransactions, currentSeasonStartYear);
 
 // ===============================
 // 🔹 ICONS DYNAMIQUES
@@ -158,7 +167,7 @@ onMounted(async () => {
             <img :src="depensesIconUrl" alt="Icône Dépenses" width="72" height="72" />
           </div>
           <div class="card-info">
-            <span class="card-subtitle">Dépenses Cumulées (Saison {{ currentYear }})</span>
+            <span class="card-subtitle">Dépenses Cumulées (Saison {{ currentSeason }})</span>
             <div class="card-value text-danger font-highlight">- {{ totalDepensesAnnuelle }} €</div>
           </div>
           <div class="card-badge">
@@ -173,7 +182,7 @@ onMounted(async () => {
           <div class="chart-card">
             <div class="chart-header">
               <h3>Dépenses Mensuelles</h3>
-              <span class="chart-tag">Saison {{ currentYear }}</span>
+              <span class="chart-tag">Saison {{ currentSeason }}</span>
             </div>
             <div class="chart-wrapper">
               <LineChart :chartData="depensesData" :options="chartOptionsGenerales" />
@@ -183,7 +192,7 @@ onMounted(async () => {
           <div class="chart-card">
             <div class="chart-header">
               <h3>Dépenses par Discipline</h3>
-              <span class="chart-tag">Saison {{ currentYear }}</span>
+              <span class="chart-tag">Saison {{ currentSeason }}</span>
             </div>
             <div class="chart-wrapper">
               <BarChart :chartData="depensesDisciplinesData" :options="chartOptionsDisciplines" />
