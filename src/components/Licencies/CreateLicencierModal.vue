@@ -65,6 +65,32 @@ const formatDateForInput = (date) => {
   return '';
 };
 
+
+
+const ageAdherent = computed(() => {
+  if (!form.value.dateDeNaissance) {
+    return null;
+  }
+
+  const naissance = new Date(form.value.dateDeNaissance);
+  const aujourdHui = new Date();
+
+  let age = aujourdHui.getFullYear() - naissance.getFullYear();
+
+  const mois = aujourdHui.getMonth() - naissance.getMonth();
+
+  if (
+    mois < 0 ||
+    (mois === 0 && aujourdHui.getDate() < naissance.getDate())
+  ) {
+    age--;
+  }
+
+  return age;
+});
+
+
+
 // Calcul de la date d'expiration du certificat
 // Le frontend l'utilise uniquement pour l'affichage.
 // Le backend reste responsable de l'enregistrer.
@@ -551,14 +577,33 @@ const submitAdherent = async () => {
               </div>
 
               <!-- DATE DE NAISSANCE -->
+<div class="col-md-6">
+  <label class="form-label">
+    Date de naissance
+  </label>
 
-              <div class="col-md-6">
-                <label class="form-label">
-                  Date de naissance
-                </label>
+  <input
+    v-model="form.dateDeNaissance"
+    type="date"
+    class="form-control"
+  />
 
-                <input v-model="form.dateDeNaissance" type="date" class="form-control" />
-              </div>
+  <div
+    v-if="ageAdherent !== null"
+    class="form-text mt-2"
+    :class="ageAdherent < 18 ? 'text-info' : 'text-warning'"
+  >
+    <template v-if="ageAdherent < 18">
+      {{ ageAdherent }} ans - Certificat médical facultatif
+    </template>
+
+    <template v-else>
+      Certificat médical obligatoire
+    </template>
+  </div>
+</div>
+
+
 
               <!-- ADRESSE -->
 
