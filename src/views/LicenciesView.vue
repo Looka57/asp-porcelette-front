@@ -306,33 +306,60 @@ const updateAdherent = async (updatedUser) => {
 };
 
 
-// ===============================
+/// ===============================
 // 🔹 LICENCE FÉDÉRALE
 // ===============================
+
 const toggleLicencePayee = (user) => {
   const nouvelleValeur = !user.licencePayee;
+  const reinitialiseEnregistrement = !nouvelleValeur && user.licenceEnregistree === true;
 
   confirm.require({
-    header: nouvelleValeur
-      ? 'Confirmer le paiement'
-      : 'Confirmer le statut',
-    message: nouvelleValeur
-      ? `Confirmer que la licence de ${user.prenom} ${user.nom} a été payée ?`
-      : `Indiquer que la licence de ${user.prenom} ${user.nom} n'est pas payée ?`,
-    icon: nouvelleValeur
-      ? 'pi pi-check-circle'
-      : 'pi pi-exclamation-circle',
-    acceptLabel: nouvelleValeur
-      ? 'Confirmer le paiement'
-      : 'Confirmer',
+    header: reinitialiseEnregistrement
+      ? 'Attention'
+      : nouvelleValeur
+        ? 'Confirmer le paiement'
+        : 'Confirmer le statut',
+
+    message: reinitialiseEnregistrement
+      ? `La licence de ${user.prenom} ${user.nom} a déjà été enregistrée auprès de la fédération. Si vous indiquez qu'elle n'est plus payée, son enregistrement sera réinitialisé et devra être effectué à nouveau. Confirmer ?`
+      : nouvelleValeur
+        ? `Confirmer que la licence de ${user.prenom} ${user.nom} a été payée ?`
+        : `Indiquer que la licence de ${user.prenom} ${user.nom} n'est pas payée ?`,
+
+    icon: reinitialiseEnregistrement
+      ? 'pi pi-exclamation-triangle'
+      : nouvelleValeur
+        ? 'pi pi-check-circle'
+        : 'pi pi-exclamation-circle',
+
+    acceptLabel: reinitialiseEnregistrement
+      ? 'Confirmer'
+      : nouvelleValeur
+        ? 'Confirmer le paiement'
+        : 'Confirmer',
+
     rejectLabel: 'Annuler',
-    acceptClass: 'licence-paid-confirm-btn',
+
+    acceptClass: nouvelleValeur
+      ? 'licence-paid-confirm-btn'
+      : 'licence-validate-confirm-btn',
+
     rejectClass: 'confirm-cancel-btn',
+
     defaultFocus: 'reject',
+
     accept: async () => {
       try {
         const formData = new FormData();
+
         formData.append('LicencePayee', nouvelleValeur);
+
+        // Si on repasse une licence déjà enregistrée
+        // en "Non payée", on réinitialise son enregistrement.
+        if (reinitialiseEnregistrement) {
+          formData.append('LicenceEnregistree', false);
+        }
 
         await api.put(
           `/User/admin/${user.id || user.userId}`,
@@ -344,12 +371,16 @@ const toggleLicencePayee = (user) => {
           summary: nouvelleValeur
             ? 'Licence payée'
             : 'Licence non payée',
-          detail:
-            `${user.prenom} ${user.nom} : statut de la licence mis à jour.`,
+          detail: nouvelleValeur
+            ? `${user.prenom} ${user.nom} : statut de la licence mis à jour.`
+            : reinitialiseEnregistrement
+              ? `${user.prenom} ${user.nom} devra être réenregistré(e) auprès de la fédération.`
+              : `${user.prenom} ${user.nom} : statut de la licence mis à jour.`,
           life: 3000
         });
 
         await fetchLicencie();
+
       } catch (err) {
         console.error(
           'Erreur lors de la mise à jour de la licence :',
@@ -368,7 +399,57 @@ const toggleLicencePayee = (user) => {
   });
 };
 
+// ===============================
+// 🔹 VALIDATION ENREGISTREMENT FÉDÉRATION
+// ===============================
+const validateLicenceEnregistrement = (user) => {
+  confirm.require({
+    header: 'Confirmer l’enregistrement',
+    message:
+      `Confirmer que la licence de ${user.prenom} ${user.nom} a bien été enregistrée sur le site de la fédération ?`,
+    icon: 'pi pi-check-circle',
+    acceptLabel: 'Oui, enregistrée',
+    rejectLabel: 'Annuler',
+    acceptClass: 'licence-validate-confirm-btn',
+    rejectClass: 'confirm-cancel-btn',
+    defaultFocus: 'reject',
 
+    accept: async () => {
+      try {
+       const formData = new FormData();
+formData.append('LicenceEnregistree', true);
+
+await api.put(
+  `/User/admin/${user.id || user.userId}`,
+  formData
+);
+
+        toast.add({
+          severity: 'success',
+          summary: 'Licence enregistrée',
+          detail:
+            `${user.prenom} ${user.nom} a été retiré(e) des licences à enregistrer.`,
+          life: 3000
+        });
+
+        await fetchLicencie();
+      } catch (err) {
+        console.error(
+          'Erreur lors de la validation de l’enregistrement :',
+          err
+        );
+
+        toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail:
+            'La validation de l’enregistrement n’a pas pu être effectuée.',
+          life: 3500
+        });
+      }
+    }
+  });
+};
 
 
 
@@ -738,17 +819,32 @@ onMounted(() => {
                       </td>
                       <!-- Licence -->
                       <td class="desktop-only">
-                        <button type="button" class="licence-badge" :class="user.licencePayee
-                          ? 'licence-paid'
-                          : 'licence-unpaid'" :title="user.licencePayee
-                            ? 'Cliquer pour indiquer que la licence n’est plus payée'
-                            : 'Cliquer pour confirmer le paiement de la licence'" @click="toggleLicencePayee(user)">
-                          <i :class="user.licencePayee
-                            ? 'pi pi-check-circle'
-                            : 'pi pi-times-circle'"></i>
+                        <div class="licence-actions">
+                          <button type="button" class="licence-badge" :class="user.licencePayee
+                            ? 'licence-paid'
+                            : 'licence-unpaid'" :title="user.licencePayee
+          ? 'Licence payée'
+          : 'Cliquer pour confirmer le paiement de la licence'" @click="toggleLicencePayee(user)">
+                            <i :class="user.licencePayee
+                              ? 'pi pi-check-circle'
+                              : 'pi pi-times-circle'"></i>
+                            {{ user.licencePayee ? 'Payée' : 'Non payée' }}
+                          </button>
 
-                          {{ user.licencePayee ? 'Payée' : 'Non payée' }}
-                        </button>
+                       <button
+  v-if="user.licencePayee"
+  type="button"
+  class="licence-validate-btn"
+  :class="{ 'licence-validated': user.licenceEnregistree }"
+  :title="user.licenceEnregistree
+    ? 'Licence déjà enregistrée auprès de la fédération'
+    : 'Valider l’enregistrement auprès de la fédération'"
+  :disabled="user.licenceEnregistree"
+  @click="validateLicenceEnregistrement(user)"
+>
+  <i class="pi pi-check"></i>
+</button>
+                        </div>
                       </td>
 
 
@@ -1305,6 +1401,7 @@ onMounted(() => {
    LICENCE
 ================================ */
 
+
 .licence-badge {
   display: inline-flex;
   align-items: center;
@@ -1349,6 +1446,66 @@ onMounted(() => {
 .licence-unpaid:hover {
   background: rgba(220, 53, 69, 0.25);
   border-color: rgba(220, 53, 69, 0.55);
+}
+
+.licence-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.licence-validate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  background: rgba(25, 135, 84, 0.14);
+  color: #54d69a;
+  border: 1px solid rgba(25, 135, 84, 0.35);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.licence-validate-btn:hover {
+  background: rgba(25, 135, 84, 0.25);
+  border-color: rgba(25, 135, 84, 0.55);
+  transform: translateY(-1px);
+}
+
+.licence-validate-btn:active {
+  transform: translateY(0);
+}
+
+.licence-validate-btn.licence-validated {
+  background: rgba(108, 117, 125, 0.18);
+  color: #adb5bd;
+  border-color: rgba(108, 117, 125, 0.35);
+  cursor: default;
+  opacity: 0.8;
+}
+
+.licence-validate-btn.licence-validated:hover {
+  background: rgba(108, 117, 125, 0.18);
+  border-color: rgba(108, 117, 125, 0.35);
+  transform: none;
+}
+
+.licence-validate-confirm-btn {
+  background: #198754 !important;
+  border: 1px solid #198754 !important;
+  color: #fff !important;
+  padding: 0.55rem 1rem !important;
+}
+
+.licence-validate-confirm-btn:hover {
+  background: #157347 !important;
+  border-color: #157347 !important;
 }
 
 /* ===============================

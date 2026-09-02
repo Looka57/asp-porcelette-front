@@ -17,6 +17,7 @@ const { inscriptionsData, chartOptions, totalInscriptions } = useEvolutionInscri
 
 const totalLicencies = ref(0);
 const totalEvenements = ref(0);
+const totalLicencesAEnregistrer = ref(0);
 const totalCompta = ref(0);
 
 const DISCIPLINES_MAP = { 1: 'Judo', 2: 'Aïkido', 3: 'Jujitsu', 4: 'Judo Détente' };
@@ -79,7 +80,14 @@ const processInscriptionsData = (allUsers) => {
 const fetchStats = async () => {
   try {
     const licenciesResponse = await api.get('/User/admin/list');
+
     const users = licenciesResponse.data || [];
+    console.log('UTILISATEURS LICENCES :', users);
+    totalLicencesAEnregistrer.value = users.filter(user =>
+      user.roles?.includes('Adherent') &&
+      user.licencePayee === true &&
+      user.licenceEnregistree === false
+    ).length;
 
     processInscriptionsData(users);
 
@@ -176,6 +184,20 @@ onMounted(async () => {
             </div>
             <span class="text-light font-semibold text-lg uppercase tracking-wider mb-2">Événements</span>
             <CountUp :end-val="totalEvenements" :duration="2" class="text-4xl font-bold text-white m-0" />
+          </div>
+        </router-link>
+      </div>
+
+      <div class="col-12 md:col flex">
+        <router-link :to="{ name: 'admin-licencies' }" class="w-full no-underline">
+          <div
+            class="kpi-card p-4 border-round-xl border-1 flex flex-column align-items-center justify-content-center text-center cursor-pointer transition-all duration-300">
+            <div class="kpi-icon-wrapper mb-3 p-3 border-round-circle flex align-items-center justify-content-center">
+              <img width="80" height="80" src="https://img.icons8.com/bubbles/100/bill.png" alt="bill"/>
+            </div>
+
+            <span class="text-light font-semibold text-lg uppercase tracking-wider mb-2"> Licences à valider </span>
+            <CountUp :end-val="totalLicencesAEnregistrer" :duration="2" class="text-4xl font-bold text-white m-0" />
           </div>
         </router-link>
       </div>
