@@ -25,7 +25,7 @@ import EventActuHome from '@/components/Home/EventActuHome.vue';
         </h1>
         <div
           class="hero-subtitle-badge d-inline-block px-4 py-2 rounded-pill bg-dark bg-opacity-50 border border-secondary border-opacity-50 backdrop-blur">
-          <p class="fs-5 text-light m-0 fw-medium tracking-wide">Judo — Aïkido — Jujitsu</p>
+          <p class="fs-5 text-light m-0 fw-medium tracking-wide">Judo — Aïkido — Jujitsu - Judo Détente</p>
         </div>
       </div>
     </div>

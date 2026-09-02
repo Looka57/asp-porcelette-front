@@ -305,6 +305,85 @@ const updateAdherent = async (updatedUser) => {
   }
 };
 
+
+// ===============================
+// 🔹 LICENCE FÉDÉRALE
+// ===============================
+const toggleLicencePayee = (user) => {
+  const nouvelleValeur = !user.licencePayee;
+
+  confirm.require({
+    header: nouvelleValeur
+      ? 'Confirmer le paiement'
+      : 'Confirmer le statut',
+    message: nouvelleValeur
+      ? `Confirmer que la licence de ${user.prenom} ${user.nom} a été payée ?`
+      : `Indiquer que la licence de ${user.prenom} ${user.nom} n'est pas payée ?`,
+    icon: nouvelleValeur
+      ? 'pi pi-check-circle'
+      : 'pi pi-exclamation-circle',
+    acceptLabel: nouvelleValeur
+      ? 'Confirmer le paiement'
+      : 'Confirmer',
+    rejectLabel: 'Annuler',
+    acceptClass: 'licence-paid-confirm-btn',
+    rejectClass: 'confirm-cancel-btn',
+    defaultFocus: 'reject',
+    accept: async () => {
+      try {
+        const formData = new FormData();
+        formData.append('LicencePayee', nouvelleValeur);
+
+        await api.put(
+          `/User/admin/${user.id || user.userId}`,
+          formData
+        );
+
+        toast.add({
+          severity: 'success',
+          summary: nouvelleValeur
+            ? 'Licence payée'
+            : 'Licence non payée',
+          detail:
+            `${user.prenom} ${user.nom} : statut de la licence mis à jour.`,
+          life: 3000
+        });
+
+        await fetchLicencie();
+      } catch (err) {
+        console.error(
+          'Erreur lors de la mise à jour de la licence :',
+          err
+        );
+
+        toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail:
+            'Le statut de la licence n’a pas pu être mis à jour.',
+          life: 3500
+        });
+      }
+    }
+  });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ===============================
 // 🔹 UTILITAIRES
 // ===============================
@@ -465,15 +544,12 @@ onMounted(() => {
               ">
 
               <div class="discipline-title">
-              <div
-  class="discipline-icon"
-  :style="{
-    color: getDisciplineColor(discipline.nom),
-    background: `${getDisciplineColor(discipline.nom)}18`
-  }"
->
-  <i class="pi pi-shield"></i>
-</div>
+                <div class="discipline-icon" :style="{
+                  color: getDisciplineColor(discipline.nom),
+                  background: `${getDisciplineColor(discipline.nom)}18`
+                }">
+                  <i class="pi pi-shield"></i>
+                </div>
 
                 <div>
                   <span class="discipline-name">
@@ -559,6 +635,9 @@ onMounted(() => {
                       </th>
                       <th class="desktop-only">
                         Certificat médical
+                      </th>
+                      <th class="desktop-only">
+                        Licence
                       </th>
                       <th class="actions-column">
                         Actions
@@ -657,6 +736,25 @@ onMounted(() => {
                           Aucun
                         </span>
                       </td>
+                      <!-- Licence -->
+                      <td class="desktop-only">
+                        <button type="button" class="licence-badge" :class="user.licencePayee
+                          ? 'licence-paid'
+                          : 'licence-unpaid'" :title="user.licencePayee
+                            ? 'Cliquer pour indiquer que la licence n’est plus payée'
+                            : 'Cliquer pour confirmer le paiement de la licence'" @click="toggleLicencePayee(user)">
+                          <i :class="user.licencePayee
+                            ? 'pi pi-check-circle'
+                            : 'pi pi-times-circle'"></i>
+
+                          {{ user.licencePayee ? 'Payée' : 'Non payée' }}
+                        </button>
+                      </td>
+
+
+
+
+
 
                       <!-- Actions -->
                       <td class="actions-column">
@@ -1203,6 +1301,71 @@ onMounted(() => {
   font-style: italic;
 }
 
+/* ===============================
+   LICENCE
+================================ */
+
+.licence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.licence-badge:hover {
+  transform: translateY(-1px);
+}
+
+.licence-badge:active {
+  transform: translateY(0);
+}
+
+.licence-paid {
+  background: rgba(25, 135, 84, 0.14);
+  color: #54d69a;
+  border: 1px solid rgba(25, 135, 84, 0.35);
+}
+
+.licence-paid:hover {
+  background: rgba(25, 135, 84, 0.25);
+  border-color: rgba(25, 135, 84, 0.55);
+}
+
+.licence-unpaid {
+  background: rgba(220, 53, 69, 0.14);
+  color: #ff6b78;
+  border: 1px solid rgba(220, 53, 69, 0.35);
+}
+
+.licence-unpaid:hover {
+  background: rgba(220, 53, 69, 0.25);
+  border-color: rgba(220, 53, 69, 0.55);
+}
+
+/* ===============================
+   CONFIRMATION LICENCE PAYÉE
+================================ */
+
+.licence-paid-confirm-btn {
+  background: #198754 !important;
+  border: 1px solid #198754 !important;
+  color: #fff !important;
+  padding: 0.55rem 1rem !important;
+}
+
+.licence-paid-confirm-btn:hover {
+  background: #157347 !important;
+  border-color: #157347 !important;
+}
 
 /* ===============================
    BOUTONS ACTIONS
