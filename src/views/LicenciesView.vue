@@ -416,13 +416,13 @@ const validateLicenceEnregistrement = (user) => {
 
     accept: async () => {
       try {
-       const formData = new FormData();
-formData.append('LicenceEnregistree', true);
+        const formData = new FormData();
+        formData.append('LicenceEnregistree', true);
 
-await api.put(
-  `/User/admin/${user.id || user.userId}`,
-  formData
-);
+        await api.put(
+          `/User/admin/${user.id || user.userId}`,
+          formData
+        );
 
         toast.add({
           severity: 'success',
@@ -823,27 +823,21 @@ onMounted(() => {
                           <button type="button" class="licence-badge" :class="user.licencePayee
                             ? 'licence-paid'
                             : 'licence-unpaid'" :title="user.licencePayee
-          ? 'Licence payée'
-          : 'Cliquer pour confirmer le paiement de la licence'" @click="toggleLicencePayee(user)">
+                              ? 'Licence payée'
+                              : 'Cliquer pour confirmer le paiement de la licence'" @click="toggleLicencePayee(user)">
                             <i :class="user.licencePayee
                               ? 'pi pi-check-circle'
                               : 'pi pi-times-circle'"></i>
                             {{ user.licencePayee ? 'Payée' : 'Non payée' }}
                           </button>
 
-                       <button
-  v-if="user.licencePayee"
-  type="button"
-  class="licence-validate-btn"
-  :class="{ 'licence-validated': user.licenceEnregistree }"
-  :title="user.licenceEnregistree
-    ? 'Licence déjà enregistrée auprès de la fédération'
-    : 'Valider l’enregistrement auprès de la fédération'"
-  :disabled="user.licenceEnregistree"
-  @click="validateLicenceEnregistrement(user)"
->
-  <i class="pi pi-check"></i>
-</button>
+                          <button v-if="user.licencePayee" type="button" class="licence-validate-btn"
+                            :class="{ 'licence-validated': user.licenceEnregistree }" :title="user.licenceEnregistree
+                              ? 'Licence déjà enregistrée auprès de la fédération'
+                              : 'Valider l’enregistrement auprès de la fédération'" :disabled="user.licenceEnregistree"
+                            @click="validateLicenceEnregistrement(user)">
+                            <i class="pi pi-check"></i>
+                          </button>
                         </div>
                       </td>
 
