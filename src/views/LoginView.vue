@@ -27,9 +27,7 @@ async function handleLogin() {
   authStore.user.roles?.includes('Secrétaire') ||
   authStore.user.roles?.includes('Trésorière')
 ) {
-console.log("👤 UTILISATEUR CONNECTÉ :", authStore.user);
-console.log("🎭 RÔLES :", authStore.user?.roles);
-console.log("➡️ REDIRECTION VERS DASHBOARD");
+
   router.push('/admin/dashboard');
 
 } else {

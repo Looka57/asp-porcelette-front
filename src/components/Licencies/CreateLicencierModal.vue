@@ -376,17 +376,7 @@ const submitAdherent = async () => {
     // =============================
 
     try {
-      console.log(
-        '🔵 DATE CERTIFICAT :',
-        form.value.dateCertificatMedical
-      );
-
-      console.log(
-        '🔵 DATE EXPIRATION CALCULÉE FRONT :',
-        dateExpirationCertificatMedical.value
-      );
-
-      const response = await api.put(
+        const response = await api.put(
         `/User/admin/${props.user.userId}`,
         formData,
         {

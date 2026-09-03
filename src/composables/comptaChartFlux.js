@@ -105,7 +105,7 @@ export function useFluxComptaChart(transactionsRef, comptesRef, currentYearRef) 
           return match
         })
 
-        console.log(`  📊 Transactions du compte: ${transactionsCompte.length}`)
+
 
         // 🔹 Parser et filtrer par année
         const transactionsYear = transactionsCompte
