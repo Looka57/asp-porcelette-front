@@ -5,10 +5,6 @@ const props = defineProps({
   userList: {
     type: Array,
     default: () => []
-  },
-  disciplineList: {
-    type: Array,
-    default: () => []
   }
 });
 
@@ -16,44 +12,51 @@ const props = defineProps({
 // 🔹 STATISTIQUES
 // ===============================
 
-const totalEncadrants = computed(() => {
+// Total des membres affichés
+const totalMembres = computed(() => {
   return props.userList.length;
 });
 
-const totalAdministrateurs = computed(() => {
-  return props.userList.filter(user =>
-    user.roles?.includes('Admin')
-  ).length;
-});
-
+// Membres ayant le rôle Sensei
 const totalSenseis = computed(() => {
   return props.userList.filter(user =>
     user.roles?.includes('Sensei')
   ).length;
 });
 
-const disciplinesEncadrees = computed(() => {
-  const disciplineIds = new Set(
-    props.userList
-      .filter(user => user.roles?.includes('Sensei'))
-      .map(user => user.disciplineId)
-      .filter(id => id !== null && id !== undefined)
-  );
+// Membres ayant le rôle Comité
+const totalComite = computed(() => {
+  return props.userList.filter(user =>
+    user.roles?.includes('Comité')
+  ).length;
+});
 
-  return disciplineIds.size;
+// Membres ayant le rôle Secrétaire
+const totalSecretaires = computed(() => {
+  return props.userList.filter(user =>
+    user.roles?.includes('Secrétaire')
+  ).length;
+});
+
+const totalCompta = computed(() => {
+  return props.userList.filter(user =>
+    user.roles?.includes('Trésorière')
+  ).length;
 });
 </script>
 
 <template>
   <div class="statistics-grid">
-    <!-- Total encadrants -->
+
+    <!-- Total membres -->
     <div class="stat-card stat-total">
       <div class="stat-icon">
         <i class="pi pi-users"></i>
       </div>
+
       <div class="stat-content">
-        <span class="stat-value">{{ totalEncadrants }}</span>
-        <span class="stat-label">Total encadrants</span>
+        <span class="stat-value">{{ totalMembres }}</span>
+        <span class="stat-label">Total membres</span>
       </div>
     </div>
 
@@ -62,40 +65,46 @@ const disciplinesEncadrees = computed(() => {
       <div class="stat-icon">
         <i class="pi pi-user"></i>
       </div>
+
       <div class="stat-content">
         <span class="stat-value">{{ totalSenseis }}</span>
         <span class="stat-label">Senseis</span>
       </div>
     </div>
 
-    <!-- Administrateurs -->
-    <div class="stat-card stat-admin">
+    <!-- Comité -->
+    <div class="stat-card stat-comite">
       <div class="stat-icon">
-        <i class="pi pi-shield"></i>
+        <i class="pi pi-users"></i>
       </div>
+
       <div class="stat-content">
-        <span class="stat-value">{{ totalAdministrateurs }}</span>
-        <span class="stat-label">Administrateurs</span>
+        <span class="stat-value">{{ totalComite }}</span>
+        <span class="stat-label">Comité</span>
       </div>
     </div>
 
-    <!-- Disciplines -->
-    <div class="stat-card stat-discipline">
+    <!-- Secrétaires -->
+    <div class="stat-card stat-secretaire">
       <div class="stat-icon">
-        <i class="pi pi-sitemap"></i>
+        <i class="pi pi-user-edit"></i>
       </div>
-      <div class="stat-content">
-        <span class="stat-value">{{ disciplinesEncadrees }}</span>
-        <span class="stat-label">Disciplines encadrées</span>
+
+      <div class="stat-content-secretaireCompta">
+        <span class="stat-value">{{ totalSecretaires }}</span> __<span class="stat-value">{{ totalCompta }}</span>
+        <span class="stat-label">Secrétaires/Trésorières</span>
       </div>
     </div>
+
   </div>
 </template>
 
 <style scoped>
+
 /* ===============================
    🔹 CONTENEUR
 ================================ */
+
 .statistics-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -107,6 +116,7 @@ const disciplinesEncadrees = computed(() => {
 /* ===============================
    🔹 CARTE
 ================================ */
+
 .stat-card {
   position: relative;
   display: flex;
@@ -114,11 +124,18 @@ const disciplinesEncadrees = computed(() => {
   gap: 1rem;
   min-height: 105px;
   padding: 1.15rem;
-  background: linear-gradient(145deg, rgba(43, 48, 54, 0.95), rgba(33, 37, 41, 0.95));
+  background: linear-gradient(
+    145deg,
+    rgba(43, 48, 54, 0.95),
+    rgba(33, 37, 41, 0.95)
+  );
   border: 1px solid #3c434a;
   border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .stat-card::after {
@@ -142,6 +159,7 @@ const disciplinesEncadrees = computed(() => {
 /* ===============================
    🔹 ICÔNE
 ================================ */
+
 .stat-icon {
   width: 48px;
   height: 48px;
@@ -156,6 +174,7 @@ const disciplinesEncadrees = computed(() => {
 /* ===============================
    🔹 CONTENU
 ================================ */
+
 .stat-content {
   display: flex;
   flex-direction: column;
@@ -176,32 +195,43 @@ const disciplinesEncadrees = computed(() => {
   font-weight: 500;
 }
 
+.stat-content-secretaireCompta{
+  display: flex;
+  gap: 0.25rem;
+}
+
 /* ===============================
    🔹 VARIANTS
 ================================ */
+
+/* Total */
 .stat-total .stat-icon {
   background: rgba(255, 193, 7, 0.1);
   color: #ffc107;
 }
 
+/* Sensei */
 .stat-sensei .stat-icon {
-  background: rgba(13, 202, 240, 0.1);
-  color: #0dcaf0;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
-.stat-admin .stat-icon {
-  background: rgba(220, 53, 69, 0.1);
-  color: #ff6b78;
+/* Comité */
+.stat-comite .stat-icon {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
 }
 
-.stat-discipline .stat-icon {
-  background: rgba(25, 135, 84, 0.12);
-  color: #54d69a;
+/* Secrétaire */
+.stat-secretaire .stat-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
 }
 
 /* ===============================
    🔹 RESPONSIVE
 ================================ */
+
 @media (max-width: 1100px) {
   .statistics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -229,4 +259,6 @@ const disciplinesEncadrees = computed(() => {
     font-size: 1.55rem;
   }
 }
+
 </style>
+

@@ -27,6 +27,12 @@ const error = ref(null);
 const photoFile = ref(null);
 const validationError = ref('');
 const editingUserId = ref(null);
+const availableRoles = [
+  { value: 'Sensei', label: 'Sensei' },
+  { value: 'Comité', label: 'Comité' },
+  { value: 'Secrétaire', label: 'Secrétaire' },
+  { value: 'Trésorière', label: 'Trésorière' }
+];
 
 // --------------------
 // Helpers utilitaires
@@ -168,9 +174,24 @@ const loadSenseiData = async () => {
   try {
     const response = await api.get('User/admin/list');
     const allUsers = response.data || [];
-    userList.value = allUsers.filter(user => user.roles.includes('Admin') || user.roles.includes('Sensei'));
+
+    // Rôles pouvant accéder au dashboard
+    const dashboardRoles = [
+      'Admin',
+      'Sensei',
+      'Comité',
+      'Secrétaire',
+      'Trésorière'
+    ];
+
+    // On affiche tous les utilisateurs possédant au moins
+    // un rôle permettant l'accès au dashboard.
+    userList.value = allUsers.filter(user =>
+      user.roles?.some(role => dashboardRoles.includes(role))
+    );
+
   } catch (err) {
-    error.value = 'Échec du rechargement de la liste des Sensei.';
+    error.value = 'Échec du rechargement de la liste des membres.';
     console.error(err);
   } finally {
     loading.value = false;
@@ -182,18 +203,34 @@ const loadSenseiData = async () => {
 // --------------------
 const saveNewSensei = async () => {
   validationError.value = '';
-  const disciplineIdNum = Number(selectedDiscipline.value);
+
+  const isSensei = newSensei.value.roles.includes('Sensei');
+
+  const disciplineIdNum = isSensei
+    ? Number(selectedDiscipline.value)
+    : null;
+
   newSensei.value.disciplineId = disciplineIdNum;
 
   const isPasswordRequired = !editingUserId.value;
 
-  if (!newSensei.value.nom || !newSensei.value.email || !disciplineIdNum || (isPasswordRequired && !newSensei.value.password)) {
-    validationError.value = 'Veuillez remplir tous les champs obligatoires (Mot de passe requis pour l\'ajout).';
+  if (
+    !newSensei.value.nom ||
+    !newSensei.value.email ||
+    !newSensei.value.roles.length ||
+    (isSensei && !disciplineIdNum) ||
+    (isPasswordRequired && !newSensei.value.password)
+  ) {
+    validationError.value = isSensei
+      ? 'Veuillez remplir les champs obligatoires, sélectionner au moins un rôle et choisir une discipline pour un Sensei.'
+      : 'Veuillez remplir les champs obligatoires et sélectionner au moins un rôle.';
+
     return;
   }
 
   try {
     const formData = new FormData();
+
     for (const key in newSensei.value) {
       let value = newSensei.value[key];
 
@@ -207,6 +244,7 @@ const saveNewSensei = async () => {
 
       if (key === 'dateDeNaissance' && value) {
         const dateObj = new Date(value);
+
         if (!isNaN(dateObj)) {
           value = dateObj.toISOString();
         } else {
@@ -220,67 +258,178 @@ const saveNewSensei = async () => {
       }
     }
 
+    // Envoi des rôles sélectionnés lors de la création
+    newSensei.value.roles.forEach(role => {
+      formData.append('Roles', role);
+    });
+
     if (photoFile.value) {
       formData.append('PhotoFile', photoFile.value);
     }
 
-if (editingUserId.value) {
-      await api.put(`User/admin/${editingUserId.value}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      toast.add({
-        severity: 'success',
-        summary: 'Mis à jour',
-        detail: 'Informations enregistrées avec succès.',
-        life: 3000
-      });
-    } else {
+    // =========================================================
+    // CRÉATION
+    // =========================================================
+
+    if (!editingUserId.value) {
+
       await api.post('/User/register/sensei', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+
       toast.add({
         severity: 'success',
         summary: 'Créé',
-        detail: 'Nouveau Sensei créé avec succès.',
+        detail: 'Nouveau membre créé avec succès.',
+        life: 3000
+      });
+
+    }
+
+    // =========================================================
+    // MODIFICATION
+    // =========================================================
+
+    else {
+
+      const currentUser = userList.value.find(
+        user => (user.id || user.userId) === editingUserId.value
+      );
+
+      // Rôles actuels du membre
+      const currentRoles = currentUser?.roles || [];
+
+      // Rôles actuellement sélectionnés dans le formulaire
+      const selectedRoles = newSensei.value.roles || [];
+
+      // On ne synchronise que les rôles gérables depuis cette interface
+      const managedRoles = availableRoles.map(role => role.value);
+
+      // ---------------------------------------------------------
+      // Rôles à ajouter
+      // ---------------------------------------------------------
+
+      const rolesToAdd = selectedRoles.filter(
+        role =>
+          managedRoles.includes(role) &&
+          !currentRoles.includes(role)
+      );
+
+      // ---------------------------------------------------------
+      // Rôles à retirer
+      // ---------------------------------------------------------
+
+      const rolesToRemove = currentRoles.filter(
+        role =>
+          managedRoles.includes(role) &&
+          !selectedRoles.includes(role)
+      );
+
+      // ---------------------------------------------------------
+      // Mise à jour des informations du membre
+      // ---------------------------------------------------------
+
+      await api.put(`User/admin/${editingUserId.value}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      // ---------------------------------------------------------
+      // Ajout des nouveaux rôles
+      // ---------------------------------------------------------
+
+      for (const roleName of rolesToAdd) {
+        await api.post('/User/admin/roles/assign', {
+          userId: editingUserId.value,
+          roleName: roleName
+        });
+      }
+
+      // ---------------------------------------------------------
+      // Suppression des rôles décochés
+      // ---------------------------------------------------------
+
+      for (const roleName of rolesToRemove) {
+        await api.post('/User/admin/roles/remove', {
+          userId: editingUserId.value,
+          roleName: roleName
+        });
+      }
+
+      toast.add({
+        severity: 'success',
+        summary: 'Mis à jour',
+        detail: 'Informations et rôles enregistrés avec succès.',
         life: 3000
       });
     }
 
-    // 1. Retirer le focus du bouton actif avant de fermer (évite les bugs aria-hidden)
+    // =========================================================
+    // FERMETURE DE LA MODALE
+    // =========================================================
+
+    // Retirer le focus du bouton actif
+    // pour éviter les problèmes aria-hidden
     const activeElement = document.activeElement;
+
     if (activeElement) {
       activeElement.blur();
     }
 
-    // 2. Fermer la modale Bootstrap proprement
+    // Fermer proprement la modale Bootstrap
     const modalElement = document.getElementById('createAdherent');
+
     if (modalElement) {
-      const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+      const modalInstance =
+        window.bootstrap.Modal.getInstance(modalElement);
+
       if (modalInstance) {
         modalInstance.hide();
       }
     }
 
-    // 3. Recharger les données et réinitialiser
+    // Recharger les données et réinitialiser
     await loadSenseiData();
     resetForm();
 
-  }
+  } catch (err) {
 
-  catch (err) {
-    let errorMessage = 'Erreur lors de la sauvegarde. Veuillez réessayer.';
+    let errorMessage =
+      'Erreur lors de la sauvegarde. Veuillez réessayer.';
+
     if (err.response && err.response.data) {
+
       if (err.response.data.message) {
-        errorMessage = `Erreur API: ${err.response.data.message}`;
+
+        errorMessage =
+          `Erreur API: ${err.response.data.message}`;
+
       } else if (typeof err.response.data === 'string') {
-        errorMessage = `Erreur: ${err.response.data}`;
+
+        errorMessage =
+          `Erreur: ${err.response.data}`;
+
       } else if (err.response.data.errors) {
-        const errorKeys = Object.keys(err.response.data.errors);
-        errorMessage = 'Erreur(s) de validation: ' + errorKeys.map(key => `${key}: ${err.response.data.errors[key].join(', ')}`).join('; ');
+
+        const errorKeys =
+          Object.keys(err.response.data.errors);
+
+        errorMessage =
+          'Erreur(s) de validation: ' +
+          errorKeys
+            .map(
+              key =>
+                `${key}: ${err.response.data.errors[key].join(', ')}`
+            )
+            .join('; ');
       }
     }
+
     validationError.value = errorMessage;
-    console.error('Erreur API détaillée:', err);
+
+    console.error(
+      'Erreur API détaillée:',
+      err
+    );
   }
 };
 
@@ -315,14 +464,9 @@ onMounted(async () => {
           <i class="pi pi-users"></i>
         </div>
 
-        <h1>
-          Gestion des Senseis
-        </h1>
+       <h1> Gestion des membres</h1>
 
-        <p>
-          Gestion des encadrants,
-          disciplines et informations des Senseis
-        </p>
+<p>  Gestion des membres, rôles et informations des encadrants</p>
 
       </div>
 
@@ -334,12 +478,10 @@ onMounted(async () => {
         <button type="button" class="add-member-btn" data-bs-toggle="modal" data-bs-target="#createAdherent"
           @click="resetForm">
           <i class="pi pi-user-plus"></i>
-          <span>
-            Ajouter un Sensei
-          </span>
+          <span>  Ajouter un membre</span>
         </button>
       </div>
-      <SenseisStats :userList="userList" :disciplineList="disciplineList" />
+     <SenseisStats :userList="userList" />
 
 
       <!-- Modal de création / édition -->
@@ -349,8 +491,7 @@ onMounted(async () => {
           <div class="modal-content custom-modal">
             <div class="modal-header">
               <h5 class="modal-title" id="createAdherentLabel">
-                {{ editingUserId ? 'Modifier le Sensei' : 'Créer un nouveau Sensei' }}
-              </h5>
+                  {{ editingUserId ? 'Modifier le membre' : 'Créer un nouveau membre' }}              </h5>
               <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Fermer"
                 @click="resetForm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -374,6 +515,24 @@ onMounted(async () => {
 
               <form @submit.prevent="saveNewSensei" id="senseiForm">
                 <UserFormFields v-model="newSensei" :isPasswordRequired="!editingUserId" />
+                <!-- Rôles du membre -->
+                <div class="roles-section mb-4">
+                  <label class="form-label">
+                    Rôle(s) <span class="text-danger">*</span>
+                  </label>
+
+                  <div class="roles-list">
+                    <label v-for="role in availableRoles" :key="role.value" class="role-option">
+                      <input type="checkbox" :value="role.value" v-model="newSensei.roles" />
+
+                      <span>{{ role.label }}</span>
+                    </label>
+                  </div>
+
+                  <small class="roles-help">
+                    Plusieurs rôles peuvent être sélectionnés pour un même membre.
+                  </small>
+                </div>
                 <SenseiFormFields v-model="newSensei" v-model:selectedDiscipline="selectedDiscipline"
                   :disciplineList="disciplineList" @file-change="onFileChange" />
               </form>
@@ -384,7 +543,7 @@ onMounted(async () => {
                 Annuler
               </button>
               <button type="submit" form="senseiForm" class="btn-primary">
-                {{ editingUserId ? 'Enregistrer les modifications' : 'Créer le Sensei' }}
+                {{ editingUserId ? 'Enregistrer les modifications' : 'Créer le membre' }}
               </button>
             </div>
           </div>
@@ -394,7 +553,7 @@ onMounted(async () => {
       <!-- États de chargement & contenu principal -->
       <div v-if="loading" class="state-card loading-state">
         <div class="spinner"></div>
-        <span>Chargement de la liste des Senseis...</span>
+        <span>Chargement de la liste des membres...</span>
       </div>
 
       <div v-else-if="error" class="state-card error-state">
@@ -416,7 +575,7 @@ onMounted(async () => {
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-          <p>Aucun Sensei ou Administrateur trouvé pour le moment.</p>
+         <p>Aucun membre trouvé pour le moment.</p>
         </div>
 
         <UserTable v-else :userList="userList" :getDisciplineName="getDisciplineName" @edit="handleEdit"

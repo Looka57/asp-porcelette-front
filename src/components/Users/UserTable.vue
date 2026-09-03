@@ -1,10 +1,4 @@
 <script setup>
-
-// On détecte l'environnement : si on n'est pas sur localhost, on utilise l'origine du site (HTTPS)
-// const API_BASE_URL = window.location.hostname === 'localhost'
-//   ? 'http://localhost:8080'
-//   : window.location.origin;
-
 const DEFAULT_PHOTO_PATH = '/img/default-profile.png';
 
 const { userList, getDisciplineName } = defineProps({
@@ -40,23 +34,17 @@ const getPhotoPath = (user) => {
     return DEFAULT_PHOTO_PATH;
   }
 
-  // 1. Nettoyage : On enlève les doubles slashs // s'ils existent
   if (photoPath.startsWith('//')) {
     photoPath = photoPath.substring(1);
   }
 
-  // 2. On s'assure que le chemin commence par un seul /
   if (!photoPath.startsWith('/')) {
     photoPath = '/' + photoPath;
   }
 
-  // 3. Logique d'environnement
   if (window.location.hostname === 'localhost') {
-    // En local : on a besoin de l'URL complète avec le port 8080
     return `http://localhost:8080${photoPath}`;
   } else {
-    // En ligne : on retourne le chemin relatif direct (comme dans votre Dashboard)
-    // Cela donnera : /images/profiles/...
     return photoPath;
   }
 };
@@ -67,7 +55,6 @@ const handleImageError = (event) => {
 };
 </script>
 
-
 <template>
   <div class="table-responsive">
     <table class="table table-dark table-striped table-hover align-middle text-center overflow-hidden">
@@ -75,24 +62,19 @@ const handleImageError = (event) => {
         <tr>
           <th scope="col" class="d-none d-md-table-cell">#</th>
           <th scope="col" class="d-none d-md-table-cell">Photo</th>
-
           <th scope="col">Nom</th>
           <th scope="col">Prénom</th>
-
-          <th scope="col" class="d-none d-md-table-cell">Email</th>
-          <th scope="col" class="d-none d-md-table-cell">Téléphone</th>
+          <th scope="col">Rôle(s)</th>
+          <th scope="col" class="d-none d-md-table-cell">Coordonnées</th>
           <th scope="col" class="d-none d-md-table-cell">Ville</th>
-          <th scope="col" class="d-none d-md-table-cell">Adresse</th>
-          <th scope="col" class="d-none d-md-table-cell">Statut</th>
+          <!-- <th scope="col" class="d-none d-md-table-cell">Statut</th> -->
           <th scope="col" class="d-none d-md-table-cell">Date Inscriptions</th>
           <th scope="col" class="d-none d-md-table-cell">Discipline</th>
-
           <th scope="col" style="width: 150px;">Action</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(user, index) in userList" :key="user.userId || user.id">
-
           <th scope="row" class="d-none d-md-table-cell">{{ index + 1 }}</th>
           <td class="d-none d-md-table-cell">
             <img v-if="getPhotoPath(user)" :src="getPhotoPath(user)" alt="Photo utilisateur"
@@ -102,12 +84,26 @@ const handleImageError = (event) => {
 
           <td>{{ user.nom }}</td>
           <td>{{ user.prenom }}</td>
+          <td>
+            <div class="roles-cell">
+              <span v-for="role in user.roles" :key="role" class="role-badge"
+                :class="`role-${role.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')}`">
+                {{ role }}
+              </span>
+              <span v-if="!user.roles?.length" class="text-secondary">
+                Aucun rôle
+              </span>
+            </div>
+          </td>
 
-          <td class="d-none d-md-table-cell">{{ user.email || 'N/A' }}</td>
-          <td class="d-none d-md-table-cell">{{ user.telephone || 'N/A' }}</td>
-          <td class="d-none d-md-table-cell">{{ user.rueEtNumero || 'N/A' }}</td>
+          <!-- Coordonnées regroupées : Email en haut, Téléphone en dessous -->
+          <td class="d-none d-md-table-cell">
+            <div class="text-light">{{ user.email || 'N/A' }}</div>
+            <div class="text-secondary small">{{ user.telephone || 'N/A' }}</div>
+          </td>
+
           <td class="d-none d-md-table-cell">{{ user.ville || 'N/A' }}</td>
-          <td class="d-none d-md-table-cell">{{ user.statut || 'N/A' }}</td>
+          <!-- <td class="d-none d-md-table-cell">{{ user.statut || 'N/A' }}</td> -->
           <td class="d-none d-md-table-cell">{{ formatDate(user.dateAdhesion) || 'N/A' }}</td>
           <td class="d-none d-md-table-cell">{{ getDisciplineName(user.disciplineId) }}</td>
 
@@ -131,5 +127,54 @@ const handleImageError = (event) => {
 <style scoped>
 img.rounded-circle {
   border: 2px solid #ffc107;
+}
+
+.roles-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.role-admin {
+  background: rgba(252, 225, 143, 0.384);
+  border-color: rgba(255, 193, 7, 0.35);
+  color: #ffc107;
+}
+
+.role-sensei {
+  background: rgba(59, 131, 246, 0.295);
+  border-color: rgba(107, 159, 241, 0.35);
+  color: #3b82f6;
+}
+
+.role-comite {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.35);
+  color: #a855f7;
+}
+
+.role-secretaire {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #10b981;
+}
+
+.role-tresoriere {
+  background: rgba(249, 115, 22, 0.12);
+  border-color: rgba(249, 115, 22, 0.35);
+  color: #f97316;
 }
 </style>
