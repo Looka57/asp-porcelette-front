@@ -4,6 +4,15 @@
 // ===============================
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
+import ProgressSpinner from 'primevue/progressspinner'
+import Message from 'primevue/message'
+import Tag from 'primevue/tag'
+import Button from 'primevue/button'
+import Tooltip from 'primevue/tooltip'
+
+// Si vous utilisez la directive v-tooltip de PrimeVue,
+// vous pouvez l'enregistrer localement ou globalement (selon votre configuration) :
+const vTooltip = Tooltip
 
 // ===============================
 // 🔹 ÉTATS
@@ -194,9 +203,7 @@ onMounted(loadData)
   background: #2a2e35;
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-
 }
-
 
 .period-box {
   background: rgba(255, 255, 255, 0.03);

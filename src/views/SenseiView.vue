@@ -464,9 +464,9 @@ onMounted(async () => {
           <i class="pi pi-users"></i>
         </div>
 
-       <h1> Gestion des membres</h1>
+        <h1> Gestion des membres</h1>
 
-<p>  Gestion des membres, rôles et informations des encadrants</p>
+        <p> Gestion des membres, rôles et informations des encadrants</p>
 
       </div>
 
@@ -478,10 +478,10 @@ onMounted(async () => {
         <button type="button" class="add-member-btn" data-bs-toggle="modal" data-bs-target="#createAdherent"
           @click="resetForm">
           <i class="pi pi-user-plus"></i>
-          <span>  Ajouter un membre</span>
+          <span> Ajouter un membre</span>
         </button>
       </div>
-     <SenseisStats :userList="userList" />
+      <SenseisStats :userList="userList" />
 
 
       <!-- Modal de création / édition -->
@@ -491,7 +491,7 @@ onMounted(async () => {
           <div class="modal-content custom-modal">
             <div class="modal-header">
               <h5 class="modal-title" id="createAdherentLabel">
-                  {{ editingUserId ? 'Modifier le membre' : 'Créer un nouveau membre' }}              </h5>
+                {{ editingUserId ? 'Modifier le membre' : 'Créer un nouveau membre' }} </h5>
               <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Fermer"
                 @click="resetForm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -514,7 +514,6 @@ onMounted(async () => {
               </div>
 
               <form @submit.prevent="saveNewSensei" id="senseiForm">
-                <UserFormFields v-model="newSensei" :isPasswordRequired="!editingUserId" />
                 <!-- Rôles du membre -->
                 <div class="roles-section mb-4">
                   <label class="form-label">
@@ -522,10 +521,17 @@ onMounted(async () => {
                   </label>
 
                   <div class="roles-list">
-                    <label v-for="role in availableRoles" :key="role.value" class="role-option">
+                    <label v-for="role in availableRoles" :key="role.value" class="role-option"
+                      :class="{ selected: newSensei.roles.includes(role.value) }">
                       <input type="checkbox" :value="role.value" v-model="newSensei.roles" />
 
-                      <span>{{ role.label }}</span>
+                      <span class="role-check">
+                        <i class="pi pi-check"></i>
+                      </span>
+
+                      <span class="role-label">
+                        {{ role.label }}
+                      </span>
                     </label>
                   </div>
 
@@ -533,6 +539,7 @@ onMounted(async () => {
                     Plusieurs rôles peuvent être sélectionnés pour un même membre.
                   </small>
                 </div>
+                <UserFormFields v-model="newSensei" :isPasswordRequired="!editingUserId" />
                 <SenseiFormFields v-model="newSensei" v-model:selectedDiscipline="selectedDiscipline"
                   :disciplineList="disciplineList" @file-change="onFileChange" />
               </form>
@@ -575,7 +582,7 @@ onMounted(async () => {
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-         <p>Aucun membre trouvé pour le moment.</p>
+          <p>Aucun membre trouvé pour le moment.</p>
         </div>
 
         <UserTable v-else :userList="userList" :getDisciplineName="getDisciplineName" @edit="handleEdit"
@@ -896,7 +903,7 @@ onMounted(async () => {
 </style>
 
 <!-- 🔹 STYLES GLOBAUX PRIMEVUE (NON SCOPED) -->
-<!-- 🔹 STYLES GLOBAUX PRIMEVUE (NON SCOPED) -->
+
 <style>
 /* Modale de Confirmation globale */
 .p-dialog,
@@ -1017,5 +1024,114 @@ onMounted(async () => {
 .p-toast .p-toast-message .p-toast-message-icon,
 .p-toast .p-toast-message .p-toast-icon-close {
   color: #ffffff !important;
+}
+
+/* ===============================
+   🔹 RÔLES
+   =============================== */
+
+.roles-section {
+  margin-top: 0.5rem;
+}
+
+.roles-section>.form-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: #f1f3f5;
+  font-weight: 600;
+}
+
+.roles-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.role-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 52px;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.65rem;
+  color: #aeb4bd;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.role-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 187, 51, 0.35);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.role-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.role-check {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #59616b;
+  border-radius: 5px;
+  color: transparent;
+  background: rgba(0, 0, 0, 0.15);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.role-check .pi {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.role-option.selected {
+  background: rgba(255, 187, 51, 0.08);
+  border-color: rgba(255, 187, 51, 0.55);
+  color: #ffffff;
+}
+
+.role-option.selected .role-check {
+  background: #ffbb33;
+  border-color: #ffbb33;
+  color: #121417;
+  box-shadow: 0 0 12px rgba(255, 187, 51, 0.2);
+}
+
+.role-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.roles-help {
+  display: block;
+  margin-top: 0.6rem;
+  color: #747c86;
+  font-size: 0.78rem;
+}
+
+/* Responsive */
+
+@media (max-width: 640px) {
+  .roles-list {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

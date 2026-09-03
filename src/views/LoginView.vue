@@ -20,11 +20,23 @@ async function handleLogin() {
 
   if (result.success && authStore.user) {
     // Redirection uniquement en cas de VRAI succès
-    if (authStore.user.roles?.includes('Admin') || authStore.user.roles?.includes('Sensei')) {
-      router.push('/admin/dashboard');
-    } else {
-      router.push('/profile');
-    }
+  if (
+  authStore.user.roles?.includes('Admin') ||
+  authStore.user.roles?.includes('Sensei') ||
+  authStore.user.roles?.includes('Comité') ||
+  authStore.user.roles?.includes('Secrétaire') ||
+  authStore.user.roles?.includes('Trésorière')
+) {
+console.log("👤 UTILISATEUR CONNECTÉ :", authStore.user);
+console.log("🎭 RÔLES :", authStore.user?.roles);
+console.log("➡️ REDIRECTION VERS DASHBOARD");
+  router.push('/admin/dashboard');
+
+} else {
+
+  router.push('/profile');
+
+}
   } else {
     // Affichage du message d'erreur retourné par le backend
     loginError.value = true;

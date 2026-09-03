@@ -94,10 +94,6 @@ async function fetchEvenement() {
 
     const reponse = await api.get(API_PATH_EVENEMENT)
     const evenementsAPI = reponse.data
-    console.log('📅 Tous les événements :', evenementsAPI)
-    console.log('📅 Événements Judo Détente :',
-      evenementsAPI.filter(e => e.disciplineId === 4)
-    )
     const maintenant = new Date()
 
     const evenementsFiltres = evenementsAPI.filter(e =>

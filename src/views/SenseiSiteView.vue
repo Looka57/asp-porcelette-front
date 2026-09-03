@@ -13,26 +13,25 @@ const isLoading = ref(true);
 const errorMessage = ref(null);
 const disciplines = ref([]);
 
-const API_PATH_USER = 'User/admin/list';
+
+const API_PATH_USER = 'User/public/senseis';
 
 // ===============================
 // 🔹 FONCTIONS
 // ===============================
+
 async function fetchSensei() {
   try {
     isLoading.value = true;
-    const response = await api.get(API_PATH_USER);
-    const allUsers = response.data;
 
-    // Filtrer les Sensei
-    const foundSensei = allUsers.filter(u => u.roles && u.roles.includes("Sensei"));
+    const response = await api.get(API_PATH_USER);
+    const foundSensei = response.data;
 
     if (foundSensei.length > 0) {
       senseis.value = foundSensei;
     } else {
       errorMessage.value = "Aucun Sensei trouvé.";
     }
-
   } catch (error) {
     console.error('❌ Erreur lors du chargement des Sensei :', error);
     errorMessage.value = "Erreur lors du chargement des Sensei.";
@@ -85,25 +84,25 @@ onMounted(async () => {
 
     <!-- Bannière -->
     <div class="imgBaniereAikido">
-  <div class="overlay">
-  <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-3">
-    Expertise & Transmission
-  </span>
+      <div class="overlay">
+        <span class="text-uppercase tracking-wider fs-7 fw-bold text-warning d-block mb-3">
+          Expertise & Transmission
+        </span>
 
-  <h1 class="display-3 text-uppercase text-white fw-black mb-3">
-    Nos Senseis
-  </h1>
+        <h1 class="display-3 text-uppercase text-white fw-black mb-3">
+          Nos Senseis
+        </h1>
 
-  <p class="lead text-white fw-light mb-4">
-    Transmettre. Accompagner. Faire progresser.
-  </p>
+        <p class="lead text-white fw-light mb-4">
+          Transmettre. Accompagner. Faire progresser.
+        </p>
 
-  <p class="text-white px-5 intro-text opacity-85">
-    Découvrez l'équipe qui vous accompagne dans votre pratique,
-    de l'apprentissage des fondamentaux au perfectionnement,
-    avec exigence, respect et bienveillance.
-  </p>
-</div>
+        <p class="text-white px-5 intro-text opacity-85">
+          Découvrez l'équipe qui vous accompagne dans votre pratique,
+          de l'apprentissage des fondamentaux au perfectionnement,
+          avec exigence, respect et bienveillance.
+        </p>
+      </div>
     </div>
 
     <!-- Liste des Senseis -->
@@ -119,7 +118,8 @@ onMounted(async () => {
           <p class="m-0 text-muted">Chargement des Sensei...</p>
         </div>
 
-        <div v-else-if="errorMessage" class="alert alert-danger bg-danger bg-opacity-15 text-danger border-0 text-center py-4">
+        <div v-else-if="errorMessage"
+          class="alert alert-danger bg-danger bg-opacity-15 text-danger border-0 text-center py-4">
           {{ errorMessage }}
         </div>
 
@@ -134,14 +134,15 @@ onMounted(async () => {
               </div>
               <div class="card-body text-center pt-2 pb-4 px-4 d-flex flex-column">
                 <h3 class="card-title fw-bold text-white fs-4 mb-1">{{ sensei.prenom }} {{ sensei.nom }}</h3>
-                <p :style="{color: getDisciplineColorId(sensei.disciplineId)}" class="card-subtitle mb-3 fw-semibold">{{ sensei.grade || 'Grade non précisé' }}</p>
+                <p :style="{ color: getDisciplineColorId(sensei.disciplineId) }" class="card-subtitle mb-3 fw-semibold">{{
+                  sensei.grade || 'Grade non précisé' }}</p>
                 <p class="card-text disciplines text-light opacity-80 mb-4">
                   Discipline : <span class="text-white fw-semibold">{{ getDisciplineName(sensei.disciplineId) }}</span>
                 </p>
 
                 <!-- Route conservée à l'identique (sensei.id) -->
-                <router-link :to="`/equipeDetailView/${sensei.id}`" class="btn btn-discipline-custom mt-auto fw-bold rounded-pill py-2"
-                  :style="{
+                <router-link :to="`/equipeDetailView/${sensei.id}`"
+                  class="btn btn-discipline-custom mt-auto fw-bold rounded-pill py-2" :style="{
                     backgroundColor: 'transparent',
                     borderColor: 'var(--discipline-color)',
                     color: 'var(--discipline-color)'

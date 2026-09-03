@@ -134,7 +134,7 @@ const router = createRouter({
       component: () => import('@/views/AdminDashboard.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei'],
+        roles: ['Admin', 'Sensei', 'Comité', 'Secrétaire', 'Trésorière'],
       },
     },
     {
@@ -143,7 +143,7 @@ const router = createRouter({
       component: () => import('@/views/SenseiView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei'],
+        roles: ['Admin', 'Sensei',  'Secrétaire'],
       },
     },
     {
@@ -152,7 +152,7 @@ const router = createRouter({
       component: () => import('@/views/LicenciesView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei'],
+        roles: ['Admin', 'Sensei','Secrétaire'],
       },
     },
     {
@@ -170,7 +170,7 @@ const router = createRouter({
       component: () => import('@/views/EventsView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei'],
+        roles: ['Admin', 'Sensei', 'Comité'],
       },
     },
     {
@@ -179,7 +179,7 @@ const router = createRouter({
       component: () => import('@/views/ActualiteView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei'],
+        roles: ['Admin', 'Sensei', 'Comité'],
       },
     },
     {
@@ -206,7 +206,7 @@ const router = createRouter({
       component: () => import('@/views/ComptabiliteView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei'],
+        roles: ['Admin', 'Sensei', 'Comité', 'Secrétaire', 'Trésorière'],
       },
     },
     {
@@ -215,7 +215,7 @@ const router = createRouter({
       component: () => import('@/views/GestionTransactionsPage.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei'],
+        roles: ['Admin', 'Sensei', 'Comité', 'Secrétaire', 'Trésorière'],
       },
     },
     {
@@ -234,7 +234,7 @@ const router = createRouter({
       props: true,
       meta: {
         requiresAuth: true,
-        roles: ['Admin', 'Sensei'],
+        roles: ['Admin', 'Sensei','Trésorière'],
       },
     },
 

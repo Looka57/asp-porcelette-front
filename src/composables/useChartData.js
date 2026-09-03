@@ -21,12 +21,6 @@ export function useEvolutionInscriptionsChart(rawInscriptionsDataRef) {
   const inscriptionsData = computed(() => {
     const rawData =
       rawInscriptionsDataRef && rawInscriptionsDataRef.value ? rawInscriptionsDataRef.value : {}
-
-    console.log('>>> RAW INSCRIPTIONS =', rawData)
-    console.log('>>> JUDO =', rawData.Judo)
-    console.log('>>> AIKIDO =', rawData.Aïkido)
-    console.log('>>> JUJITSU =', rawData.Jujitsu)
-    console.log('>>> JUDO DETENTE =', rawData['Judo Détente'])
     // Calculs sécurisés :
     const dataJudo = rawData.Judo ? cumulativeSum(rawData.Judo) : []
     const dataAikido = rawData.Aïkido ? cumulativeSum(rawData.Aïkido) : []

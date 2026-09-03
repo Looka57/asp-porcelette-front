@@ -15,7 +15,7 @@ const errorMessage = ref(null)
 // ===============================
 // 🔹 CONSTANTES D’API
 // ===============================
-const API_PATH_USER = 'User/admin/list'
+const API_PATH_USER = 'User/public/senseis'
 
 // ===============================
 // 🔹 FONCTIONS
@@ -24,12 +24,10 @@ async function fetchSensei() {
   try {
     isLoading.value = true
     const reponse = await api.get(API_PATH_USER)
-    const allUser = reponse.data
-    const listSensei = allUser.filter(user => {
-      return Array.isArray(user.roles) && user.roles.some(role => role.toLowerCase() === 'sensei')
-    })
+    senseis.value = reponse.data
 
-    senseis.value = listSensei
+
+
   } catch (error) {
     console.error('❌ Erreur lors du chargement des senseis :', error)
     errorMessage.value = "Erreur lors du chargement des senseis."
