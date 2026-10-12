@@ -1,7 +1,4 @@
 <script setup>
-// ===============================
-// 🔹 IMPORTS
-// ===============================
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
 
@@ -16,25 +13,6 @@ const errorMessage = ref(null)
 // 🔹 CONSTANTES D’API
 // ===============================
 const API_PATH_USER = 'User/public/senseis'
-
-// ===============================
-// 🔹 FONCTIONS
-// ===============================
-async function fetchSensei() {
-  try {
-    isLoading.value = true
-    const reponse = await api.get(API_PATH_USER)
-    senseis.value = reponse.data
-
-
-
-  } catch (error) {
-    console.error('❌ Erreur lors du chargement des senseis :', error)
-    errorMessage.value = "Erreur lors du chargement des senseis."
-  } finally {
-    isLoading.value = false
-  }
-}
 
 // ===============================
 // 🔹 MAPPAGE DISCIPLINE → COULEUR DE BORDURE
@@ -72,6 +50,19 @@ function getPhotoUrl(photoPath) {
 }
 
 onMounted(fetchSensei)
+
+async function fetchSensei() {
+  try {
+    isLoading.value = true
+    const reponse = await api.get(API_PATH_USER)
+    senseis.value = reponse.data
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement des senseis :', error)
+    errorMessage.value = "Erreur lors du chargement des senseis."
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -91,20 +82,29 @@ onMounted(fetchSensei)
     </div>
 
     <div class="row g-4 justify-content-center">
-      <div v-for="sensei in senseis" :key="sensei.userId" class="col-xl-3 col-lg-4 col-md-6 col-sm-6 teacher-card">
-        <div class="sensei-card-wrapper p-3 rounded-4 bg-dark-card border border-secondary border-opacity-10 h-100">
+      <div v-for="sensei in senseis" :key="sensei.userId" class="col-xl-3 col-lg-4 col-md-6 col-sm-12 teacher-card">
+        <!-- Lien cliquable enveloppant la carte -->
+        <router-link :to="`/equipeDetailView/${sensei.userId}`" class="text-decoration-none d-block h-100">
+          <div class="sensei-card-wrapper p-3 rounded-4 bg-dark-card border border-secondary border-opacity-10 h-100">
 
-          <div class="sensei-photo-container shadow-md" :class="getBorderClass(sensei.disciplineId)">
-            <img :src="getPhotoUrl(sensei.photoUrl)" :alt="'Photo de ' + sensei.prenom + ' ' + sensei.nom"
-              :title="sensei.prenom + ' ' + sensei.nom" class="sensei-photo" width="626" height="626" loading="lazy" />
+            <div class="sensei-photo-container shadow-md" :class="getBorderClass(sensei.disciplineId)">
+              <img :src="getPhotoUrl(sensei.photoUrl)" :alt="'Photo de ' + sensei.prenom + ' ' + sensei.nom"
+                :title="sensei.prenom + ' ' + sensei.nom" class="sensei-photo" width="626" height="626"
+                loading="lazy" />
+            </div>
+
+            <div class="sensei-text-content">
+              <h3 class="mt-4 mb-1 text-white fs-5 fw-bold">{{ sensei.prenom }} {{ sensei.nom }}</h3>
+              <p :style="{ color: getDisciplineColor(sensei.disciplineId) }" class="fs-6 fw-medium m-0">
+                {{ sensei.grade || 'Grade non précisé' }}
+              </p>
+              <!-- Lien textuel visible uniquement sur mobile pour indiquer qu'on peut cliquer -->
+              <span class="d-inline-block d-md-none text-warning fs-7 mt-2">
+                Voir le profil &rarr;
+              </span>
+            </div>
           </div>
-
-          <h3 class="mt-4 mb-1 text-white fs-5 fw-bold">{{ sensei.prenom }} {{ sensei.nom }}</h3>
-          <p :style="{ color: getDisciplineColor(sensei.disciplineId) }" class="fs-6 fw-medium m-0">
-            {{ sensei.grade || 'Grade non précisé' }}
-          </p>
-
-        </div>
+        </router-link>
       </div>
     </div>
   </div>
@@ -181,5 +181,29 @@ onMounted(fetchSensei)
 
 .fs-7 {
   font-size: 0.75rem;
+}
+
+/* --- ADAPTATION MOBILE UNIQUEMENT (écrans < 768px) --- */
+@media (max-width: 767.98px) {
+  .sensei-card-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 1rem;
+    padding: 1rem !important;
+  }
+
+  .sensei-photo-container {
+    width: 85px;
+    height: 85px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .sensei-text-content h3 {
+    margin-top: 0 !important;
+    font-size: 1rem !important;
+  }
 }
 </style>
