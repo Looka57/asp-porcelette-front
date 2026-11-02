@@ -119,7 +119,7 @@ onMounted(async () => {
         </div>
 
         <div v-else-if="errorMessage"
-          class="alert alert-danger bg-danger bg-opacity-15 text-danger border-0 text-center py-4">
+          class="alert alert-light bg-danger bg-opacity-15 text-danger border-0 text-center py-4">
           {{ errorMessage }}
         </div>
 

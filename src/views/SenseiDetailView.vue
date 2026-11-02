@@ -67,7 +67,7 @@ async function fetchSensei() {
 
   } catch (error) {
     console.error("Erreur chargement Sensei :", error);
-    errorMessage.value = "Sensei introuvable ou erreur de chargement. (Vérifiez l'authentification si vous utilisez la route /admin/)";
+    errorMessage.value = "Sensei introuvable ou erreur de chargement.";
   } finally {
     isLoading.value = false;
   }
@@ -157,7 +157,7 @@ onMounted(async () => {
         <p class="m-0 text-muted">Chargement des détails...</p>
       </div>
 
-      <div v-else-if="errorMessage" class="alert alert-danger bg-danger bg-opacity-15 text-danger border-0 text-center py-4">
+      <div v-else-if="errorMessage" class="alert alert-danger bg-danger bg-opacity-15 text-light border-0 text-center py-4">
         {{ errorMessage }}
       </div>
 
