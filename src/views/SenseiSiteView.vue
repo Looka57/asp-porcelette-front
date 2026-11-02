@@ -141,7 +141,7 @@ onMounted(async () => {
                 </p>
 
                 <!-- Route conservée à l'identique (sensei.id) -->
-                <router-link :to="`/equipeDetailView/${sensei.id}`"
+                <router-link :to="`/equipeDetailView/${sensei.userId}`"
                   class="btn btn-discipline-custom mt-auto fw-bold rounded-pill py-2" :style="{
                     backgroundColor: 'transparent',
                     borderColor: 'var(--discipline-color)',
